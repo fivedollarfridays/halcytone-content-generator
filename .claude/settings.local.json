@@ -26,7 +26,8 @@
       "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_endpoints_v2.py -v --tb=short)",
       "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_content_assembler.py tests/unit/test_endpoints.py tests/unit/test_endpoints_v2.py tests/unit/test_platform_client.py -v --cov=src/halcytone_content_generator/services/content_assembler --cov=src/halcytone_content_generator/api/endpoints --cov=src/halcytone_content_generator/api/endpoints_v2 --cov=src/halcytone_content_generator/services/platform_client --cov-report=term-missing)",
       "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_content_assembler.py tests/unit/test_endpoints.py tests/unit/test_endpoints_v2.py tests/unit/test_platform_client.py --cov=src.halcytone_content_generator.services.content_assembler --cov=src.halcytone_content_generator.api.endpoints --cov=src.halcytone_content_generator.api.endpoints_v2 --cov=src.halcytone_content_generator.services.platform_client --cov-report=term-missing)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": []
