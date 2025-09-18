@@ -108,8 +108,8 @@ class TestGenerateEnhancedContent:
     @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
     @patch('src.halcytone_content_generator.api.endpoints_v2.ContentValidator')
     @patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.CRMClient')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.PlatformClient')
+    @patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
+    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_enhanced_content_preview_only(
         self, mock_platform_client, mock_crm_client, mock_assembler,
@@ -167,8 +167,8 @@ class TestGenerateEnhancedContent:
     @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
     @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
     @patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.CRMClient')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.PlatformClient')
+    @patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
+    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_enhanced_content_full_flow(
         self, mock_platform_client, mock_crm_client, mock_assembler,
