@@ -66,6 +66,16 @@ class Settings(BaseSettings):
     CACHE_TTL: int = 300  # seconds
     ENABLE_CACHE: bool = True
 
+    # Dry Run Settings
+    DRY_RUN: bool = False  # Global dry run mode for all operations
+    BATCH_DRY_RUN: bool = False  # Specific dry run for batch operations
+
+    # Batch Processing Settings
+    BATCH_MAX_ITEMS: int = 50  # Maximum items per batch
+    BATCH_MAX_DAYS: int = 30  # Maximum days to generate content for
+    BATCH_DEFAULT_PERIOD: str = "week"  # Default batch period
+    BATCH_ENABLE_SCHEDULING: bool = True  # Enable scheduled batch generation
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

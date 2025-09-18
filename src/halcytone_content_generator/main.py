@@ -91,3 +91,7 @@ app.include_router(endpoints_v2.router, prefix="/api")
 # Include critical production endpoints
 from .api import endpoints_critical
 app.include_router(endpoints_critical.router)
+
+# Include batch generation endpoints
+from .api import endpoints_batch
+app.include_router(endpoints_batch.router, prefix="/api/v1")

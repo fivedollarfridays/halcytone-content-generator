@@ -19,11 +19,14 @@ class WebPublisher(Publisher):
 
     def __init__(self, config: Dict[str, Any] = None):
         super().__init__("web", config)
-        self.platform_client = EnhancedPlatformClient(
-            base_url=self.config.get('platform_base_url', 'http://localhost:8000'),
-            api_key=self.config.get('platform_api_key', ''),
-            dry_run=self.dry_run
-        )
+
+        # Create a mock Settings object for the platform client
+        from ...config import Settings
+        settings = Settings()
+        settings.PLATFORM_BASE_URL = self.config.get('platform_base_url', 'http://localhost:8000')
+        settings.PLATFORM_API_KEY = self.config.get('platform_api_key', '')
+
+        self.platform_client = EnhancedPlatformClient(settings)
 
         # Web-specific limits
         self.content_limits = {

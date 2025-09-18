@@ -9,15 +9,37 @@ from ..config import Settings, get_settings
 from ..schemas.content import (
     ContentGenerationRequest,
     ContentGenerationResponse,
-    ContentPreview
+    ContentPreview,
+    Content,
+    NewsletterContent,
+    WebUpdateContent,
+    SocialPost
 )
 from ..services.document_fetcher import DocumentFetcher
 from ..services.content_assembler import ContentAssembler
-from ..services.crm_client import CRMClient
-from ..services.platform_client import PlatformClient
+from ..services.publishers.email_publisher import EmailPublisher
+from ..services.publishers.web_publisher import WebPublisher
+from ..services.publishers.social_publisher import SocialPublisher
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["content"])
+
+
+def get_publishers(settings: Settings):
+    """Get all available publishers configured with settings"""
+    config = {
+        'crm_base_url': settings.CRM_BASE_URL,
+        'crm_api_key': settings.CRM_API_KEY,
+        'platform_base_url': settings.PLATFORM_BASE_URL,
+        'platform_api_key': settings.PLATFORM_API_KEY,
+        'dry_run': settings.DRY_RUN
+    }
+
+    return {
+        'email': EmailPublisher(config),
+        'web': WebPublisher(config),
+        'social': SocialPublisher(config)
+    }
 
 
 @router.post("/generate-content", response_model=ContentGenerationResponse)
@@ -45,9 +67,14 @@ async def generate_content(
 
         # Step 2: Assemble content for different channels
         assembler = ContentAssembler()
-        newsletter = assembler.generate_newsletter(content)
-        web_update = assembler.generate_web_update(content)
-        social_posts = assembler.generate_social_posts(content)
+        newsletter_data = assembler.generate_newsletter(content)
+        web_update_data = assembler.generate_web_update(content)
+        social_posts_data = assembler.generate_social_posts(content)
+
+        # Convert to Pydantic objects
+        newsletter = NewsletterContent(**newsletter_data) if newsletter_data else None
+        web_update = WebUpdateContent(**web_update_data) if web_update_data else None
+        social_posts = [SocialPost(**post) for post in social_posts_data] if social_posts_data else []
 
         # If preview only, return without sending
         if request.preview_only:
@@ -58,33 +85,86 @@ async def generate_content(
                 social_posts=social_posts
             )
 
+        # Get publishers
+        publishers = get_publishers(settings)
         results = {}
 
-        # Step 3: Send newsletter via CRM
+        # Step 3: Send newsletter via Email Publisher
         if request.send_email and newsletter:
-            crm_client = CRMClient(settings)
-            email_result = await crm_client.send_newsletter(
-                newsletter['subject'],
-                newsletter['html'],
-                newsletter['text']
-            )
-            results['email'] = email_result
-            logger.info(f"Newsletter sent to {email_result.get('sent', 0)} recipients")
+            email_publisher = publishers['email']
+            email_content = Content.from_newsletter(newsletter, dry_run=settings.DRY_RUN)
 
-        # Step 4: Publish to website
+            # Validate content
+            validation_result = await email_publisher.validate(email_content)
+            if not validation_result.is_valid:
+                logger.warning(f"Email validation issues: {validation_result.issues}")
+                results['email'] = {"status": "validation_failed", "issues": validation_result.issues}
+            else:
+                # Publish email
+                publish_result = await email_publisher.publish(email_content)
+                results['email'] = {
+                    "status": publish_result.status.value,
+                    "message": publish_result.message,
+                    "external_id": publish_result.external_id,
+                    "metadata": publish_result.metadata
+                }
+                logger.info(f"Newsletter published: {publish_result.message}")
+
+        # Step 4: Publish to website via Web Publisher
         if request.publish_web and web_update:
-            platform_client = PlatformClient(settings)
-            web_result = await platform_client.publish_update(
-                web_update['title'],
-                web_update['content'],
-                web_update['excerpt']
-            )
-            results['web'] = web_result
-            logger.info(f"Web update published: {web_result.get('id')}")
+            web_publisher = publishers['web']
+            web_content = Content.from_web_update(web_update, dry_run=settings.DRY_RUN)
 
-        # Step 5: Social posts (for manual review initially)
-        results['social'] = social_posts
-        logger.info(f"Generated {len(social_posts)} social media posts")
+            # Validate content
+            validation_result = await web_publisher.validate(web_content)
+            if not validation_result.is_valid:
+                logger.warning(f"Web validation issues: {validation_result.issues}")
+                results['web'] = {"status": "validation_failed", "issues": validation_result.issues}
+            else:
+                # Publish web content
+                publish_result = await web_publisher.publish(web_content)
+                results['web'] = {
+                    "status": publish_result.status.value,
+                    "message": publish_result.message,
+                    "external_id": publish_result.external_id,
+                    "metadata": publish_result.metadata
+                }
+                logger.info(f"Web update published: {publish_result.message}")
+
+        # Step 5: Process social posts via Social Publisher
+        if request.generate_social and social_posts:
+            social_publisher = publishers['social']
+            social_results = []
+
+            for post in social_posts:
+                social_content = Content.from_social_post(post, dry_run=settings.DRY_RUN)
+
+                # Validate content
+                validation_result = await social_publisher.validate(social_content)
+                if not validation_result.is_valid:
+                    logger.warning(f"Social validation issues for {post.platform}: {validation_result.issues}")
+                    social_results.append({
+                        "platform": post.platform,
+                        "status": "validation_failed",
+                        "issues": validation_result.issues
+                    })
+                else:
+                    # Publish social content
+                    publish_result = await social_publisher.publish(social_content)
+                    social_results.append({
+                        "platform": post.platform,
+                        "status": publish_result.status.value,
+                        "message": publish_result.message,
+                        "external_id": publish_result.external_id,
+                        "metadata": publish_result.metadata
+                    })
+
+            results['social'] = {
+                "posts": social_results,
+                "total_posts": len(social_posts),
+                "platforms": list(set(post.platform for post in social_posts))
+            }
+            logger.info(f"Processed {len(social_posts)} social media posts")
 
         return ContentGenerationResponse(
             status="success",

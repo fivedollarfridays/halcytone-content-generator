@@ -20,11 +20,14 @@ class EmailPublisher(Publisher):
 
     def __init__(self, config: Dict[str, Any] = None):
         super().__init__("email", config)
-        self.crm_client = EnhancedCRMClient(
-            base_url=self.config.get('crm_base_url', 'http://localhost:8001'),
-            api_key=self.config.get('crm_api_key', ''),
-            dry_run=self.dry_run
-        )
+
+        # Create a mock Settings object for the CRM client
+        from ...config import Settings
+        settings = Settings()
+        settings.CRM_BASE_URL = self.config.get('crm_base_url', 'http://localhost:8001')
+        settings.CRM_API_KEY = self.config.get('crm_api_key', '')
+
+        self.crm_client = EnhancedCRMClient(settings)
         self.analytics = EmailAnalytics()
 
         # Email-specific limits

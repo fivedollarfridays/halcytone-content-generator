@@ -101,8 +101,8 @@ class TestGenerateContent:
     @patch('src.halcytone_content_generator.api.endpoints.get_settings')
     @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
     @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
-    @patch('src.halcytone_content_generator.api.endpoints.CRMClient')
-    @patch('src.halcytone_content_generator.api.endpoints.PlatformClient')
+    @patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
+    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_content_preview_only(
         self, mock_platform_client, mock_crm_client, mock_assembler,
@@ -155,8 +155,8 @@ class TestGenerateContent:
     @patch('src.halcytone_content_generator.api.endpoints.get_settings')
     @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
     @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
-    @patch('src.halcytone_content_generator.api.endpoints.CRMClient')
-    @patch('src.halcytone_content_generator.api.endpoints.PlatformClient')
+    @patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
+    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_content_full_flow(
         self, mock_platform_client, mock_crm_client, mock_assembler,
@@ -328,7 +328,7 @@ class TestGenerateContent:
     @patch('src.halcytone_content_generator.api.endpoints.get_settings')
     @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
     @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
-    @patch('src.halcytone_content_generator.api.endpoints.PlatformClient')
+    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_content_web_only(
         self, mock_platform_client, mock_assembler, mock_fetcher, mock_get_settings,
