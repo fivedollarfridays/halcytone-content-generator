@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  content-generator-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: halcytone-content-gen-dev
+    ports:
+      - "8000:8000"
+    environment:
+      # Development settings
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - RELOAD=true
+
+      # Mock services for development
+      - CRM_BASE_URL=http://localhost:8001
+      - PLATFORM_BASE_URL=http://localhost:8002
+
+      # Development API keys
+      - CRM_API_KEY=dev-crm-key-123
+      - PLATFORM_API_KEY=dev-platform-key-456
+
+      # Optional: Real document API keys for testing
+      - GOOGLE_DOCS_API_KEY=${GOOGLE_DOCS_API_KEY:-}
+      - NOTION_API_KEY=${NOTION_API_KEY:-}
+
+      # Development settings
+      - EMAIL_BATCH_SIZE=10
+      - EMAIL_RATE_LIMIT=1000
+      - TEST_MODE=true
+
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+      - ./data:/app/data
+    networks:
+      - dev-network
+    restart: unless-stopped
+    command: python -m uvicorn src.halcytone_content_generator.main:app --host 0.0.0.0 --port 8000 --reload
+
+  redis-dev:
+    image: redis:7-alpine
+    container_name: halcytone-redis-dev
+    ports:
+      - "6379:6379"
+    networks:
+      - dev-network
+    restart: unless-stopped
+
+networks:
+  dev-network:
+    driver: bridge

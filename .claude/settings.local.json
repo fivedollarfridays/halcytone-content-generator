@@ -10,7 +10,22 @@
       "Bash(py --version)",
       "Bash(python:*)",
       "Bash(py -m:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(py:*)",
+      "Bash(del:*)",
+      "Read(//c/Users/kmast/AppData/Local/Programs/Python//**)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" --version)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_content_assembler.py -v --tb=short)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_platform_client.py -v --tb=short)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_endpoints.py -v --tb=short -x)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs\\Python\\Python311\\python.exe\" -m pytest tests/unit/test_endpoints.py -v --tb=short)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_endpoints.py::TestGetStatus::test_get_status_all_configured -v --tb=short)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_endpoints.py -v --tb=short)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_endpoints_v2.py -v --tb=short -x)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_endpoints_v2.py::TestGenerateEnhancedContent::test_content_validation_with_issues -v --tb=short)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_endpoints_v2.py -v --tb=short)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_content_assembler.py tests/unit/test_endpoints.py tests/unit/test_endpoints_v2.py tests/unit/test_platform_client.py -v --cov=src/halcytone_content_generator/services/content_assembler --cov=src/halcytone_content_generator/api/endpoints --cov=src/halcytone_content_generator/api/endpoints_v2 --cov=src/halcytone_content_generator/services/platform_client --cov-report=term-missing)",
+      "Bash(\"/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe\" -m pytest tests/unit/test_content_assembler.py tests/unit/test_endpoints.py tests/unit/test_endpoints_v2.py tests/unit/test_platform_client.py --cov=src.halcytone_content_generator.services.content_assembler --cov=src.halcytone_content_generator.api.endpoints --cov=src.halcytone_content_generator.api.endpoints_v2 --cov=src.halcytone_content_generator.services.platform_client --cov-report=term-missing)"
     ],
     "deny": [],
     "ask": []

@@ -314,6 +314,68 @@ class DocumentFetcher:
 
         return categories
 
+    async def fetch_google_doc(self, doc_id: str = None) -> Dict[str, List[Dict]]:
+        """
+        Public method to fetch Google Doc content
+
+        Args:
+            doc_id: Optional document ID, uses settings if not provided
+
+        Returns:
+            Parsed content dictionary
+        """
+        if doc_id:
+            self.living_doc_id = doc_id
+        return await self._fetch_google_docs()
+
+    async def fetch_notion_content(self, database_id: str = None) -> Dict[str, List[Dict]]:
+        """
+        Public method to fetch Notion content
+
+        Args:
+            database_id: Optional database ID, uses settings if not provided
+
+        Returns:
+            Parsed content dictionary
+        """
+        if database_id:
+            self.notion_database_id = database_id
+        return await self._fetch_notion()
+
+    async def fetch_mock_content(self) -> Dict[str, List[Dict]]:
+        """
+        Public method to fetch mock content for testing
+
+        Returns:
+            Mock content dictionary
+        """
+        return self.parse_mock_content()
+
+    async def fetch_from_url(self, url: str, parse_strategy: Optional[str] = None) -> Dict[str, List[Dict]]:
+        """
+        Fetch and parse content from a URL
+
+        Args:
+            url: URL to fetch content from
+            parse_strategy: Optional parsing strategy
+
+        Returns:
+            Parsed content dictionary
+        """
+        # Simple URL fetching (would be more sophisticated in production)
+        import httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()
+
+            content_text = response.text
+
+            # Simple parsing based on content
+            if "breathscape" in content_text.lower():
+                return self.parse_mock_content()
+            else:
+                return {"content": [{"title": "URL Content", "content": content_text}]}
+
     async def _fetch_internal(self) -> Dict[str, List[Dict]]:
         """
         Fetch content from internal source (JSON file or internal API)

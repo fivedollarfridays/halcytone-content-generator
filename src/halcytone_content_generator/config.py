@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
+    TEST_MODE: bool = False  # Add test_mode field
 
     # API Configuration
     API_KEY: str = ""  # This service's API key for authentication
@@ -28,6 +29,7 @@ class Settings(BaseSettings):
     # Content Source Configuration
     LIVING_DOC_TYPE: str = "google_docs"  # Options: google_docs, notion, internal
     LIVING_DOC_ID: str = ""
+    GOOGLE_DOCS_API_KEY: Optional[str] = None
     GOOGLE_CREDENTIALS_JSON: Optional[str] = None
     NOTION_API_KEY: Optional[str] = None
     NOTION_DATABASE_ID: Optional[str] = None

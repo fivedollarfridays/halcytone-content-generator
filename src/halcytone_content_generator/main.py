@@ -87,3 +87,7 @@ app.include_router(endpoints.router, prefix="/api/v1")
 # Include enhanced v2 endpoints
 from .api import endpoints_v2
 app.include_router(endpoints_v2.router, prefix="/api")
+
+# Include critical production endpoints
+from .api import endpoints_critical
+app.include_router(endpoints_critical.router)

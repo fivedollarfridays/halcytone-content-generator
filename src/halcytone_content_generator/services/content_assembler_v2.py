@@ -55,6 +55,7 @@ class EnhancedContentAssembler:
     def generate_newsletter(
         self,
         content: Dict[str, List[Dict]],
+        template: Optional[str] = None,
         custom_data: Optional[Dict] = None
     ) -> Dict[str, str]:
         """
@@ -62,11 +63,15 @@ class EnhancedContentAssembler:
 
         Args:
             content: Categorized content dictionary
+            template: Optional template style override
             custom_data: Optional custom data for template
 
         Returns:
             Newsletter content with subject, HTML, and text versions
         """
+        # Use provided template or default
+        template_style = template or self.template_style
+
         # Prepare template data
         template_data = self._prepare_newsletter_data(content)
 
@@ -86,11 +91,11 @@ class EnhancedContentAssembler:
         }
 
         # Render HTML
-        template = self.env.get_template(self.template_style)
+        template = self.env.get_template(template_style)
         html = template.render(**template_data)
 
         # Generate plain text version
-        if self.template_style == 'plain':
+        if template_style == 'plain':
             text = html
         else:
             text_template = self.env.get_template('plain')
