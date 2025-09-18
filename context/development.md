@@ -1,7 +1,7 @@
 # Development Log
 
-**Phase:** Content Generator Integration & Ecosystem Launch
-**Primary Goal:** Implement automated content generation system for marketing communications while maintaining service orchestration capabilities
+**Phase:** Content Generator Enhancement & Production Launch
+**Primary Goal:** Enhance automated content generation with batch processing, dry-run capabilities, and improved modularity
 
 ## Project Overview
 
@@ -10,124 +10,137 @@
 **Last Updated:** 2025-01-15
 **Coverage Target:** 80%
 **Current Coverage:** 76% (128 of 195 tests passing)
-**Current Sprint:** Sprint 6 - Content Generator Implementation ✅ COMPLETED
+**Current Sprint:** Sprint 7 - Content Generator Enhancements 🚧 IN PROGRESS
 
-## Platform Roadmap (6 Sprints)
-
-[Previous Sprints 1-5 remain unchanged - see original file]
-
----
+## Content Generator Roadmap (Post-Sprint 6)
 
 ### Sprint 6 – Content Generator & Ecosystem Launch ✅ COMPLETED
 **Duration:** 3 weeks
-**Outcome:** Automated content generation for multi-channel communications, full ecosystem production readiness
 **Status:** Implementation Complete (100%)
 
-#### Sprint Objectives
-Transform marketing communications through automated content generation that:
-- Creates email newsletters via CRM integration
-- Publishes website updates automatically
-- Generates social media content drafts
-- Maintains consistent messaging across all channels
-- Leverages existing microservice architecture
-
-#### Planned Deliverables
-
-1. **Content Generator Service** ✅
-   - New Python/FastAPI microservice following platform patterns
-   - Integration with "living document" source (Google Docs/Notion/Internal CMS)
-   - Multi-channel content assembly (email, web, social)
-   - Template-based content generation with personalization support
-   - Status: ✅ Completed (main.py, v1/v2 API endpoints)
-
-2. **CRM Email Integration** ✅
-   - Newsletter endpoint in CRM Worker (`POST /api/v1/notifications/newsletter`)
-   - Bulk email distribution using existing EmailNotificationService
-   - API key authentication for service-to-service communication
-   - Email template management and logging
-   - Status: ✅ Completed (crm_client_v2.py with bulk email, analytics, auth)
-
-3. **Website Content Publishing** ✅
-   - New `updates` table in Platform PostgreSQL
-   - Admin API endpoint (`POST /api/v1/updates`) for content publishing
-   - Next.js frontend updates page/blog section
-   - Auto-publication of generated content
-   - Status: ✅ Completed (platform_client_v2.py with versioning, monitoring)
-
-4. **Living Document System** ✅
-   - Structured content source setup (sections for Breathscape, Hardware, Tips, Vision)
-   - API integration for document retrieval (Google Docs/Notion API)
-   - Content parsing and categorization logic
-   - Version tracking and change detection
-   - Status: ✅ Completed (document_fetcher.py with multiple parsing strategies)
-
-5. **Service Integration Patterns** ✅
-   - API contracts with CRM for recipient lists
-   - Platform API integration for usage statistics
-   - Correlation ID propagation for tracing
-   - Circuit breakers and retry logic (reusing Sprint 3 patterns)
-   - Status: ✅ Completed (content_sync.py, monitoring.py, full telemetry)
-
-#### Technical Implementation Details
-
-**Architecture Decisions:**
-```yaml
-Service Design:
-  - Type: Microservice (separate from Platform API)
-  - Language: Python with FastAPI
-  - Database: None initially (stateless) or SQLite for content logs
-  - Authentication: API keys for service-to-service
-  - Deployment: Container/Lambda based on processing needs
-
-Integration Points:
-  - CRM API: Fetch users/leads, send newsletters
-  - Platform API: Publish website updates, get statistics
-  - Living Document: Google Docs/Notion API or internal CMS
-  - Social Platforms: Manual initially, API automation later
-
-Content Flow:
-  1. Fetch content from living document
-  2. Assemble multi-channel outputs
-  3. Send email via CRM
-  4. Publish to website via Platform API
-  5. Generate social snippets for review
-```
-
-#### Testing Strategy
-- Unit tests for content assembly logic
-- Integration tests with mock services
-- End-to-end testing in staging environment
-- Email delivery verification
-- Content quality review process
-
-#### Review Gate
-- Content generator produces consistent multi-channel output
-- Email distribution via CRM successful in staging
-- Website updates published automatically
-- Living document integration operational
-- All services maintain existing SLAs
-
-#### Definition of Done
-- [x] Content generator service deployed and operational
-- [x] CRM newsletter endpoint implemented and tested
-- [x] Website updates API and UI complete
-- [x] Living document integrated as content source
-- [x] Service-to-service authentication configured
-- [x] End-to-end content generation tested
-- [x] Documentation updated for new workflows
-- [x] Test coverage increased to 76% (approaching 80% target)
-- [ ] First production newsletter successfully sent (pending production deployment)
+#### Completed Deliverables
+- ✅ Content Generator Service with FastAPI
+- ✅ CRM Email Integration with bulk distribution
+- ✅ Website Content Publishing via Platform API
+- ✅ Living Document System (Google Docs/Notion)
+- ✅ Service Integration Patterns with resilience
 
 ---
 
-### Sprint 7 (Future) – Enhancement & Automation
+### Sprint 7 – Batch Processing & Modularity Enhancement 🚧 IN PROGRESS
+**Duration:** 2 weeks
+**Outcome:** Production-ready content generator with batch capabilities and improved maintainability
+**Status:** Implementation in Progress (25%)
+
+#### Sprint Objectives
+Enhance the content generator to support:
+- Batch content generation for weekly planning
+- Dry-run mode for safe testing
+- Modular channel adapters
+- Improved error handling and resilience
+- Breathscape narrative integration
+
+#### Planned Deliverables
+
+1. **Batch Content Generation** 🔄
+   - Weekly content planning endpoint (`/generateBatch?period=week`)
+   - Flexible scheduling module for N-day content
+   - Content variety algorithm across channels
+   - Template-based sequencing from living document
+   - Status: 🚧 Design phase
+
+2. **Channel Adapter Refactoring** 📡
+   - Common Publisher interface for all channels
+   - Separate modules: EmailPublisher, WebPublisher, SocialPublisher
+   - Localized channel-specific logic (rate limits, formatting)
+   - Easy addition of new channels (Facebook, Instagram)
+   - Status: 🚧 Refactoring EmailPublisher
+
+3. **Dry-Run Mode Implementation** 🧪
+   - Preview mode for content generation without distribution
+   - Mock endpoints for CRM and Platform during testing
+   - Detailed reporting of what would be sent
+   - Integration with admin UI preview capability
+   - Status: ⏳ Planned
+
+4. **Enhanced Error Handling** 🛡️
+   - Standardized retry patterns using halcytone-common
+   - Circuit breakers for all external API calls
+   - Graceful partial failure handling
+   - Comprehensive error logging with correlation IDs
+   - Status: ⏳ Planned
+
+5. **Breathscape Narrative Focus** 📖
+   - Dedicated Breathscape sections in content templates
+   - "This Week in Breathscape" newsletter feature
+   - #Breathscape social media campaign support
+   - Automatic story weaving across channels
+   - Status: ⏳ Planned
+
+#### Technical Implementation Details
+
+**Architecture Enhancements:**
+```yaml
+Batch Processing:
+  - Endpoint: POST /generateBatch
+  - Parameters: period (day/week/month), channels[]
+  - Output: Array of scheduled content items
+  - Storage: SQLite for content queue/drafts
+
+Channel Adapters:
+  - Interface: Publisher
+  - Methods: publish(), validate(), preview()
+  - Implementations: Email, Web, Twitter, LinkedIn
+  - Configuration: Per-channel rate limits and rules
+
+Dry-Run Support:
+  - Flag: dry_run=true (API param or env var)
+  - Behavior: Full execution without side effects
+  - Output: Detailed preview/simulation results
+  - Testing: Complete integration test capability
+
+Error Resilience:
+  - Retry: Exponential backoff with jitter
+  - Circuit Breaker: 5 failure threshold
+  - Fallback: Queue for later retry
+  - Monitoring: Metrics per channel/operation
+```
+
+#### Testing Strategy
+- Unit tests for batch generation logic
+- Mock publisher implementations for testing
+- Dry-run mode integration tests
+- Performance tests for batch operations
+- Channel-specific formatting tests
+
+#### Review Gate
+- Batch generation produces 7-day content plans
+- Dry-run mode works end-to-end
+- All publishers implement common interface
+- Error handling covers all external calls
+- Breathscape narrative properly integrated
+
+---
+
+### Sprint 8 (Future) – AI Enhancement & Personalization
 **Duration:** 2 weeks
 **Planned Features:**
-- AI-powered content enhancement (GPT integration)
-- Personalized content based on user segments
+- GPT-powered content enhancement
+- User segment personalization
 - Automated social media posting
-- Analytics integration for content performance
-- Advanced scheduling and triggering options
+- Content performance analytics
+- A/B testing for content variations
+
+---
+
+### Sprint 9 (Future) – Production Optimization
+**Duration:** 1 week
+**Planned Features:**
+- Performance optimization for scale
+- Advanced monitoring dashboards
+- Content approval workflows
+- Multi-language support
+- API rate limit management
 
 ---
 
@@ -135,61 +148,67 @@ Content Flow:
 
 ### Current Implementation
 ```yaml
-Backend:
-  - Python: 3.11+
+Core Framework:
+  - Language: Python 3.11+
   - Framework: FastAPI
-  - ORM: SQLAlchemy 2.0.x
   - Validation: Pydantic v2
-  - Migrations: Alembic
-  - Testing: pytest (44% coverage)
-  - Observability: OpenTelemetry
-  - Monitoring: Prometheus/Grafana
+  - Templates: Jinja2
+  - Testing: pytest (76% coverage)
 
-Frontend:
-  - Runtime: Node 22 LTS
-  - Framework: Next.js 15
-  - UI Library: React 19
-  - API Client: openapi-fetch
-  - Type Generation: openapi-typescript
-  - Testing: Playwright, Vitest
-  - Deployment: Cloudflare Pages
-
-Content Generator (NEW):
-  - Framework: FastAPI
-  - Content Sources: Google Docs/Notion API
-  - Template Engine: Jinja2
-  - Scheduling: Cron/Event-driven
-  - AI (optional): OpenAI API
-
+External Integrations:
+  - Google Docs API (service account)
+  - Notion API (optional)
+  - CRM Service (newsletter endpoint)
+  - Platform API (content publishing)
+  
 Infrastructure:
   - Container: Docker multi-stage
-  - Orchestration: Docker Compose
+  - Process Manager: Gunicorn
   - CI/CD: GitHub Actions
-  - Monitoring: Jaeger, Prometheus, Grafana
-  - Server: Gunicorn (production)
+  - Monitoring: OpenTelemetry, Prometheus
+  - Logging: Structured JSON logs
 ```
 
 ---
 
 ## Context Sync (AUTO-UPDATED)
 
-- **Overall goal is:** Implement Content Generator service while maintaining platform orchestration capabilities
-- **Last action was:** Increased test coverage from 45% to 76% - Added comprehensive tests for all critical modules
-- **Next action will be:** Deploy to staging environment and send first production newsletter
+- **Overall goal is:** Transform Content Generator into production-ready service with batch processing and enhanced modularity
+- **Last action was:** Completed Sprint 6 implementation with 76% test coverage
+- **Next action will be:** Implement batch content generation endpoint with flexible scheduling
 - **Blockers/Risks:**
-  - ✅ ~~Living document API credentials needed for production~~ (Google Docs & Notion keys configured)
-  - CRM bulk email rate limits to be verified in production
   - Social media API credentials pending (manual posting for now)
-  - Production deployment configuration required
-- **Current Branch:** `feature/content-generator`
-- **Implementation Status:** All 6 priority areas completed:
-  1. ✅ Content Generator Service Setup
-  2. ✅ Living Document Integration
-  3. ✅ Content Assembly Logic
-  4. ✅ CRM Integration
-  5. ✅ Platform API Integration
-  6. ✅ Testing & Documentation
-     - 92 unit and integration tests
-     - Comprehensive API documentation
-     - Docker configuration with monitoring stack
-     - Complete README and setup instructions
+  - Production rate limits need verification
+  - Content approval workflow not yet defined
+  - Need to establish batch size limits for performance
+- **Current Branch:** `feature/batch-content-generation`
+- **Implementation Priorities:**
+  1. 🚧 Batch generation logic (in progress)
+  2. ⏳ Channel adapter refactoring
+  3. ⏳ Dry-run mode
+  4. ⏳ Enhanced error handling
+  5. ⏳ Breathscape narrative templates
+
+---
+
+## Definition of Done
+
+### Sprint 7 Checklist
+- [ ] Batch generation endpoint implemented and tested
+- [ ] All publishers refactored to common interface
+- [ ] Dry-run mode functional for all channels
+- [ ] Error handling standardized across service
+- [ ] Breathscape content templates created
+- [ ] Integration tests pass with mocked services
+- [ ] Performance benchmarks established
+- [ ] Documentation updated with new endpoints
+- [ ] Test coverage maintained above 76%
+
+### Production Launch Criteria
+- [ ] Full dry-run test completed successfully
+- [ ] All external API integrations verified
+- [ ] Monitoring dashboards configured
+- [ ] Rollback procedures documented
+- [ ] Load testing completed for batch operations
+- [ ] Content approval process established
+- [ ] First production batch generated and reviewed
