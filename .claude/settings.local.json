@@ -5,7 +5,12 @@
       "Bash(bpsai-pair:*)",
       "Bash(dir:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(py --version)",
+      "Bash(python:*)",
+      "Bash(py -m:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
