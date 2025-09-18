@@ -83,3 +83,7 @@ async def readiness_check(settings: Settings = Depends(get_settings)):
 
 # Include API routers
 app.include_router(endpoints.router, prefix="/api/v1")
+
+# Include enhanced v2 endpoints
+from .api import endpoints_v2
+app.include_router(endpoints_v2.router, prefix="/api")
