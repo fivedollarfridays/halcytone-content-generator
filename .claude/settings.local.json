@@ -59,7 +59,8 @@
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_content_enhancer.py -v --tb=short)",
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_content_enhancer.py --cov=src/halcytone_content_generator/services/ai_content_enhancer --cov-report=term-missing -q --disable-warnings)",
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_prompts.py -v --tb=short)",
-      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_prompts.py --cov=src/halcytone_content_generator/templates/ai_prompts --cov-report=term-missing -q --disable-warnings)"
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_prompts.py --cov=src/halcytone_content_generator/templates/ai_prompts --cov-report=term-missing -q --disable-warnings)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_content_quality_scorer.py -v --tb=short)"
     ],
     "deny": [],
     "ask": []

@@ -504,6 +504,79 @@ class AIContentEnhancer:
         result = await self.enhance_content(request)
         return result.enhanced_content
 
+    async def enhance_with_quality_feedback(self, content: str, content_type: ContentType) -> dict:
+        """
+        Enhance content using quality scoring feedback
+
+        Args:
+            content: Original content
+            content_type: Type of content
+
+        Returns:
+            Dictionary with enhanced content and quality improvements
+        """
+        try:
+            # Import here to avoid circular imports
+            from .content_quality_scorer import get_content_quality_scorer
+
+            quality_scorer = get_content_quality_scorer()
+
+            # Get initial quality score
+            initial_score = await quality_scorer.score_content(content, content_type, include_ai_analysis=False)
+
+            # Identify areas for improvement based on quality score
+            improvements_needed = []
+            category_scores = initial_score.category_scores
+
+            if category_scores.get("readability", 0) < 70:
+                improvements_needed.append(EnhancementMode.IMPROVE_CLARITY)
+            if category_scores.get("engagement", 0) < 70:
+                improvements_needed.append(EnhancementMode.INCREASE_ENGAGEMENT)
+            if category_scores.get("seo_optimization", 0) < 70:
+                improvements_needed.append(EnhancementMode.OPTIMIZE_SEO)
+
+            # Apply enhancements based on quality feedback
+            enhanced_content = content
+            applied_enhancements = []
+
+            for mode in improvements_needed:
+                request = EnhancementRequest(
+                    content=enhanced_content,
+                    content_type=content_type,
+                    mode=mode
+                )
+                result = await self.enhance_content(request)
+                if result.confidence_score > 0.7:  # Only apply if confident
+                    enhanced_content = result.enhanced_content
+                    applied_enhancements.append(mode.value)
+
+            # Get final quality score
+            final_score = await quality_scorer.score_content(enhanced_content, content_type, include_ai_analysis=False)
+
+            return {
+                "original_content": content,
+                "enhanced_content": enhanced_content,
+                "initial_quality_score": initial_score.overall_score,
+                "final_quality_score": final_score.overall_score,
+                "quality_improvement": final_score.overall_score - initial_score.overall_score,
+                "applied_enhancements": applied_enhancements,
+                "improvement_suggestions": final_score.improvement_suggestions,
+                "quality_level": final_score.quality_level.value
+            }
+
+        except Exception as e:
+            logger.error(f"Quality-based enhancement failed: {e}")
+            return {
+                "original_content": content,
+                "enhanced_content": content,
+                "initial_quality_score": 0.0,
+                "final_quality_score": 0.0,
+                "quality_improvement": 0.0,
+                "applied_enhancements": [],
+                "improvement_suggestions": [f"Enhancement failed: {str(e)}"],
+                "quality_level": "critical"
+            }
+
 
 # Singleton instance
 _enhancer_instance = None
