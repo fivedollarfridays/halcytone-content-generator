@@ -5,7 +5,8 @@ import pytest
 from unittest.mock import Mock
 from datetime import datetime
 
-from src.halcytone_content_generator.services.content_validator import ContentValidator, ValidationSeverity
+from src.halcytone_content_generator.services.content_validator import ContentValidator
+from src.halcytone_content_generator.services.publishers.base import ValidationSeverity
 
 
 class TestContentValidator:

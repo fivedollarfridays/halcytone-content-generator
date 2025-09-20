@@ -34,9 +34,16 @@ class Settings(BaseSettings):
     NOTION_API_KEY: Optional[str] = None
     NOTION_DATABASE_ID: Optional[str] = None
 
-    # Optional AI Services
+    # AI Services Configuration
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_MODEL: str = "gpt-3.5-turbo"
+    AI_TEMPERATURE: float = 0.7  # Creativity level (0.0-1.0)
+    AI_MAX_TOKENS: int = 1500  # Maximum response length
+    AI_ENABLE_ENHANCEMENT: bool = True  # Enable AI content enhancement
+    AI_ENABLE_QUALITY_SCORING: bool = True  # Enable AI quality scoring
+    AI_ENABLE_PERSONALIZATION: bool = True  # Enable AI personalization
+    AI_ENABLE_AB_TESTING: bool = False  # Enable A/B testing variations
+    AI_DEFAULT_VARIATIONS: int = 3  # Default number of A/B test variations
 
     # Email Configuration
     EMAIL_BATCH_SIZE: int = 100
@@ -75,6 +82,11 @@ class Settings(BaseSettings):
     BATCH_MAX_DAYS: int = 30  # Maximum days to generate content for
     BATCH_DEFAULT_PERIOD: str = "week"  # Default batch period
     BATCH_ENABLE_SCHEDULING: bool = True  # Enable scheduled batch generation
+
+    # User Segmentation Settings
+    USER_SEGMENTS_ENABLED: bool = True
+    DEFAULT_SEGMENT: str = "general"
+    SEGMENT_PERSONALIZATION: bool = True
 
     class Config:
         env_file = ".env"
