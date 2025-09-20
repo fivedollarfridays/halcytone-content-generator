@@ -57,7 +57,9 @@
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_content_assembler.py tests/unit/test_platform_client.py tests/unit/test_publisher_integration.py tests/unit/test_breathscape_templates.py tests/unit/test_dry_run_integration.py tests/unit/test_crm_client.py tests/unit/test_endpoints_batch.py --cov=src --cov-report=term-missing -q --disable-warnings)",
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_content_assembler.py tests/unit/test_platform_client.py tests/unit/test_publisher_integration.py tests/unit/test_breathscape_templates.py tests/unit/test_dry_run_integration.py tests/unit/test_endpoints_batch.py --cov=src --cov-report=term-missing)",
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_content_enhancer.py -v --tb=short)",
-      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_content_enhancer.py --cov=src/halcytone_content_generator/services/ai_content_enhancer --cov-report=term-missing -q --disable-warnings)"
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_content_enhancer.py --cov=src/halcytone_content_generator/services/ai_content_enhancer --cov-report=term-missing -q --disable-warnings)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_prompts.py -v --tb=short)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_ai_prompts.py --cov=src/halcytone_content_generator/templates/ai_prompts --cov-report=term-missing -q --disable-warnings)"
     ],
     "deny": [],
     "ask": []

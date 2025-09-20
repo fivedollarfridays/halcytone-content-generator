@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from ..config import get_settings
 from ..schemas.content import Content, SocialPost, NewsletterContent, WebUpdateContent
 from ..core.resilience import RetryPolicy, CircuitBreaker
+from ..templates.ai_prompts import get_prompt_templates, ToneStyle
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +167,7 @@ class AIContentEnhancer:
         self.api_key = self.settings.OPENAI_API_KEY
         self.model = self.settings.OPENAI_MODEL or "gpt-3.5-turbo"
         self.prompt_manager = PromptManager()
+        self.advanced_prompts = get_prompt_templates()  # Use advanced template system
         self.circuit_breaker = CircuitBreaker(
             failure_threshold=5,
             recovery_timeout=60,
