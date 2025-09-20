@@ -452,6 +452,61 @@ class AIContentEnhancer:
 
         return variations
 
+    async def personalize_for_user(self, content: str, user_id: str,
+                                  content_type: ContentType) -> str:
+        """
+        Personalize content for a specific user based on their segments
+
+        Args:
+            content: Original content
+            user_id: User identifier
+            content_type: Type of content
+
+        Returns:
+            Personalized content
+        """
+        try:
+            # Import here to avoid circular imports
+            from .user_segmentation import get_user_segmentation_service
+
+            segmentation_service = get_user_segmentation_service()
+
+            # Get user's content strategy
+            strategy = segmentation_service.get_personalized_content_strategy(user_id)
+            content_preferences = strategy.get("content_preferences", {})
+
+            # Build context from user preferences
+            context = {
+                "target_audience": content_preferences.get("tone", "general"),
+                "keywords": strategy.get("priority_topics", [])[:5],  # Top 5 topics
+                "tone": content_preferences.get("tone", "friendly")
+            }
+
+            # Determine enhancement mode based on preferences
+            mode = EnhancementMode.PERSONALIZE
+            if content_preferences.get("technical"):
+                mode = EnhancementMode.TECHNICAL
+            elif content_preferences.get("educational_content"):
+                mode = EnhancementMode.IMPROVE_CLARITY
+            elif content_preferences.get("motivational"):
+                mode = EnhancementMode.INCREASE_ENGAGEMENT
+
+            request = EnhancementRequest(
+                content=content,
+                content_type=content_type,
+                mode=mode,
+                context=context,
+                target_audience=context["target_audience"],
+                keywords=context["keywords"]
+            )
+
+            result = await self.enhance_content(request)
+            return result.enhanced_content
+
+        except Exception as e:
+            logger.error(f"User-based personalization failed: {e}")
+            return content
+
     async def personalize_for_segment(self, content: str, segment: str,
                                      content_type: ContentType) -> str:
         """
