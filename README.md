@@ -25,11 +25,15 @@ The Halcytone Content Generator is a microservice that automates the process of 
 - **Multi-Channel Distribution**
   - Email newsletters via CRM integration
   - Website content publishing via Platform API
+  - **Automated Social Media Posting** (Twitter, LinkedIn) with API integration
   - Social media content generation (Twitter, LinkedIn, Facebook)
-  - Scheduled publishing
+  - Scheduled publishing with background queue management
 
 - **Advanced Features**
   - **Publisher Pattern Architecture** for scalable multi-channel publishing
+  - **Automated Social Media Posting** with Twitter API v2 and LinkedIn UGC API
+  - **Background Scheduling Queue** with retry logic and rate limiting
+  - **Real-time Posting Analytics** with performance tracking
   - **Breathscape Templates** specialized for wellness/breathing content
   - **Dry-run Mode** for safe content preview and testing
   - **Batch Content Generation** with comprehensive scheduling
