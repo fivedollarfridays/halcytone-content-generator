@@ -263,9 +263,9 @@ class WebPublisher(Publisher):
                 title=web_update.title,
                 content=web_update.content,
                 excerpt=web_update.excerpt,
-                slug=web_update.slug,
                 tags=web_update.tags,
-                published_at=web_update.published_at or datetime.now()
+                scheduled_at=web_update.published_at,
+                correlation_id=f"web-{web_update.slug or self._generate_slug(web_update.title)}"
             )
 
             return PublishResult(

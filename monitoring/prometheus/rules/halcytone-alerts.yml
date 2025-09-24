@@ -1,0 +1,151 @@
+groups:
+  - name: halcytone-service-alerts
+    rules:
+      # Service Health Alerts
+      - alert: HalcytoneServiceDown
+        expr: up{job="halcytone-content-generator"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: halcytone
+        annotations:
+          summary: "Halcytone Content Generator service is down"
+          description: "The main Halcytone Content Generator service has been down for more than 30 seconds."
+
+      - alert: MockCRMServiceDown
+        expr: up{job="mock-crm-service"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          service: mock-crm
+        annotations:
+          summary: "Mock CRM service is down"
+          description: "The Mock CRM service has been down for more than 1 minute. Dry run functionality may be impacted."
+
+      - alert: MockPlatformServiceDown
+        expr: up{job="mock-platform-service"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          service: mock-platform
+        annotations:
+          summary: "Mock Platform service is down"
+          description: "The Mock Platform service has been down for more than 1 minute. Dry run functionality may be impacted."
+
+      # Performance Alerts
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(fastapi_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone
+        annotations:
+          summary: "High response times detected"
+          description: "95th percentile response time is above 2 seconds for more than 5 minutes. Current value: {{ $value }}s"
+
+      - alert: CriticalResponseTime
+        expr: histogram_quantile(0.95, rate(fastapi_request_duration_seconds_bucket[5m])) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: halcytone
+        annotations:
+          summary: "Critical response times detected"
+          description: "95th percentile response time is above 5 seconds for more than 2 minutes. Current value: {{ $value }}s"
+
+      - alert: HighErrorRate
+        expr: rate(fastapi_requests_total{status_code=~"5.."}[5m]) / rate(fastapi_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: halcytone
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for more than 2 minutes. Current rate: {{ printf \"%.2f\" $value }}%"
+
+      # Resource Usage Alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 10 minutes. Current usage: {{ printf \"%.2f\" $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: ((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for more than 10 minutes. Current usage: {{ printf \"%.2f\" $value }}%"
+
+      - alert: CriticalMemoryUsage
+        expr: ((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is above 95% for more than 5 minutes. Current usage: {{ printf \"%.2f\" $value }}%"
+
+  - name: halcytone-dry-run-alerts
+    rules:
+      # Dry Run Specific Alerts
+      - alert: DryRunModeDisabled
+        expr: halcytone_dry_run_mode == 0
+        for: 0s
+        labels:
+          severity: warning
+          service: halcytone
+        annotations:
+          summary: "Dry run mode is disabled"
+          description: "The service is running in LIVE mode, not dry run. Verify this is intentional."
+
+      - alert: MockServiceInteractionFailure
+        expr: rate(halcytone_mock_service_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: mock-services
+        annotations:
+          summary: "Mock service interaction failures"
+          description: "Failures in mock service interactions detected. Rate: {{ $value }} errors/sec"
+
+      - alert: ContentGenerationFailures
+        expr: rate(halcytone_content_generation_failures_total[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+          service: halcytone
+        annotations:
+          summary: "Content generation failures detected"
+          description: "Content generation failure rate is above 5% for more than 3 minutes. Current rate: {{ $value }} failures/sec"
+
+  - name: halcytone-business-alerts
+    rules:
+      # Business Logic Alerts
+      - alert: NoContentGenerationActivity
+        expr: rate(halcytone_content_generated_total[30m]) == 0
+        for: 30m
+        labels:
+          severity: warning
+          service: halcytone
+        annotations:
+          summary: "No content generation activity"
+          description: "No content has been generated in the last 30 minutes. This may indicate a problem with the content pipeline."
+
+      - alert: UnusuallyHighContentGeneration
+        expr: rate(halcytone_content_generated_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: info
+          service: halcytone
+        annotations:
+          summary: "Unusually high content generation rate"
+          description: "Content generation rate is unusually high: {{ $value }} items/sec. This may indicate load testing or unusual usage patterns."

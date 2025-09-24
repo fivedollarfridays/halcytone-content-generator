@@ -227,13 +227,10 @@ class EmailPublisher(Publisher):
             # Use the enhanced CRM client's bulk send method
             send_result = await self.crm_client.send_newsletter_bulk(
                 subject=newsletter.subject,
-                html_content=newsletter.html,
-                text_content=newsletter.text or "",
-                recipient_list="default",  # Could be configurable
-                sender_info={
-                    "name": self.config.get('sender_name', 'Halcytone'),
-                    "email": self.config.get('sender_email', 'noreply@halcytone.com')
-                }
+                html=newsletter.html,
+                text=newsletter.text or "",
+                recipient_filter=None,  # Could be configurable
+                test_mode=False
             )
 
             # Track analytics

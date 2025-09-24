@@ -1,7 +1,7 @@
 """
 Enhanced API endpoints with template selection and customization
 """
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from typing import Optional, List
 import logging
 
@@ -43,6 +43,7 @@ def get_publishers(settings: Settings):
 @router.post("/generate-content")
 async def generate_enhanced_content(
     request: ContentGenerationRequest,
+    raw_request: Request,
     template_style: str = Query(default="modern", description="Email template style (modern, minimal, plain)"),
     social_platforms: Optional[List[str]] = Query(default=None, description="Social platforms to generate for"),
     seo_optimize: bool = Query(default=True, description="Enable SEO optimization for web content"),
@@ -61,6 +62,17 @@ async def generate_enhanced_content(
         settings: Application settings
     """
     try:
+        # Handle legacy payload format - check for content.dry_run
+        try:
+            raw_body = await raw_request.json()
+            if isinstance(raw_body, dict) and "content" in raw_body:
+                content_section = raw_body["content"]
+                if isinstance(content_section, dict) and content_section.get("dry_run", False):
+                    request.preview_only = True
+                    logger.info("Legacy dry_run detected, enabling preview_only mode")
+        except Exception as e:
+            logger.debug(f"Could not parse raw request for legacy format: {e}")
+
         # Step 1: Fetch living document content
         fetcher = DocumentFetcher(settings)
         content = await fetcher.fetch_content()
@@ -443,8 +455,10 @@ async def validate_content(
         summary = validator.generate_content_summary(content)
 
         return {
-            "valid": is_valid,
+            "is_valid": is_valid,
+            "content_type": "mixed",  # Default since we validate from multiple sources
             "issues": issues,
+            "warnings": [],  # Separate warnings from issues if needed
             "summary": summary,
             "recommendations": {
                 "add_more_content": len(issues) > 0,

@@ -170,6 +170,41 @@ async def get_email_status(message_id: str):
         ]
     }
 
+# User/Subscriber Management Endpoints
+@app.get("/api/v1/users/subscribers")
+async def get_subscribers(
+    limit: int = 100,
+    offset: int = 0,
+    status: str = "active",
+    newsletter_opt_in: bool = None
+):
+    """Get list of subscribers"""
+    # Generate mock subscriber list
+    subscribers = []
+    for i in range(offset, min(offset + limit, 1000)):  # Mock 1000 total subscribers
+        subscriber = {
+            "id": f"sub_{i:04d}",
+            "email": f"subscriber{i}@example.com",
+            "first_name": f"User{i}",
+            "last_name": f"Test{i}",
+            "status": status,
+            "subscription_date": "2024-01-01T00:00:00Z",
+            "tags": ["newsletter", "dry-run"],
+            "metadata": {}
+        }
+        subscribers.append(subscriber)
+
+    logger.info(f"Mock subscribers requested: limit={limit}, offset={offset}, status={status}, newsletter_opt_in={newsletter_opt_in}")
+
+    return {
+        "subscribers": subscribers,
+        "total": 1000,
+        "limit": limit,
+        "offset": offset,
+        "status_filter": status,
+        "newsletter_opt_in_filter": newsletter_opt_in
+    }
+
 # Contact Management Endpoints
 @app.post("/api/v1/contacts", response_model=ContactResponse)
 async def create_contact(request: ContactRequest):

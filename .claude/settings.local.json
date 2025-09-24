@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(curl:*)"
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/contracts/test_content_api.py::TestContentAPIContract -v --tb=short)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/contracts/test_content_api.py::TestContentAPIContract -v --tb=short --maxfail=3)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe mocks/crm_service.py)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/contracts/test_content_api.py::TestContentAPIContract::test_update_content_validation_contract tests/contracts/test_content_api.py::TestContentAPIContract::test_validation_error_format_contract -v --tb=short)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/contracts/test_content_api.py::TestContentAPIContract::test_dry_run_contract -v --tb=short)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []

@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     # AI Services Configuration
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_MODEL: str = "gpt-3.5-turbo"
+
+    # Security Configuration
+    API_KEY_ENCRYPTION_KEY: str = "dev-encryption-key-replace-in-production"
+    JWT_SECRET_KEY: str = "dev-jwt-secret-replace-in-production"
     AI_TEMPERATURE: float = 0.7  # Creativity level (0.0-1.0)
     AI_MAX_TOKENS: int = 1500  # Maximum response length
     AI_ENABLE_ENHANCEMENT: bool = True  # Enable AI content enhancement
@@ -74,7 +78,9 @@ class Settings(BaseSettings):
     ENABLE_CACHE: bool = True
 
     # Dry Run Settings
-    DRY_RUN: bool = False  # Global dry run mode for all operations
+    DRY_RUN: bool = False  # Global dry run mode for all operations (legacy)
+    DRY_RUN_MODE: bool = False  # New dry run mode flag
+    USE_MOCK_SERVICES: bool = False  # Use mock services instead of real APIs
     BATCH_DRY_RUN: bool = False  # Specific dry run for batch operations
 
     # Batch Processing Settings

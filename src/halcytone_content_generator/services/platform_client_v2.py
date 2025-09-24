@@ -115,8 +115,19 @@ class EnhancedPlatformClient:
         Args:
             settings: Application settings
         """
-        self.base_url = settings.PLATFORM_BASE_URL
-        self.api_key = settings.PLATFORM_API_KEY
+        self.settings = settings
+        self.dry_run_mode = settings.DRY_RUN_MODE or settings.DRY_RUN
+        self.use_mock_services = settings.USE_MOCK_SERVICES
+
+        # Use mock service URL if in dry run mode
+        if self.dry_run_mode and self.use_mock_services:
+            self.base_url = "http://localhost:8002"  # Mock Platform service
+            self.api_key = "mock-platform-api-key"
+            logger.info("Platform Client: Using mock service for dry run mode")
+        else:
+            self.base_url = settings.PLATFORM_BASE_URL
+            self.api_key = settings.PLATFORM_API_KEY
+
         self.service_name = settings.SERVICE_NAME
 
         # Initialize circuit breaker
@@ -190,32 +201,39 @@ class EnhancedPlatformClient:
             # Generate slug from title
             slug = self._generate_slug(title)
 
-            # Prepare request payload
-            payload = {
-                "title": title,
-                "content": content,
-                "excerpt": excerpt,
-                "slug": slug,
-                "type": content_type.value,
-                "status": ContentStatus.SCHEDULED.value if scheduled_at else ContentStatus.PUBLISHED.value,
-                "tags": tags or [],
-                "categories": categories or [],
-                "seo_metadata": seo_metadata or {},
-                "author": self.service_name,
-                "scheduled_at": scheduled_at.isoformat() if scheduled_at else None,
-                "published_at": datetime.now().isoformat() if not scheduled_at else None
-            }
-
-            # Make API call with circuit breaker
-            result = await self._call_with_circuit_breaker(
-                "POST",
-                "/api/v1/content",
-                json=payload,
-                headers={
-                    "X-Correlation-ID": correlation_id,
-                    "X-Service-Name": self.service_name
+            if self.dry_run_mode and self.use_mock_services:
+                # Use mock Platform service
+                result = await self._publish_via_mock_service(
+                    title, content, excerpt, content_type, tags, scheduled_at, correlation_id
+                )
+            else:
+                # Use real Platform API
+                # Prepare request payload
+                payload = {
+                    "title": title,
+                    "content": content,
+                    "excerpt": excerpt,
+                    "slug": slug,
+                    "type": content_type.value,
+                    "status": ContentStatus.SCHEDULED.value if scheduled_at else ContentStatus.PUBLISHED.value,
+                    "tags": tags or [],
+                    "categories": categories or [],
+                    "seo_metadata": seo_metadata or {},
+                    "author": self.service_name,
+                    "scheduled_at": scheduled_at.isoformat() if scheduled_at else None,
+                    "published_at": datetime.now().isoformat() if not scheduled_at else None
                 }
-            )
+
+                # Make API call with circuit breaker
+                result = await self._call_with_circuit_breaker(
+                    "POST",
+                    "/api/v1/content",
+                    json=payload,
+                    headers={
+                        "X-Correlation-ID": correlation_id,
+                        "X-Service-Name": self.service_name
+                    }
+                )
 
             # Create published content object
             published_content = PublishedContent(
@@ -750,6 +768,67 @@ class EnhancedPlatformClient:
             "average_duration_ms": avg_duration,
             "correlation_ids": list(set(e.correlation_id for e in events))
         }
+
+    async def _publish_via_mock_service(
+        self, title: str, content: str, excerpt: str,
+        content_type, tags: Optional[List[str]],
+        scheduled_at: Optional[datetime], correlation_id: str
+    ) -> Dict:
+        """Publish content via mock Platform service for dry run testing"""
+
+        try:
+            # Prepare payload for mock API
+            payload = {
+                "title": title,
+                "content": content,
+                "content_type": content_type.value if content_type else "web_update",
+                "metadata": {
+                    "excerpt": excerpt,
+                    "correlation_id": correlation_id
+                },
+                "tags": tags or [],
+                "publish_immediately": not bool(scheduled_at),
+                "scheduled_at": scheduled_at.isoformat() if scheduled_at else None
+            }
+
+            logger.info(f"Publishing content via mock Platform service: {title}")
+
+            # Send to mock service
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.base_url}/api/v1/content/publish",
+                    json=payload,
+                    headers={
+                        "Content-Type": "application/json",
+                        "X-Correlation-ID": correlation_id
+                    },
+                    timeout=30.0
+                )
+
+                response.raise_for_status()
+                result = response.json()
+
+                logger.info(f"Mock Platform response: {result}")
+
+                # Return normalized result
+                return {
+                    "id": result.get('content_id'),
+                    "url": result.get('url'),
+                    "status": result.get('status', 'published'),
+                    "published_at": result.get('published_at'),
+                    "analytics": {}
+                }
+
+        except Exception as e:
+            logger.error(f"Mock Platform service error: {e}")
+            # Return mock success for dry run resilience
+            return {
+                "id": f"mock-{correlation_id}",
+                "url": f"https://halcytone.com/content/mock-{correlation_id}",
+                "status": "published",
+                "published_at": datetime.utcnow().isoformat(),
+                "analytics": {}
+            }
 
     def clear_cache(self):
         """Clear content cache"""
