@@ -260,11 +260,13 @@ class EnhancedContentAssembler:
             tip = content['tips'][0]
             thread_items = self._split_into_thread(tip.get('content', ''))
             thread = self.social_templates.create_thread(thread_items, 'twitter')
+            # Join thread items into a single string for validation
+            thread_content = '\n\n'.join(thread) if isinstance(thread, list) else thread
             posts.append({
                 'platform': 'twitter',
-                'content': thread,
+                'content': thread_content,
                 'type': 'thread',
-                'thread_count': len(thread)
+                'thread_count': len(thread) if isinstance(thread, list) else 1
             })
 
         return posts

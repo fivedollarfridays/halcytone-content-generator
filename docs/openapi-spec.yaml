@@ -1,0 +1,951 @@
+openapi: 3.0.3
+info:
+  title: Halcytone Content Generator API
+  description: |
+    RESTful API for content generation, validation, and multi-channel distribution.
+
+    ## Features
+    - Multi-channel content generation (Email, Web, Social)
+    - Content validation and SEO optimization
+    - Real-time session content via WebSocket
+    - Batch processing capabilities
+    - Cache management
+    - Analytics and monitoring
+
+    ## Authentication
+    All API requests require a Bearer token in the Authorization header.
+  version: 1.0.0
+  contact:
+    name: Halcytone API Support
+    email: api-support@halcytone.com
+    url: https://docs.halcytone.com
+  license:
+    name: Proprietary
+    url: https://halcytone.com/license
+
+servers:
+  - url: https://content.halcytone.com/api
+    description: Production server
+  - url: https://staging.content.halcytone.com/api
+    description: Staging server
+  - url: https://dev.content.halcytone.com/api
+    description: Development server
+
+tags:
+  - name: Content Generation
+    description: Generate and manage content
+  - name: Validation
+    description: Content validation endpoints
+  - name: Templates
+    description: Template management
+  - name: Batch Processing
+    description: Bulk content operations
+  - name: Cache
+    description: Cache management
+  - name: Analytics
+    description: Analytics and reporting
+  - name: WebSocket
+    description: Real-time content updates
+  - name: Health
+    description: Health and readiness checks
+
+security:
+  - BearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check if the service is healthy
+      operationId: healthCheck
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              example:
+                status: healthy
+                version: 1.0.0
+                environment: production
+                timestamp: "2025-01-24T10:00:00Z"
+                checks:
+                  database: ok
+                  redis: ok
+                  google_docs: ok
+                  notion: ok
+
+  /ready:
+    get:
+      tags:
+        - Health
+      summary: Readiness check
+      description: Check if the service is ready to handle requests
+      operationId: readinessCheck
+      security: []
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessStatus'
+
+  /v2/generate-content:
+    post:
+      tags:
+        - Content Generation
+      summary: Generate content
+      description: |
+        Generate content for multiple channels with optional AI enhancement.
+        Supports preview mode, dry-run, and various tone options.
+      operationId: generateContent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentGenerationRequest'
+            examples:
+              weeklyUpdate:
+                summary: Weekly update generation
+                value:
+                  send_email: true
+                  publish_web: true
+                  generate_social: true
+                  template_style: weekly_update
+                  tone: encouraging
+                  validate_before_generate: true
+              blogPost:
+                summary: Blog post creation
+                value:
+                  content:
+                    type: blog
+                    title: "The Science of Breathing"
+                    category: "Science & Research"
+                    target_keywords: ["coherent breathing", "HRV"]
+                  publish_web: true
+                  seo_optimize: true
+                  tone: medical_scientific
+      responses:
+        '200':
+          description: Content generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentGenerationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /v2/validate-content:
+    post:
+      tags:
+        - Validation
+      summary: Validate content
+      description: Validate content without generating or publishing
+      operationId: validateContent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentValidationRequest'
+      responses:
+        '200':
+          description: Validation complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentValidationResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /templates:
+    get:
+      tags:
+        - Templates
+      summary: List templates
+      description: Get list of available content templates
+      operationId: listTemplates
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [email, web, social]
+          description: Filter templates by category
+      responses:
+        '200':
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  templates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Template'
+
+  /batch/generate:
+    post:
+      tags:
+        - Batch Processing
+      summary: Batch content generation
+      description: Generate multiple content items in a single request
+      operationId: batchGenerateContent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchGenerationRequest'
+      responses:
+        '202':
+          description: Batch processing started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchGenerationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /batch/{batch_id}/status:
+    get:
+      tags:
+        - Batch Processing
+      summary: Get batch status
+      description: Check the status of a batch processing job
+      operationId: getBatchStatus
+      parameters:
+        - name: batch_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Batch status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchStatus'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /cache/invalidate:
+    post:
+      tags:
+        - Cache
+      summary: Invalidate cache
+      description: Invalidate cache entries by patterns or targets
+      operationId: invalidateCache
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CacheInvalidationRequest'
+      responses:
+        '200':
+          description: Cache invalidated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheInvalidationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /cache/status:
+    get:
+      tags:
+        - Cache
+      summary: Get cache status
+      description: Get current cache statistics and health
+      operationId: getCacheStatus
+      responses:
+        '200':
+          description: Cache status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheStatus'
+
+  /analytics/summary:
+    get:
+      tags:
+        - Analytics
+      summary: Get analytics summary
+      description: Get overall analytics summary
+      operationId: getAnalyticsSummary
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Analytics summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsSummary'
+
+  /sessions/{session_id}/connect:
+    get:
+      tags:
+        - WebSocket
+      summary: Connect to session
+      description: |
+        Establish WebSocket connection for real-time session updates.
+        Use ws:// or wss:// protocol.
+      operationId: connectToSession
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [participant, instructor, observer, admin]
+            default: observer
+      responses:
+        '101':
+          description: Switching Protocols - WebSocket connection established
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Health & Status
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - version
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        version:
+          type: string
+        environment:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          additionalProperties:
+            type: string
+
+    ReadinessStatus:
+      type: object
+      required:
+        - ready
+        - initialized
+      properties:
+        ready:
+          type: boolean
+        initialized:
+          type: boolean
+        dependencies:
+          type: object
+          additionalProperties:
+            type: boolean
+
+    # Content Types
+    ContentType:
+      type: string
+      enum:
+        - update
+        - blog
+        - announcement
+        - session_summary
+      description: Type of content
+
+    ToneType:
+      type: string
+      enum:
+        - professional
+        - encouraging
+        - medical_scientific
+        - casual
+      description: Tone for content generation
+
+    ChannelType:
+      type: string
+      enum:
+        - email
+        - web
+        - social
+      description: Distribution channel
+
+    SocialPlatform:
+      type: string
+      enum:
+        - twitter
+        - linkedin
+        - instagram
+        - facebook
+      description: Social media platform
+
+    # Request Schemas
+    ContentGenerationRequest:
+      type: object
+      properties:
+        content:
+          type: object
+          properties:
+            type:
+              $ref: '#/components/schemas/ContentType'
+            title:
+              type: string
+              minLength: 1
+              maxLength: 200
+            content:
+              type: string
+              minLength: 10
+            author:
+              type: string
+            category:
+              type: string
+            tags:
+              type: array
+              items:
+                type: string
+            target_keywords:
+              type: array
+              items:
+                type: string
+        send_email:
+          type: boolean
+          default: false
+        publish_web:
+          type: boolean
+          default: false
+        generate_social:
+          type: boolean
+          default: false
+        social_platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/SocialPlatform'
+        template_style:
+          type: string
+          default: modern
+        tone:
+          $ref: '#/components/schemas/ToneType'
+        per_channel_tones:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ToneType'
+        seo_optimize:
+          type: boolean
+          default: true
+        validate_before_generate:
+          type: boolean
+          default: true
+        preview_only:
+          type: boolean
+          default: false
+        dry_run:
+          type: boolean
+          default: false
+        invalidate_cache:
+          type: boolean
+          default: false
+        include_preview:
+          type: boolean
+          default: true
+        force_refresh:
+          type: boolean
+          default: false
+
+    ContentValidationRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: object
+          properties:
+            type:
+              $ref: '#/components/schemas/ContentType'
+            title:
+              type: string
+            content:
+              type: string
+            channels:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChannelType'
+        strict_mode:
+          type: boolean
+          default: true
+
+    BatchGenerationRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ContentGenerationRequest'
+        batch_size:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 5
+        parallel_processing:
+          type: boolean
+          default: true
+        continue_on_error:
+          type: boolean
+          default: false
+
+    CacheInvalidationRequest:
+      type: object
+      required:
+        - targets
+      properties:
+        targets:
+          type: array
+          items:
+            type: string
+            enum: [cdn, local, api, redis, memory, database]
+        patterns:
+          type: array
+          items:
+            type: string
+        reason:
+          type: string
+        force:
+          type: boolean
+          default: false
+
+    # Response Schemas
+    ContentGenerationResponse:
+      type: object
+      required:
+        - status
+        - content_id
+        - published_to
+      properties:
+        status:
+          type: string
+          enum: [success, partial_success, failed, preview]
+        content_id:
+          type: string
+          format: uuid
+        published_to:
+          type: array
+          items:
+            type: string
+        results:
+          type: object
+          additionalProperties:
+            type: object
+        newsletter:
+          $ref: '#/components/schemas/NewsletterContent'
+        web_update:
+          $ref: '#/components/schemas/WebUpdateContent'
+        social_posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SocialPost'
+        errors:
+          type: array
+          items:
+            type: string
+        generated_at:
+          type: string
+          format: date-time
+
+    ContentValidationResponse:
+      type: object
+      required:
+        - is_valid
+        - content_type
+      properties:
+        is_valid:
+          type: boolean
+        content_type:
+          $ref: '#/components/schemas/ContentType'
+        issues:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          properties:
+            word_count:
+              type: integer
+            reading_time:
+              type: integer
+            seo_score:
+              type: number
+              minimum: 0
+              maximum: 100
+
+    BatchGenerationResponse:
+      type: object
+      required:
+        - batch_id
+        - status
+      properties:
+        batch_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [queued, processing, completed, failed]
+        total_items:
+          type: integer
+        processed_items:
+          type: integer
+        failed_items:
+          type: integer
+        estimated_completion:
+          type: string
+          format: date-time
+
+    BatchStatus:
+      type: object
+      required:
+        - batch_id
+        - status
+      properties:
+        batch_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [queued, processing, completed, failed]
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              item_id:
+                type: string
+              status:
+                type: string
+              content_id:
+                type: string
+              error:
+                type: string
+
+    CacheInvalidationResponse:
+      type: object
+      required:
+        - status
+        - request_id
+      properties:
+        status:
+          type: string
+          enum: [success, partial_success, failed]
+        request_id:
+          type: string
+          format: uuid
+        targets_processed:
+          type: object
+          additionalProperties:
+            type: boolean
+        keys_invalidated:
+          type: integer
+        duration_ms:
+          type: integer
+
+    CacheStatus:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        type:
+          type: string
+        size_mb:
+          type: number
+        entries:
+          type: integer
+        hit_rate:
+          type: number
+          minimum: 0
+          maximum: 100
+        memory_usage:
+          type: object
+          properties:
+            used_mb:
+              type: number
+            total_mb:
+              type: number
+            percentage:
+              type: number
+
+    AnalyticsSummary:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            start_date:
+              type: string
+              format: date
+            end_date:
+              type: string
+              format: date
+        content_generated:
+          type: integer
+        emails_sent:
+          type: integer
+        web_published:
+          type: integer
+        social_posts:
+          type: integer
+        average_engagement_rate:
+          type: number
+        top_performing_content:
+          type: array
+          items:
+            type: object
+            properties:
+              content_id:
+                type: string
+              title:
+                type: string
+              engagement_score:
+                type: number
+
+    # Content Models
+    NewsletterContent:
+      type: object
+      properties:
+        subject:
+          type: string
+        preview_text:
+          type: string
+        html:
+          type: string
+        plain_text:
+          type: string
+        recipient_count:
+          type: integer
+
+    WebUpdateContent:
+      type: object
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        meta_description:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        published_url:
+          type: string
+          format: uri
+
+    SocialPost:
+      type: object
+      required:
+        - platform
+        - content
+      properties:
+        platform:
+          $ref: '#/components/schemas/SocialPlatform'
+        content:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        media_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+        scheduled_for:
+          type: string
+          format: date-time
+
+    Template:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        preview_url:
+          type: string
+          format: uri
+        variables:
+          type: array
+          items:
+            type: string
+
+    # Error Schemas
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+        request_id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+
+    ValidationError:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: array
+          items:
+            type: object
+            properties:
+              loc:
+                type: array
+                items:
+                  type: string
+              msg:
+                type: string
+              type:
+                type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: bad_request
+            message: Invalid request format
+            request_id: 123e4567-e89b-12d3-a456-426614174000
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: unauthorized
+            message: Invalid or expired token
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: forbidden
+            message: Insufficient permissions
+
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: not_found
+            message: Resource not found
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+
+    RateLimited:
+      description: Rate limited
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: rate_limited
+            message: Too many requests
+            details:
+              retry_after: 60
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: internal_error
+            message: An unexpected error occurred

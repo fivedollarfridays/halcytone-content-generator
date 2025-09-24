@@ -146,8 +146,7 @@ async def generate_enhanced_content(
 
             web_update_data = assembler.generate_web_update(
                 content,
-                seo_optimize=seo_optimize,
-                tone_profile=web_tone.value if web_tone else None
+                seo_optimize=seo_optimize
             )
             web_update = WebUpdateContent(**web_update_data) if web_update_data else None
 
@@ -165,15 +164,17 @@ async def generate_enhanced_content(
 
             social_posts_data = assembler.generate_social_posts(
                 content,
-                platforms,
-                tone_profile=social_tone.value if social_tone else None
+                platforms
             )
             social_posts = [SocialPost(**post) for post in social_posts_data] if social_posts_data else []
 
         # If preview only, return without sending
         if request.preview_only:
+            import uuid
             return ContentGenerationResponse(
                 status="preview",
+                content_id=str(uuid.uuid4()),
+                published_to=[],  # Nothing published in preview mode
                 newsletter=newsletter,
                 web_update=web_update,
                 social_posts=social_posts,
@@ -326,8 +327,23 @@ async def generate_enhanced_content(
                     "error": str(e)
                 }
 
+        # Collect published channels for API contract compatibility
+        published_to = []
+        if request.send_email and results.get('email', {}).get('status') != 'validation_failed':
+            published_to.append('email')
+        if request.publish_web and results.get('web', {}).get('status') != 'validation_failed':
+            published_to.append('web')
+        if request.generate_social and results.get('social'):
+            published_to.append('social')
+
+        # Generate a content ID for tracking
+        import uuid
+        content_id = str(uuid.uuid4())
+
         return ContentGenerationResponse(
             status="success",
+            content_id=content_id,
+            published_to=published_to,
             results=results,
             newsletter=newsletter if request.include_preview else None,
             web_update=web_update if request.include_preview else None,

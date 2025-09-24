@@ -80,6 +80,8 @@ class ContentGenerationRequest(BaseModel):
 class ContentGenerationResponse(BaseModel):
     """Response model for content generation"""
     status: str
+    content_id: Optional[str] = None  # Added for API contract compatibility
+    published_to: List[str] = Field(default_factory=list)  # Added for API contract compatibility
     results: Optional[Dict[str, Any]] = None
     newsletter: Optional[NewsletterContent] = None
     web_update: Optional[WebUpdateContent] = None

@@ -15,7 +15,22 @@
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest --co -q)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest --tb=no -q --disable-warnings)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest --cov=src --cov-report=term-missing --tb=no -q --disable-warnings --maxfail=1)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/contracts/test_content_api.py::TestContentAPIContract::test_content_generation_endpoint_contract -v)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_auth.py --cov=src/halcytone_content_generator/core/auth --cov-report=term-missing -v)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_auth.py --cov=src/halcytone_content_generator/core/auth --cov-report=term-missing -v --tb=short)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_auth.py -k \"not invalid_json and not exception_handling and not save_credentials_to_env_notion and not TestAuthIntegrationScenarios\" --cov=src/halcytone_content_generator/core/auth --cov-report=term-missing)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/ --cov=src --cov-report=term-missing --tb=no -q --disable-warnings)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_auth.py tests/contracts/ --cov=src --cov-report=term)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_auth.py --cov=src --cov-report=term)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest --cov=src --cov-report=term-missing --tb=no -q --disable-warnings)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest --cov=src/halcytone_content_generator/services/schema_validator --cov=src/halcytone_content_generator/publishers/web_publisher --cov=src/halcytone_content_generator/publishers/email_publisher --cov-report=term-missing --tb=no -q --disable-warnings --maxfail=1)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_schema_validator.py tests/unit/test_web_publisher.py tests/unit/test_email_publisher.py -v --tb=short)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_schema_validator.py tests/unit/test_web_publisher.py tests/unit/test_email_publisher.py --cov=src/halcytone_content_generator/services/schema_validator --cov=src/halcytone_content_generator/services/publishers/web_publisher --cov=src/halcytone_content_generator/services/publishers/email_publisher --cov-report=term-missing --tb=no -q --disable-warnings)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest --cov=src --cov-report=term --tb=no -q --disable-warnings --maxfail=5)"
     ],
     "deny": [],
     "ask": []
