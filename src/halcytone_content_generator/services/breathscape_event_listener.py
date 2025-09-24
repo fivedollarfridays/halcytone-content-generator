@@ -172,9 +172,12 @@ class BreathscapeEventListener:
 
         elif event_type == BreathscapeEventType.TECHNIQUE_CHANGED:
             technique_data = event.get('data', {})
+            # Convert seconds to minutes for display
+            duration_seconds = technique_data.get('duration', 300)  # Default 5 minutes
+            duration_minutes = duration_seconds // 60
             transformed['content'] = {
                 'title': f"🌬️ Now Practicing: {technique_data.get('technique', 'New Technique')}",
-                'message': f"Duration: {technique_data.get('duration', 5)} minutes",
+                'message': f"Duration: {duration_minutes} minutes",
                 'instruction': technique_data.get('instruction', '')
             }
 

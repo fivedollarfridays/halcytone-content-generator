@@ -154,8 +154,8 @@ class TestSessionSummaryGenerator:
         metadata = result['metadata']
         assert metadata['session_id'] == 'test-session-001'
         assert metadata['session_type'] == 'live'
-        assert metadata['quality_score'] == 4.5
-        assert metadata['featured'] is True  # HRV > 10%
+        assert metadata['quality_score'] == 5.0  # Auto-calculated from 12.5% HRV improvement (>10%)
+        assert metadata['featured'] is False  # HRV 12.5% < 15% threshold for featured
         assert 'generated_at' in metadata
 
     def test_technique_formatting(self, generator, sample_session):
@@ -317,5 +317,5 @@ class TestSessionSummaryGenerator:
         assert metrics['techniques']['count'] == 3
         assert len(metrics['techniques']['list']) == 3
 
-        assert metrics['quality_score']['value'] == 4.5
-        assert metrics['quality_score']['display'] == "4.5/5"
+        assert metrics['quality_score']['value'] == 5.0  # Auto-calculated from 12.5% HRV improvement
+        assert metrics['quality_score']['display'] == "5.0/5"

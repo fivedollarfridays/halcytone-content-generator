@@ -669,7 +669,7 @@ BREATHING_SESSION_EMAIL_TEMPLATE = """
             <div class="session-badge">{{ session_type | upper }} SESSION</div>
             <div class="session-title">{{ session_title }}</div>
             <div class="session-meta">
-                {{ session_date }} • {{ duration_minutes }} minutes • {{ participant_count }} participants
+                {{ session_date }} • {{ duration_minutes }} minutes • {{ participant_count }} participants{% if instructor_name %} • Led by {{ instructor_name }}{% endif %}
             </div>
         </div>
 

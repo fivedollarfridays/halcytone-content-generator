@@ -1,8 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_session_content.py -v --tb=short)",
-      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_session_content.py tests/unit/test_session_summary_generator.py tests/unit/test_websocket_manager.py tests/unit/test_breathscape_event_listener.py -v --tb=short -q)"
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_session_summary_generator.py tests/unit/test_breathscape_event_listener.py::TestBreathscapeEventListener::test_technique_changed_transformation -v --tb=short)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_session_summary_generator.py::TestSessionSummaryGenerator::test_generate_email_summary tests/unit/test_session_summary_generator.py::TestSessionSummaryGenerator::test_multi_channel_generation tests/unit/test_session_summary_generator.py::TestSessionSummaryGenerator::test_no_hrv_improvement_handling tests/unit/test_session_summary_generator.py::TestSessionSummaryGenerator::test_session_type_specific_content tests/unit/test_session_summary_generator.py::TestSessionSummaryGenerator::test_format_session_metrics tests/unit/test_breathscape_event_listener.py::TestBreathscapeEventListener::test_technique_changed_transformation -v)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_session_content.py tests/unit/test_session_summary_generator.py tests/unit/test_websocket_manager.py tests/unit/test_breathscape_event_listener.py --cov=src/halcytone_content_generator/services/session_summary_generator --cov=src/halcytone_content_generator/services/websocket_manager --cov=src/halcytone_content_generator/services/breathscape_event_listener --cov=src/halcytone_content_generator/schemas/content_types --cov-report=term-missing --tb=no -q)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_session_content.py tests/unit/test_session_summary_generator.py tests/unit/test_websocket_manager.py tests/unit/test_breathscape_event_listener.py --cov=src --cov-report=term-missing --tb=no -q --disable-warnings)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_session_content.py tests/unit/test_session_summary_generator.py tests/unit/test_websocket_manager.py tests/unit/test_breathscape_event_listener.py tests/unit/test_websocket_coverage.py tests/unit/test_event_listener_coverage.py --cov=src --cov-report=term-missing --tb=short -q --disable-warnings)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/integration/test_session_workflow.py -v --tb=short)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/integration/test_simple_workflow.py -v --tb=short)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/integration/test_api_endpoints.py -v --tb=short)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/integration/ -v --tb=short)"
     ],
     "deny": [],
     "ask": []

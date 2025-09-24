@@ -161,10 +161,16 @@ class SessionSummaryGenerator:
         html_content = self.web_template.render(**context)
 
         # Generate SEO metadata
+        hrv_improvement = context.get('average_hrv_improvement')
+        if hrv_improvement is not None and hrv_improvement > 0:
+            hrv_text = f"average HRV improvement {hrv_improvement}%"
+        else:
+            hrv_text = "focused on breathing techniques and wellness"
+
         seo_description = (
             f"Breathing session summary: {context['participant_count']} participants, "
             f"{context['duration_minutes']} minutes, "
-            f"average HRV improvement {context.get('average_hrv_improvement', 'N/A')}%"
+            f"{hrv_text}"
         )
 
         return {
@@ -183,7 +189,17 @@ class SessionSummaryGenerator:
             try:
                 # Simplify breathing techniques for social media
                 simple_techniques = [t['name'] for t in context['breathing_techniques']]
-                social_context = {**context, 'breathing_techniques': simple_techniques}
+
+                # Handle null HRV improvement for social media
+                hrv_improvement = context.get('average_hrv_improvement')
+                if hrv_improvement is None or hrv_improvement <= 0:
+                    hrv_improvement = 0
+
+                social_context = {
+                    **context,
+                    'breathing_techniques': simple_techniques,
+                    'average_hrv_improvement': hrv_improvement
+                }
 
                 content = template.render(**social_context)
 
@@ -193,7 +209,7 @@ class SessionSummaryGenerator:
 
                 social_content[platform] = {
                     'content': content,
-                    'hashtags': self._generate_hashtags(platform, context)
+                    'hashtags': self._generate_hashtags(platform, social_context)
                 }
             except Exception as e:
                 logger.error(f"Error generating {platform} content: {e}")

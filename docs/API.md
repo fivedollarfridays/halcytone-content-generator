@@ -619,6 +619,236 @@ console.log(`Job created: ${job.job_id}`);
 
 7. **Error Handling**: Implement robust error handling for network failures and API errors.
 
+### Session Management API (Sprint 3: Halcytone Live Support)
+
+#### POST /api/v2/session-summary
+
+Generate multi-channel content summary for a breathing session.
+
+**Request Body:**
+```json
+{
+  "title": "Morning Breathing Session",
+  "content": "Deep breathing session for stress relief",
+  "session_id": "session-2024-03-21-001",
+  "session_duration": 1800,
+  "participant_count": 25,
+  "breathing_techniques": ["Box Breathing", "4-7-8 Breathing"],
+  "average_hrv_improvement": 12.5,
+  "key_achievements": ["Perfect synchronization", "100% completion rate"],
+  "session_type": "live",
+  "instructor_name": "Sarah Chen",
+  "session_date": "2024-03-21T10:00:00Z",
+  "published": true,
+  "channels": ["email", "web", "social"],
+  "publish_immediately": false
+}
+```
+
+**Response:**
+```json
+{
+  "status": "preview",
+  "content_id": "uuid-here",
+  "preview_urls": {
+    "session": "/sessions/session-2024-03-21-001"
+  },
+  "newsletter": {
+    "subject": "Session Summary: Morning Breathing Session",
+    "html": "<html>...</html>",
+    "text": "Plain text version..."
+  },
+  "web_update": {
+    "title": "Morning Breathing Session",
+    "content": "<article>...</article>",
+    "slug": "session-2024-03-21-001-summary",
+    "seo_description": "Session with 25 participants achieving 12.5% HRV improvement"
+  },
+  "social_posts": {
+    "twitter": {
+      "content": "Just completed an amazing Morning Breathing Session! ...",
+      "hashtags": ["#breathwork", "#mindfulness"]
+    },
+    "linkedin": {
+      "content": "Professional update about the session...",
+      "hashtags": ["#wellness", "#corporate"]
+    },
+    "facebook": {
+      "content": "Community-focused session update...",
+      "hashtags": ["#health", "#community"]
+    }
+  }
+}
+```
+
+#### POST /api/v2/live-announce
+
+Broadcast real-time announcements to active sessions.
+
+**Request Body:**
+```json
+{
+  "announcement": {
+    "type": "session_starting",
+    "title": "Morning Session Starting Soon!",
+    "message": "Join us in 5 minutes for guided breathing",
+    "action_url": "/sessions/join/morning-001"
+  },
+  "session_id": "morning-001"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "announced",
+  "sessions_notified": ["morning-001"],
+  "participant_count": 25,
+  "delivered": true
+}
+```
+
+#### GET /api/v2/session/{session_id}/content
+
+Get session-specific content and metrics.
+
+**Query Parameters:**
+- `include_metrics`: Include session metrics (default: false)
+- `include_replay`: Include message replay data (default: false)
+
+**Response:**
+```json
+{
+  "session_id": "morning-001",
+  "active": true,
+  "session_info": {
+    "title": "Morning Breathing Session",
+    "instructor": "Sarah Chen",
+    "participant_count": 25,
+    "participants": [
+      {"id": "user-001", "name": "John D.", "joined_at": "2024-03-21T10:00:00Z"}
+    ],
+    "started_at": "2024-03-21T10:00:00Z",
+    "techniques_used": ["Box Breathing", "4-7-8 Breathing"]
+  },
+  "metrics": {
+    "average_hrv": 12.5,
+    "completion_rate": 0.95,
+    "quality_score": 4.5,
+    "engagement_rate": 0.92
+  },
+  "replay": {
+    "message_count": 42,
+    "messages": [
+      {
+        "timestamp": "2024-03-21T10:00:00Z",
+        "type": "session_started",
+        "content": {...}
+      }
+    ]
+  }
+}
+```
+
+#### GET /api/v2/sessions/live
+
+List currently active live sessions.
+
+**Query Parameters:**
+- `include_metrics`: Include real-time metrics (default: false)
+
+**Response:**
+```json
+{
+  "count": 2,
+  "sessions": [
+    {
+      "session_id": "morning-001",
+      "title": "Morning Breathing Session",
+      "instructor": "Sarah Chen",
+      "participant_count": 25,
+      "active": true,
+      "started_at": "2024-03-21T10:00:00Z",
+      "metrics": {
+        "current_hrv_improvement": 8.5
+      }
+    },
+    {
+      "session_id": "afternoon-001",
+      "title": "Afternoon Relaxation",
+      "instructor": "Mike Johnson",
+      "participant_count": 18,
+      "active": true,
+      "started_at": "2024-03-21T14:00:00Z",
+      "metrics": {
+        "current_hrv_improvement": 6.2
+      }
+    }
+  ]
+}
+```
+
+### WebSocket API
+
+#### WebSocket /ws/live-updates
+
+Connect to receive real-time session updates.
+
+**Connection URL:**
+```
+ws://localhost:8000/ws/live-updates?session_id={session_id}&client_id={client_id}&role={role}
+```
+
+**Query Parameters:**
+- `session_id`: Session to join (required)
+- `client_id`: Unique client identifier (required)
+- `role`: Connection role (participant|instructor|observer|admin) (default: participant)
+
+**Message Types (Server → Client):**
+
+| Type | Description | Payload |
+|------|-------------|---------|
+| `welcome` | Connection established | `{session_id, client_id, role, participant_count}` |
+| `participant_joined` | New participant | `{name, count, timestamp}` |
+| `technique_changed` | Breathing technique update | `{title, instruction, duration}` |
+| `hrv_milestone` | HRV achievement | `{improvement, message, achievement}` |
+| `session_ending` | Session concluding | `{summary_available, duration}` |
+| `error` | Error occurred | `{code, message, details}` |
+
+**Message Types (Client → Server):**
+
+| Type | Description | Payload |
+|------|-------------|---------|
+| `heartbeat` | Keep connection alive | `{}` |
+| `technique_feedback` | Rate technique | `{technique, rating, difficulty}` |
+| `participant_status` | Update status | `{status, hrv_reading}` |
+
+**Example Client Connection:**
+```javascript
+const ws = new WebSocket('ws://localhost:8000/ws/live-updates?session_id=morning-001&client_id=user-123&role=participant');
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+
+  switch(data.type) {
+    case 'welcome':
+      console.log('Connected to session:', data.session_id);
+      break;
+    case 'technique_changed':
+      updateTechnique(data.content);
+      break;
+    case 'hrv_milestone':
+      showAchievement(data.content);
+      break;
+  }
+};
+
+// Send heartbeat every 30 seconds
+setInterval(() => {
+  ws.send(JSON.stringify({type: 'heartbeat'}));
+}, 30000);
+```
+
 ## Support
 
 For support, please contact:
