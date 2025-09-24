@@ -1,5 +1,5 @@
 # Project Tree (Updated after Sprint 1 Completion)
-_Generated: 2025-01-17 - Post Sprint 1 Foundation & Testing Enhancement_
+_Generated: 2025-09-24T03:28:00Z - Post Sprint 1 Foundation & Testing Enhancement_
 _Test Coverage: 26% (up from 11%) - Core systems established_
 
 ```
@@ -58,6 +58,7 @@ src/halcytone_content_generator/__init__.py
 src/halcytone_content_generator/api
 src/halcytone_content_generator/api/__init__.py
 src/halcytone_content_generator/api/endpoints.py
+src/halcytone_content_generator/api/endpoints_batch.py
 src/halcytone_content_generator/api/endpoints_critical.py
 src/halcytone_content_generator/api/endpoints_v2.py
 src/halcytone_content_generator/config.py
@@ -88,7 +89,7 @@ src/halcytone_content_generator/services/monitoring.py
 src/halcytone_content_generator/services/personalization.py
 src/halcytone_content_generator/services/platform_client.py
 src/halcytone_content_generator/services/platform_client_v2.py
-src/halcytone_content_generator/services/publishers/
+src/halcytone_content_generator/services/publishers
 src/halcytone_content_generator/services/publishers/__init__.py
 src/halcytone_content_generator/services/publishers/base.py
 src/halcytone_content_generator/services/publishers/email_publisher.py
