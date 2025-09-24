@@ -4,7 +4,7 @@ Sprint 2: Schema Validation Implementation
 """
 from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 from typing import Dict, List, Optional, Any, Union, Literal, Annotated
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 import re
 
@@ -14,6 +14,7 @@ class ContentType(str, Enum):
     UPDATE = "update"
     BLOG = "blog"
     ANNOUNCEMENT = "announcement"
+    SESSION = "session"  # Sprint 3: Halcytone Live session summaries
 
 
 class ContentPriority(int, Enum):
@@ -353,6 +354,158 @@ class AnnouncementContentStrict(ContentBaseStrict):
         return self
 
 
+class SessionContentStrict(ContentBaseStrict):
+    """
+    Session summary content schema - Breathing session reports and analytics
+    Sprint 3: Halcytone Live Support for session summaries
+    """
+    type: Literal[ContentType.SESSION] = ContentType.SESSION
+
+    session_id: Annotated[str, Field(
+        min_length=1,
+        max_length=100,
+        description="Unique session identifier"
+    )]
+
+    session_duration: Annotated[int, Field(
+        gt=0,
+        le=7200,  # Max 2 hours
+        description="Session duration in seconds"
+    )]
+
+    participant_count: Annotated[int, Field(
+        ge=1,
+        le=1000,
+        description="Number of participants in the session"
+    )]
+
+    breathing_techniques: List[Annotated[str, Field(
+        min_length=1,
+        max_length=100
+    )]] = Field(
+        min_length=1,
+        max_length=10,
+        description="Breathing techniques used in session"
+    )
+
+    average_hrv_improvement: Optional[Annotated[float, Field(
+        ge=-100.0,
+        le=200.0
+    )]] = Field(
+        default=None,
+        description="Average HRV improvement percentage"
+    )
+
+    key_achievements: List[Annotated[str, Field(
+        min_length=1,
+        max_length=500
+    )]] = Field(
+        default_factory=list,
+        max_length=10,
+        description="Notable achievements from the session"
+    )
+
+    session_type: Literal["live", "guided", "practice", "workshop"] = Field(
+        default="guided",
+        description="Type of breathing session"
+    )
+
+    instructor_name: Optional[Annotated[str, Field(
+        min_length=1,
+        max_length=100
+    )]] = Field(
+        default=None,
+        description="Name of session instructor"
+    )
+
+    session_date: datetime = Field(
+        description="When the session occurred"
+    )
+
+    metrics_summary: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Additional session metrics and statistics"
+    )
+
+    participant_feedback: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Aggregated participant feedback"
+    )
+
+    @field_validator('session_date')
+    @classmethod
+    def validate_session_date(cls, v: datetime) -> datetime:
+        """Ensure session date has timezone and is not too far in future"""
+        if v.tzinfo is None:
+            v = v.replace(tzinfo=timezone.utc)
+
+        now = datetime.now(timezone.utc)
+        if v > now.replace(hour=23, minute=59, second=59):
+            raise ValueError('Session date cannot be in the future')
+
+        # Sessions older than 30 days should not be processed
+        thirty_days_ago = now - timedelta(days=30)
+        if v < thirty_days_ago:
+            raise ValueError('Session is too old (>30 days) for summary generation')
+
+        return v
+
+    @field_validator('breathing_techniques')
+    @classmethod
+    def validate_techniques(cls, v: List[str]) -> List[str]:
+        """Validate breathing techniques"""
+        valid_techniques = {
+            "Box Breathing", "4-7-8 Breathing", "Coherent Breathing",
+            "Belly Breathing", "Alternate Nostril", "Breath of Fire",
+            "Lions Breath", "Humming Bee", "Cooling Breath", "Custom"
+        }
+
+        # Allow known techniques or custom ones
+        for technique in v:
+            if technique not in valid_techniques and not technique.startswith("Custom:"):
+                # Add as custom technique
+                v[v.index(technique)] = f"Custom: {technique}"
+
+        return v
+
+    @model_validator(mode='after')
+    def validate_session_data(self) -> 'SessionContentStrict':
+        """Additional validation for session data"""
+        # Live sessions should have an instructor
+        if self.session_type == "live" and not self.instructor_name:
+            raise ValueError('Live sessions must have an instructor name')
+
+        # Workshop sessions should have higher participant counts
+        if self.session_type == "workshop" and self.participant_count < 5:
+            raise ValueError('Workshop sessions should have at least 5 participants')
+
+        # Calculate session quality based on metrics
+        if self.average_hrv_improvement is not None:
+            quality_score = 0.0
+            if self.average_hrv_improvement > 10:
+                quality_score = 5.0
+            elif self.average_hrv_improvement > 5:
+                quality_score = 4.0
+            elif self.average_hrv_improvement > 0:
+                quality_score = 3.0
+
+            if not self.metrics_summary:
+                object.__setattr__(self, 'metrics_summary', {})
+            self.metrics_summary['quality_score'] = quality_score
+
+        # Set appropriate priority for session summaries
+        if self.session_type in ["live", "workshop"]:
+            object.__setattr__(self, 'priority', ContentPriority.HIGH)
+        else:
+            object.__setattr__(self, 'priority', ContentPriority.NORMAL)
+
+        # Session summaries should be featured if they have exceptional results
+        if self.average_hrv_improvement and self.average_hrv_improvement > 15:
+            object.__setattr__(self, 'featured', True)
+
+        return self
+
+
 class ContentValidationResult(BaseModel):
     """Result of content validation"""
     model_config = ConfigDict(extra="forbid")
@@ -544,7 +697,7 @@ class WebUpdateContentStrict(BaseModel):
 
 
 # Union type for all content types
-ContentUnion = Union[UpdateContentStrict, BlogContentStrict, AnnouncementContentStrict]
+ContentUnion = Union[UpdateContentStrict, BlogContentStrict, AnnouncementContentStrict, SessionContentStrict]
 
 
 class ContentRequestStrict(BaseModel):

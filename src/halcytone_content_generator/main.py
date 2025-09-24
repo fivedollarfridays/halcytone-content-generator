@@ -19,9 +19,16 @@ logger = setup_logging(__name__)
 async def lifespan(app: FastAPI):
     """Handle application startup and shutdown events"""
     logger.info("Starting Halcytone Content Generator Service...")
-    # Startup code here (e.g., verify external service connectivity)
+
+    # Initialize WebSocket services (Sprint 3)
+    from .api.websocket_endpoints import initialize_websocket_services, cleanup_websocket_services
+    await initialize_websocket_services()
+
     yield
-    # Shutdown code here
+
+    # Cleanup WebSocket services
+    await cleanup_websocket_services()
+
     logger.info("Shutting down Halcytone Content Generator Service...")
 
 
@@ -99,3 +106,7 @@ app.include_router(endpoints_batch.router, prefix="/api/v1")
 # Include schema-validated endpoints (Sprint 2)
 from .api.endpoints_schema_validated import router as schema_validated_router
 app.include_router(schema_validated_router, prefix="/api")
+
+# Include WebSocket endpoints (Sprint 3)
+from .api import websocket_endpoints
+app.include_router(websocket_endpoints.router)
