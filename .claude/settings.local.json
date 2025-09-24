@@ -10,6 +10,9 @@
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/integration/test_simple_workflow.py -v --tb=short)",
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/integration/test_api_endpoints.py -v --tb=short)",
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/integration/ -v --tb=short)",
+      "Bash(git push:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
       "Bash(git merge:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)"

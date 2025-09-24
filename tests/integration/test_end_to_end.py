@@ -336,7 +336,7 @@ class TestEndToEndIntegration:
         # Test web update generation
         web_update = assembler.generate_web_update(mock_content)
         assert 'title' in web_update
-        assert 'html' in web_update
+        assert 'content' in web_update
         assert 'tags' in web_update
 
         # Test social posts generation
@@ -350,7 +350,7 @@ class TestAPIIntegration:
     """Test API endpoint integration"""
 
     @pytest.fixture
-    async def client(self):
+    def client(self):
         """Create test client"""
         from fastapi.testclient import TestClient
         from src.halcytone_content_generator.main import app
@@ -374,7 +374,7 @@ class TestAPIIntegration:
     @pytest.mark.asyncio
     async def test_generate_content_endpoint(self, client):
         """Test content generation API endpoint"""
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher:
+        with patch('src.halcytone_content_generator.services.document_fetcher.DocumentFetcher') as mock_fetcher:
             mock_instance = Mock()
             mock_instance.fetch_mock_content.return_value = {
                 'breathscape': [{'title': 'Test', 'content': 'Test content'}]
@@ -382,10 +382,10 @@ class TestAPIIntegration:
             mock_fetcher.return_value = mock_instance
 
             response = client.post(
-                "/api/v1/content/generate",
+                "/api/v1/generate-content",
                 json={
-                    "source": "mock",
-                    "channels": ["email", "web"]
+                    "send_email": True,
+                    "publish_web": True
                 }
             )
 
@@ -394,7 +394,7 @@ class TestAPIIntegration:
     @pytest.mark.asyncio
     async def test_sync_content_endpoint(self, client):
         """Test content sync API endpoint"""
-        with patch('src.halcytone_content_generator.api.endpoints_v2.ContentSyncService') as mock_sync:
+        with patch('src.halcytone_content_generator.services.content_sync.ContentSyncService') as mock_sync:
             mock_instance = Mock()
             mock_job = Mock(
                 job_id='test-123',

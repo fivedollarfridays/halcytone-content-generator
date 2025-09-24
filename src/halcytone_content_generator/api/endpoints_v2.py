@@ -16,6 +16,8 @@ from ..services.content_validator import ContentValidator
 from ..services.publishers.email_publisher import EmailPublisher
 from ..services.publishers.web_publisher import WebPublisher
 from ..services.publishers.social_publisher import SocialPublisher
+from ..services.tone_manager import get_tone_manager
+from ..services.cache_manager import get_cache_manager
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["content-v2"], prefix="/v2")
@@ -83,33 +85,89 @@ async def generate_enhanced_content(
             content_summary = validator.generate_content_summary(content)
             logger.info(f"Content summary: {content_summary}")
 
-        # Step 3: Generate content with enhanced assembler
+        # Step 3: Get tone manager and select appropriate tone
+        tone_manager = get_tone_manager()
+        selected_tone = None
+
+        if settings.TONE_SYSTEM_ENABLED:
+            # Use tone from request or auto-select based on content
+            if request.tone:
+                selected_tone = tone_manager.get_tone_profile(request.tone)
+            elif request.tone_combination:
+                selected_tone = tone_manager.blend_tones(request.tone_combination)
+            elif request.per_channel_tones:
+                # Will be handled per-channel below
+                pass
+            elif settings.TONE_AUTO_SELECTION:
+                # Auto-select tone based on content type and channel
+                selected_tone = tone_manager.select_tone(
+                    content_type="newsletter",
+                    channel="email",
+                    context={"content_items": len(content.get('breathscape', [])) + len(content.get('hardware', []))}
+                )
+            else:
+                selected_tone = tone_manager.get_tone_profile(settings.DEFAULT_TONE)
+
+            logger.info(f"Selected tone: {selected_tone.name if selected_tone else 'None'}")
+
+        # Step 4: Generate content with enhanced assembler
         assembler = EnhancedContentAssembler(template_style=template_style)
 
-        # Generate newsletter
+        # Generate newsletter with tone support
         newsletter = None
         if request.send_email:
+            # Determine tone for email channel
+            email_tone = selected_tone
+            if request.per_channel_tones and 'email' in request.per_channel_tones:
+                email_tone = tone_manager.get_tone_profile(request.per_channel_tones['email'])
+            elif not email_tone and settings.TONE_AUTO_SELECTION:
+                email_tone = tone_manager.select_tone("newsletter", "email")
+
             custom_data = {
                 'stats': [
                     {'value': '10K+', 'label': 'Users'},
                     {'value': '95%', 'label': 'Accuracy'},
                     {'value': '4.8⭐', 'label': 'Rating'}
-                ]
+                ],
+                'tone_profile': email_tone.value if email_tone else None
             }
             newsletter_data = assembler.generate_newsletter(content, custom_data=custom_data)
             newsletter = NewsletterContent(**newsletter_data) if newsletter_data else None
 
-        # Generate web update with SEO
+        # Generate web update with tone and SEO
         web_update = None
         if request.publish_web:
-            web_update_data = assembler.generate_web_update(content, seo_optimize=seo_optimize)
+            # Determine tone for web channel
+            web_tone = selected_tone
+            if request.per_channel_tones and 'web' in request.per_channel_tones:
+                web_tone = tone_manager.get_tone_profile(request.per_channel_tones['web'])
+            elif not web_tone and settings.TONE_AUTO_SELECTION:
+                web_tone = tone_manager.select_tone("blog_post", "web")
+
+            web_update_data = assembler.generate_web_update(
+                content,
+                seo_optimize=seo_optimize,
+                tone_profile=web_tone.value if web_tone else None
+            )
             web_update = WebUpdateContent(**web_update_data) if web_update_data else None
 
-        # Generate social posts for multiple platforms
+        # Generate social posts with tone support for multiple platforms
         social_posts = []
         if request.generate_social:
             platforms = social_platforms or ['twitter', 'linkedin', 'instagram', 'facebook']
-            social_posts_data = assembler.generate_social_posts(content, platforms)
+
+            # Determine tone for social channel
+            social_tone = selected_tone
+            if request.per_channel_tones and 'social' in request.per_channel_tones:
+                social_tone = tone_manager.get_tone_profile(request.per_channel_tones['social'])
+            elif not social_tone and settings.TONE_AUTO_SELECTION:
+                social_tone = tone_manager.select_tone("social_post", "social")
+
+            social_posts_data = assembler.generate_social_posts(
+                content,
+                platforms,
+                tone_profile=social_tone.value if social_tone else None
+            )
             social_posts = [SocialPost(**post) for post in social_posts_data] if social_posts_data else []
 
         # If preview only, return without sending
@@ -123,7 +181,13 @@ async def generate_enhanced_content(
                     'template_style': template_style,
                     'seo_enabled': seo_optimize,
                     'content_validated': validate_content,
-                    'platforms': platforms if request.generate_social else []
+                    'platforms': platforms if request.generate_social else [],
+                    'tone_system': {
+                        'enabled': settings.TONE_SYSTEM_ENABLED,
+                        'selected_tone': selected_tone.name if selected_tone else None,
+                        'per_channel_tones': request.per_channel_tones or {},
+                        'auto_selection': settings.TONE_AUTO_SELECTION
+                    }
                 }
             )
 
@@ -232,6 +296,35 @@ async def generate_enhanced_content(
                 }
             }
             logger.info(f"Enhanced social processing completed for {len(social_posts)} posts")
+
+        # Step 7: Handle cache invalidation if enabled
+        if settings.CACHE_INVALIDATION_ENABLED and request.invalidate_cache and not request.preview_only:
+            try:
+                cache_manager = get_cache_manager()
+                cache_targets = request.cache_targets or ['local', 'cdn'] if settings.CDN_ENABLED else ['local']
+
+                from ..services.cache_manager import InvalidationRequest, CacheTarget
+                invalidation_request = InvalidationRequest(
+                    targets=[CacheTarget(target) for target in cache_targets],
+                    patterns=settings.CACHE_AUTO_INVALIDATE_PATTERNS,
+                    reason="Content generation completed",
+                    initiated_by="content_generation_api"
+                )
+
+                invalidation_result = await cache_manager.invalidate_cache(invalidation_request)
+                results['cache_invalidation'] = {
+                    "status": invalidation_result.status.value,
+                    "targets_processed": list(invalidation_result.targets_processed.keys()),
+                    "keys_invalidated": invalidation_result.keys_invalidated,
+                    "request_id": invalidation_result.request_id
+                }
+                logger.info(f"Cache invalidation completed: {invalidation_result.request_id}")
+            except Exception as e:
+                logger.error(f"Cache invalidation failed: {e}")
+                results['cache_invalidation'] = {
+                    "status": "failed",
+                    "error": str(e)
+                }
 
         return ContentGenerationResponse(
             status="success",

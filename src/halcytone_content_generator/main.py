@@ -110,3 +110,7 @@ app.include_router(schema_validated_router, prefix="/api")
 # Include WebSocket endpoints (Sprint 3)
 from .api import websocket_endpoints
 app.include_router(websocket_endpoints.router)
+
+# Include Cache endpoints (Sprint 4)
+from .api import cache_endpoints
+app.include_router(cache_endpoints.router, prefix="/api/v1")

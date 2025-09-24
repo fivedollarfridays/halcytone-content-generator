@@ -48,6 +48,30 @@ class ContentGenerationRequest(BaseModel):
     send_email: bool = Field(default=True, description="Send newsletter via CRM")
     publish_web: bool = Field(default=True, description="Publish to website")
     generate_social: bool = Field(default=True, description="Generate social media posts")
+
+    # Sprint 4: Tone System Integration
+    tone: Optional[str] = Field(
+        default=None,
+        description="Content tone: professional, encouraging, medical_scientific"
+    )
+    tone_combination: Optional[str] = Field(
+        default=None,
+        description="Multi-tone combination: professional_encouraging, encouraging_medical, professional_medical"
+    )
+    per_channel_tones: Optional[Dict[str, str]] = Field(
+        default=None,
+        description="Specific tones for each channel: {'email': 'encouraging', 'web': 'professional', 'social': 'encouraging'}"
+    )
+
+    # Sprint 4: Cache Integration
+    invalidate_cache: bool = Field(
+        default=True,
+        description="Automatically invalidate cache after content update"
+    )
+    cache_targets: Optional[List[str]] = Field(
+        default=None,
+        description="Specific cache targets to invalidate: ['cdn', 'local', 'api']"
+    )
     preview_only: bool = Field(default=False, description="Only preview without sending")
     include_preview: bool = Field(default=True, description="Include preview in response")
     force_refresh: bool = Field(default=False, description="Force refresh from living document")

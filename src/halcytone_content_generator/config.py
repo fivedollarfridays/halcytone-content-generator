@@ -88,6 +88,53 @@ class Settings(BaseSettings):
     DEFAULT_SEGMENT: str = "general"
     SEGMENT_PERSONALIZATION: bool = True
 
+    # Tone Management Settings (Sprint 4: Ecosystem Integration)
+    TONE_SYSTEM_ENABLED: bool = True
+    DEFAULT_TONE: str = "encouraging"  # professional, encouraging, medical_scientific
+    TONE_AUTO_SELECTION: bool = True  # Enable automatic tone selection based on content type
+    TONE_VALIDATION_ENABLED: bool = True  # Enable brand consistency validation
+    TONE_FALLBACK_ENABLED: bool = True  # Enable fallback to default tone if selection fails
+
+    # Per-channel tone preferences
+    TONE_EMAIL_DEFAULT: str = "encouraging"
+    TONE_WEB_DEFAULT: str = "professional"
+    TONE_SOCIAL_DEFAULT: str = "encouraging"
+    TONE_BLOG_DEFAULT: str = "professional"
+    TONE_RESEARCH_DEFAULT: str = "medical_scientific"
+
+    # Brand consistency settings
+    BRAND_VALIDATION_ENABLED: bool = True
+    BRAND_VALIDATION_STRICT: bool = False  # Strict mode fails on violations, relaxed mode provides warnings
+    BRAND_VALIDATION_SCORE_THRESHOLD: float = 0.7  # Minimum brand alignment score (0.0-1.0)
+
+    # Cache Invalidation Settings (Sprint 4: Ecosystem Integration)
+    CACHE_INVALIDATION_ENABLED: bool = True
+    CACHE_INVALIDATION_API_KEYS: list[str] = []  # List of valid API keys for cache operations
+    CACHE_WEBHOOK_SECRET: str = ""  # Secret for webhook signature verification
+
+    # CDN Configuration
+    CDN_ENABLED: bool = False
+    CDN_TYPE: str = "cloudflare"  # cloudflare, aws_cloudfront, custom
+    CDN_API_KEY: str = ""
+    CDN_ZONE_ID: str = ""
+    CDN_BASE_URL: str = "https://api.cloudflare.com/client/v4"
+
+    # Cache Targets Configuration
+    CACHE_LOCAL_ENABLED: bool = True
+    CACHE_API_ENABLED: bool = True
+    CACHE_REDIS_ENABLED: bool = False
+    CACHE_REDIS_URL: str = "redis://localhost:6379"
+
+    # Cache Management Settings
+    CACHE_MAX_HISTORY: int = 1000  # Maximum invalidation history entries to keep
+    CACHE_DEFAULT_TTL: int = 3600  # Default cache TTL in seconds (1 hour)
+    CACHE_WEBHOOK_TIMEOUT: int = 10  # Webhook timeout in seconds
+
+    # Auto-invalidation triggers
+    CACHE_AUTO_INVALIDATE_ON_CONTENT_UPDATE: bool = True
+    CACHE_AUTO_INVALIDATE_ON_DEPLOYMENT: bool = True
+    CACHE_AUTO_INVALIDATE_PATTERNS: list[str] = ["api/*", "content/*", "assets/*"]
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
