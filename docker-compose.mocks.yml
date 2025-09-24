@@ -1,0 +1,91 @@
+# Docker Compose for Halcytone Mock Services
+# Used for dry run testing without external dependencies
+
+version: '3.8'
+
+services:
+  mock-crm:
+    build:
+      context: ./mocks
+      dockerfile: Dockerfile.crm
+    container_name: halcytone-mock-crm
+    ports:
+      - "8001:8001"
+    environment:
+      - SERVICE_NAME=mock-crm
+      - LOG_LEVEL=INFO
+      - PYTHONPATH=/app
+    volumes:
+      - ./mocks/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    labels:
+      - "halcytone.service=mock-crm"
+      - "halcytone.type=mock-service"
+    networks:
+      - halcytone-mocks
+
+  mock-platform:
+    build:
+      context: ./mocks
+      dockerfile: Dockerfile.platform
+    container_name: halcytone-mock-platform
+    ports:
+      - "8002:8002"
+    environment:
+      - SERVICE_NAME=mock-platform
+      - LOG_LEVEL=INFO
+      - PYTHONPATH=/app
+    volumes:
+      - ./mocks/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    labels:
+      - "halcytone.service=mock-platform"
+      - "halcytone.type=mock-service"
+    networks:
+      - halcytone-mocks
+
+  mock-logger:
+    image: busybox:latest
+    container_name: halcytone-mock-logger
+    volumes:
+      - ./mocks/logs:/logs
+    command: >
+      sh -c "
+        echo 'Mock Services Log Monitor Started' &&
+        touch /logs/crm.log /logs/platform.log &&
+        tail -f /logs/*.log || sleep infinity
+      "
+    depends_on:
+      - mock-crm
+      - mock-platform
+    restart: unless-stopped
+    labels:
+      - "halcytone.service=log-monitor"
+      - "halcytone.type=utility"
+    networks:
+      - halcytone-mocks
+
+networks:
+  halcytone-mocks:
+    name: halcytone-mocks
+    driver: bridge
+    labels:
+      - "halcytone.network=mocks"
+
+volumes:
+  mock-logs:
+    name: halcytone-mock-logs
+    labels:
+      - "halcytone.volume=logs"
