@@ -1,15 +1,15 @@
 # AI Agents Playbook - Halcytone Content Generator
 
-This playbook guides AI agents working on the Halcytone Content Generator service. Follow these instructions precisely to enhance documentation, testing, and ecosystem integration capabilities.
+This playbook guides AI agents working on the Halcytone Content Generator service. Follow these instructions precisely to implement the Dry Run System and enhance production readiness.
 
 ## Context Loop Discipline (MANDATORY)
 
 Always maintain these fields in `/context/development.md`:
 
-- **Overall goal is:** Align Content Generator with ecosystem requirements and reach production quality
+- **Overall goal is:** Implement secure dry run system with complete mock infrastructure
 - **Last action was:** What just completed (include commit SHA if applicable)
 - **Next action will be:** The immediate next step from current sprint
-- **Blockers/Risks:** Test coverage gaps, missing documentation, undefined workflows
+- **Blockers/Risks:** Security issues, missing mock services, external dependencies
 
 **After every change:**
 ```bash
@@ -17,572 +17,625 @@ git add -A && git commit -m "feat: [component] - description" && git push
 bpsai-pair context-sync --last "What you did" --next "Next step" --blockers "Any issues"
 ```
 
-## Current Mission - Ecosystem Integration & Polish
+## 🚨 CRITICAL SECURITY MISSION - Dry Run System Implementation
 
-### Active Sprint: Sprint 1 - Foundation & Cleanup ✅ COMPLETED
-**Status:** Major foundation work completed with comprehensive testing infrastructure and documentation.
+### IMMEDIATE ACTION REQUIRED: Security Remediation
 
-**Key Achievements:**
-- ✅ Complete editor documentation (docs/editor-guide.md)
-- ✅ Comprehensive test suites for AI/ML modules (0% → 60-95% coverage)
-- ✅ Contract testing framework for external APIs
-- ✅ Template testing infrastructure (email, social media)
-- ✅ Publisher pattern enhanced testing
-- ⚠️ Some test configuration issues need resolution
+**COMPROMISED CREDENTIALS DETECTED:**
+- Google Docs API: [REDACTED - Key exposed and revoked]
+- Notion API: [REDACTED - Token exposed and revoked]
 
-**Next Sprint:** Sprint 2 - Blog & Content Integration
+**EXECUTE NOW (0-4 hours):**
+```bash
+# Hour 1: Revoke and regenerate
+# 1. Go to Google Cloud Console and revoke the exposed key
+# 2. Go to Notion Integration settings and revoke the token
+# 3. Generate new development-only credentials
+# 4. Store in secure password manager
+
+# Hour 2-3: Clean repository
+git filter-branch --force --index-filter \
+  "git rm --cached --ignore-unmatch .env" \
+  --prune-empty --tag-name-filter cat -- --all
+
+# Update .gitignore
+echo ".env" >> .gitignore
+echo ".env.*" >> .gitignore
+echo "!.env.example" >> .gitignore
+
+# Create safe template
+cp .env .env.example
+# Edit .env.example to remove actual values
+
+# Hour 4: Validate
+python -m halcytone_content_generator.validate_config
+pytest tests/test_configuration.py
+```
 
 ---
 
-## Sprint Implementation Guides
+## Dry Run Sprint Implementation Guides
 
-### Sprint 1: Foundation & Cleanup ✅ COMPLETED
+### 🔥 Dry Run Sprint 1: Security Foundation & Emergency Fixes
 
-**Final Status:** Foundation successfully established with major infrastructure improvements.
+**Duration:** 1 day | **Priority:** CRITICAL
 
-#### Completed Work Summary:
-- **Documentation:** Complete editor guide with content types, flags, and workflows
-- **Test Coverage:** Created comprehensive test suites for critical zero-coverage modules:
-  - AI Content Enhancer: 60% coverage (was 0%)
-  - AI Prompts: 95% coverage (was 0%)
-  - Content Assembler: 100% coverage
-  - Platform Client: 100% coverage
-- **Contract Tests:** External API integration validation implemented
-- **Template Infrastructure:** Email and social media testing frameworks ready
-- **Publisher Pattern:** Enhanced test coverage for multi-channel publishing
+#### Security Remediation Implementation
 
-#### Outstanding Issues:
-- Test configuration mismatches in some comprehensive test files
-- Import path inconsistencies need resolution
-- Full coverage validation blocked by configuration issues
-
-#### 1.1 Documentation Review 📝
-
-**Editor Guide Creation**
-```markdown
-# docs/editor-guide.md
-
-## Content Types
-
-### Update
-- Purpose: Weekly product updates
-- Location: /updates page
-- Fields: title, date, content, featured
-- Example: "Breathscape Integration Complete"
-
-### Blog
-- Purpose: Technical deep-dives, user stories
-- Location: /blog page
-- Fields: title, author, date, content, tags
-- Example: "The Science of Coherent Breathing"
-
-### Announcement
-- Purpose: Major releases, company news
-- Location: Homepage banner + /updates
-- Fields: title, date, content, priority
-- Example: "Halcytone 2.0 Launch"
-
-## Content Flags
-
-### featured: true
-- Shows content on homepage
-- Limits: Max 3 featured at once
-- Rotation: Weekly
-
-### published: false
-- Draft state
-- Preview available via dry-run
-- Not distributed to channels
-
-## Workflow
-1. Create content in living document
-2. Tag with appropriate type and flags
-3. Run dry-run preview
-4. Review and approve
-5. Publish to channels
-```
-
-**README Enhancement**
-```markdown
-# Setup Instructions
-
-## Quick Start
-1. Clone repository
-2. Copy .env.example to .env
-3. Configure API keys (see Configuration)
-4. Install dependencies: pip install -r requirements.txt
-5. Run tests: pytest
-6. Start server: uvicorn main:app --reload
-
-## Configuration
-Required environment variables:
-- GOOGLE_DOCS_CREDENTIALS: Service account JSON
-- CRM_API_KEY: For newsletter distribution
-- PLATFORM_API_KEY: For website publishing
-
-## Content Types
-See docs/editor-guide.md for content creation guidelines
-```
-
-#### 1.2 Test Coverage Audit 🧪
-
-**Coverage Analysis Script**
 ```python
-# scripts/analyze_coverage.py
-import json
+# scripts/security_audit.py
+import os
+import re
 from pathlib import Path
+from typing import List, Dict
 
-def analyze_coverage_gaps():
-    """Identify critical untested code paths"""
-    
-    critical_modules = [
-        "services/crm_client.py",      # External API
-        "services/platform_client.py",  # External API
-        "services/google_docs.py",      # External API
-        "publishers/email.py",          # Publisher pattern
-        "publishers/web.py",            # Publisher pattern
-        "api/batch.py",                 # Batch processing
-    ]
-    
-    # Run coverage and identify gaps
-    # Generate priority list for testing
-    
-    return {
-        "current_coverage": 49,
-        "target_coverage": 70,
-        "critical_gaps": critical_modules,
-        "estimated_effort": "2-3 days"
-    }
-```
-
-**Test Implementation Priority**
-```python
-# tests/test_crm_client.py
-@pytest.mark.critical
-class TestCRMClient:
-    """Contract tests for CRM integration"""
-    
-    def test_send_newsletter_contract(self, mock_crm):
-        """Verify API contract with CRM service"""
-        client = CRMClient(api_key="test")
-        
-        # Test request format
-        response = client.send_newsletter(
-            subject="Test",
-            html_content="<p>Test</p>",
-            text_content="Test"
-        )
-        
-        # Verify response contract
-        assert "message_id" in response
-        assert "recipients_count" in response
-        
-    def test_bulk_send_resilience(self, mock_crm):
-        """Test batch sending with partial failures"""
-        # Implement retry logic testing
-        pass
-```
-
----
-
-### Sprint 2: Blog & Content Integration 📚
-
-#### 2.1 Schema Validation Implementation
-
-```python
-# schemas/content_types.py
-from pydantic import BaseModel, Field, validator
-from typing import Optional, List, Literal
-from datetime import datetime
-
-class ContentBase(BaseModel):
-    """Base content schema with validation"""
-    
-    title: str = Field(..., min_length=1, max_length=200)
-    content: str = Field(..., min_length=10)
-    date: datetime
-    author: Optional[str] = "Halcytone Team"
-    
-    @validator('title')
-    def title_not_empty(cls, v):
-        if not v.strip():
-            raise ValueError('Title cannot be empty')
-        return v.strip()
-
-class UpdateContent(ContentBase):
-    """Weekly update schema"""
-    type: Literal["update"] = "update"
-    featured: bool = False
-    tags: List[str] = []
-    
-class BlogContent(ContentBase):
-    """Blog post schema"""
-    type: Literal["blog"] = "blog"
-    category: str
-    reading_time: Optional[int] = None
-    seo_description: Optional[str] = None
-    
-    @validator('reading_time', always=True)
-    def calculate_reading_time(cls, v, values):
-        if not v and 'content' in values:
-            # ~200 words per minute
-            word_count = len(values['content'].split())
-            return max(1, word_count // 200)
-        return v
-
-class AnnouncementContent(ContentBase):
-    """Major announcement schema"""
-    type: Literal["announcement"] = "announcement"
-    priority: Literal["low", "medium", "high"] = "medium"
-    expires_at: Optional[datetime] = None
-```
-
-#### 2.2 API Contract Tests
-
-```python
-# tests/contracts/test_content_api.py
-import pytest
-from typing import Dict, Any
-
-class TestContentAPIContract:
-    """Ensure content API maintains consistent contract"""
-    
-    @pytest.fixture
-    def valid_update_payload(self) -> Dict[str, Any]:
-        return {
-            "type": "update",
-            "title": "Weekly Progress",
-            "content": "This week we achieved...",
-            "date": "2024-01-17T00:00:00Z",
-            "featured": True
-        }
-    
-    def test_update_content_contract(self, client, valid_update_payload):
-        """Verify update content endpoint contract"""
-        response = client.post("/content/update", json=valid_update_payload)
-        
-        assert response.status_code == 201
-        data = response.json()
-        
-        # Verify response structure
-        assert "id" in data
-        assert "published_to" in data
-        assert isinstance(data["published_to"], list)
-        
-    def test_content_validation_errors(self, client):
-        """Ensure proper validation error format"""
-        invalid_payload = {"type": "update"}  # Missing required fields
-        
-        response = client.post("/content/update", json=invalid_payload)
-        assert response.status_code == 422
-        
-        errors = response.json()["detail"]
-        assert any(error["loc"] == ["body", "title"] for error in errors)
-```
-
-#### 2.3 Environment Configuration
-
-```python
-# core/settings.py
-from pydantic_settings import BaseSettings
-from typing import Optional
-
-class Settings(BaseSettings):
-    """Environment-based configuration"""
-    
-    # API Endpoints
-    public_content_api_url: str = "http://localhost:8003"
-    crm_api_url: str = "http://localhost:8001/api"
-    platform_api_url: str = "http://localhost:8002/api"
-    
-    # Feature Flags
-    dry_run_mode: bool = False
-    batch_processing_enabled: bool = True
-    cache_enabled: bool = True
-    
-    # Limits
-    max_batch_size: int = 100
-    rate_limit_per_hour: int = 1000
-    
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-```
-
----
-
-### Sprint 3: Halcytone Live Support 🎯
-
-#### 3.1 Session Summary Templates
-
-```python
-# templates/session_summary.py
-BREATHING_SESSION_TEMPLATE = """
-# Breathing Session Summary
-
-**Date:** {{ session.date }}
-**Duration:** {{ session.duration_minutes }} minutes
-**Pattern:** {{ session.pattern_name }}
-
-## Session Metrics
-- **Average Coherence:** {{ session.avg_coherence }}%
-- **HRV Score:** {{ session.hrv_score }}
-- **Breaths Completed:** {{ session.breath_count }}
-
-## Insights
-{{ session.ai_insights }}
-
-## Progress
-You've completed {{ user.total_sessions }} sessions this week!
-Keep up the great work on your breathing journey.
-
----
-*Generated by Halcytone Breathscape*
-"""
-
-# services/session_content.py
-class SessionContentGenerator:
-    """Generate content from breathing sessions"""
-    
-    async def create_session_summary(self, session_data: Dict) -> AnnouncementContent:
-        """Create session summary announcement"""
-        
-        content = self.render_template(
-            BREATHING_SESSION_TEMPLATE,
-            session=session_data
-        )
-        
-        return AnnouncementContent(
-            type="announcement",
-            title=f"Session Complete: {session_data['pattern_name']}",
-            content=content,
-            priority="low",
-            expires_at=datetime.utcnow() + timedelta(days=7)
-        )
-```
-
----
-
-### Sprint 4: Ecosystem Integration 🔗
-
-#### 4.1 Tone System Implementation
-
-```python
-# services/tone_manager.py
-from enum import Enum
-from typing import Dict
-
-class ContentTone(Enum):
-    PROFESSIONAL = "professional"
-    ENCOURAGING = "encouraging"  
-    SCIENTIFIC = "scientific"
-    CASUAL = "casual"
-
-class ToneManager:
-    """Manage content tone across channels"""
+class SecurityAuditor:
+    """Audit repository for security issues"""
     
     def __init__(self):
-        self.tone_templates = {
-            ContentTone.PROFESSIONAL: {
-                "greeting": "Dear Professional",
-                "closing": "Best regards",
-                "style": "formal, data-driven"
-            },
-            ContentTone.ENCOURAGING: {
-                "greeting": "Hey there!",
-                "closing": "Keep breathing!",
-                "style": "warm, supportive"
-            },
-            ContentTone.SCIENTIFIC: {
-                "greeting": "Greetings",
-                "closing": "References available upon request",
-                "style": "precise, evidence-based"
-            }
-        }
+        self.sensitive_patterns = [
+            r'AIza[0-9A-Za-z\-_]+',  # Google API keys
+            r'ntn_[0-9A-Za-z]+',      # Notion tokens
+            r'sk-[a-zA-Z0-9]+',       # OpenAI keys
+            r'Bearer\s+[A-Za-z0-9\-._~+/]+',  # Bearer tokens
+        ]
+        
+    def scan_repository(self) -> Dict[str, List[str]]:
+        """Scan all files for exposed credentials"""
+        findings = {}
+        
+        for path in Path('.').rglob('*'):
+            if path.is_file() and not self.is_ignored(path):
+                content = path.read_text(errors='ignore')
+                for pattern in self.sensitive_patterns:
+                    matches = re.findall(pattern, content)
+                    if matches:
+                        findings[str(path)] = matches
+                        
+        return findings
     
-    def apply_tone(self, content: str, tone: ContentTone) -> str:
-        """Apply tone transformations to content"""
-        # Tone-specific transformations
-        return self.transform_content(content, self.tone_templates[tone])
+    def is_ignored(self, path: Path) -> bool:
+        """Check if path should be ignored"""
+        ignore_dirs = {'.git', '__pycache__', 'node_modules', '.pytest_cache'}
+        return any(part in ignore_dirs for part in path.parts)
+
+# Run the audit
+if __name__ == "__main__":
+    auditor = SecurityAuditor()
+    findings = auditor.scan_repository()
+    
+    if findings:
+        print("⚠️ SECURITY ISSUES FOUND:")
+        for file, keys in findings.items():
+            print(f"  File: {file}")
+            for key in keys:
+                print(f"    - {key[:10]}...")
+    else:
+        print("✅ No exposed credentials found")
 ```
 
-#### 4.2 Cache Invalidation
+#### Environment Configuration Template
 
 ```python
-# api/cache.py
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List
+# .env.example
+# Halcytone Content Generator - Environment Configuration Template
+# Copy this file to .env and fill in your actual values
 
-router = APIRouter(prefix="/cache", tags=["cache"])
+# API Keys (NEVER commit actual keys)
+GOOGLE_DOCS_API_KEY=your_google_docs_api_key_here
+GOOGLE_DOCS_SERVICE_ACCOUNT_JSON=path/to/service-account.json
+NOTION_API_TOKEN=your_notion_integration_token_here
+OPENAI_API_KEY=your_openai_api_key_here
 
-@router.post("/invalidate")
-async def invalidate_cache(
-    targets: List[str] = ["cdn", "local", "api"],
-    content_ids: Optional[List[str]] = None,
-    api_key: str = Depends(verify_api_key)
-):
-    """Invalidate cache for immediate content updates"""
-    
-    invalidated = []
-    
-    if "cdn" in targets:
-        # Purge CDN cache
-        cdn_result = await purge_cdn_cache(content_ids)
-        invalidated.append({"target": "cdn", "status": cdn_result})
-    
-    if "local" in targets:
-        # Clear local cache
-        local_cache.clear(content_ids)
-        invalidated.append({"target": "local", "status": "cleared"})
-    
-    if "api" in targets:
-        # Trigger API cache refresh
-        await refresh_api_cache(content_ids)
-        invalidated.append({"target": "api", "status": "refreshed"})
-    
-    return {
-        "invalidated": invalidated,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+# Service Endpoints
+CRM_API_URL=http://localhost:8001
+PLATFORM_API_URL=http://localhost:8002
+
+# Feature Flags
+DRY_RUN_MODE=true
+USE_MOCK_SERVICES=true
+ENABLE_MONITORING=false
+
+# Security
+API_KEY_ENCRYPTION_KEY=generate_a_secure_key_here
+JWT_SECRET_KEY=generate_another_secure_key_here
+
+# Database
+DATABASE_URL=postgresql://user:password@localhost/halcytone
+
+# Redis (optional)
+REDIS_URL=redis://localhost:6379
+
+# Monitoring (optional)
+PROMETHEUS_PORT=9090
+GRAFANA_PORT=3000
 ```
 
 ---
 
-### Sprint 5: Cohesion & Polishing 💎
+### Dry Run Sprint 2: Mock Service Infrastructure
 
-#### 5.1 Role Documentation
+**Duration:** 1-2 days | **Priority:** HIGH
 
-```markdown
-# docs/roles/marketing-guide.md
-
-## Marketing Team Workflow
-
-### Content Creation
-1. Draft in Google Docs/Notion
-2. Tag with campaign identifiers
-3. Request preview via dry-run
-4. Schedule publication
-
-### Performance Tracking
-- View analytics dashboard
-- Export engagement metrics
-- A/B test content variations
-
-### Approval Process
-1. Create content
-2. Submit for review
-3. Legal/compliance check
-4. Schedule publication
-```
-
-#### 5.2 Test Coverage Enhancement
+#### Mock CRM Service Implementation
 
 ```python
-# tests/test_integration.py
-@pytest.mark.integration
-class TestEndToEndWorkflow:
-    """Complete workflow testing"""
+# mocks/crm_service.py
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
+import uuid
+from datetime import datetime
+
+app = FastAPI(title="Mock CRM Service", version="1.0.0")
+
+class EmailRequest(BaseModel):
+    subject: str
+    html_content: str
+    text_content: str
+    recipients: Optional[List[str]] = None
+    campaign_id: Optional[str] = None
+
+class EmailResponse(BaseModel):
+    message_id: str
+    status: str
+    recipients_count: int
+    timestamp: datetime
+
+@app.post("/api/v1/email/send", response_model=EmailResponse)
+async def send_email(request: EmailRequest):
+    """Simulate email sending"""
     
-    async def test_complete_content_pipeline(self):
-        """Test content from creation to distribution"""
+    # Simulate various scenarios
+    if "error" in request.subject.lower():
+        raise HTTPException(status_code=500, detail="Simulated CRM error")
+    
+    if "slow" in request.subject.lower():
+        import asyncio
+        await asyncio.sleep(2)  # Simulate slow response
+    
+    return EmailResponse(
+        message_id=str(uuid.uuid4()),
+        status="sent",
+        recipients_count=len(request.recipients) if request.recipients else 100,
+        timestamp=datetime.utcnow()
+    )
+
+@app.get("/api/v1/contacts/count")
+async def get_contact_count():
+    """Simulate contact count endpoint"""
+    return {"total": 5432, "active": 4821, "unsubscribed": 611}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "mock-crm"}
+```
+
+#### Mock Platform Service Implementation
+
+```python
+# mocks/platform_service.py
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Dict, Any, Optional
+import uuid
+from datetime import datetime
+
+app = FastAPI(title="Mock Platform Service", version="1.0.0")
+
+class ContentPublishRequest(BaseModel):
+    title: str
+    content: str
+    content_type: str
+    metadata: Optional[Dict[str, Any]] = {}
+
+class ContentPublishResponse(BaseModel):
+    content_id: str
+    url: str
+    status: str
+    published_at: datetime
+
+@app.post("/api/v1/content/publish", response_model=ContentPublishResponse)
+async def publish_content(request: ContentPublishRequest):
+    """Simulate content publishing"""
+    
+    # Simulate various scenarios
+    if "draft" in request.title.lower():
+        status = "draft"
+    elif "error" in request.title.lower():
+        raise HTTPException(status_code=400, detail="Invalid content format")
+    else:
+        status = "published"
+    
+    content_id = str(uuid.uuid4())
+    
+    return ContentPublishResponse(
+        content_id=content_id,
+        url=f"https://halcytone.com/content/{content_id}",
+        status=status,
+        published_at=datetime.utcnow()
+    )
+
+@app.get("/api/v1/analytics/content/{content_id}")
+async def get_content_analytics(content_id: str):
+    """Simulate analytics data"""
+    return {
+        "content_id": content_id,
+        "views": 1234,
+        "engagement_rate": 0.045,
+        "avg_time_on_page": 180
+    }
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "mock-platform"}
+```
+
+#### Docker Compose for Mock Services
+
+```yaml
+# docker-compose.mocks.yml
+version: '3.8'
+
+services:
+  mock-crm:
+    build:
+      context: ./mocks
+      dockerfile: Dockerfile.crm
+    ports:
+      - "8001:8001"
+    environment:
+      - SERVICE_NAME=mock-crm
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./mocks/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mock-platform:
+    build:
+      context: ./mocks
+      dockerfile: Dockerfile.platform
+    ports:
+      - "8002:8002"
+    environment:
+      - SERVICE_NAME=mock-platform
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./mocks/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mock-logger:
+    image: busybox
+    volumes:
+      - ./mocks/logs:/logs
+    command: tail -f /logs/*.log
+
+networks:
+  default:
+    name: halcytone-mocks
+```
+
+---
+
+### Dry Run Sprint 3: Validation & Testing
+
+**Duration:** 2 days | **Priority:** HIGH
+
+#### Dry Run Validation Script
+
+```bash
+#!/bin/bash
+# scripts/validate-dry-run.sh
+
+echo "🚀 Starting Dry Run Validation..."
+
+# Check environment
+if [ "$DRY_RUN_MODE" != "true" ]; then
+    echo "❌ Error: DRY_RUN_MODE not enabled"
+    exit 1
+fi
+
+# Start mock services
+docker-compose -f docker-compose.mocks.yml up -d
+sleep 5
+
+# Run validation tests
+echo "📋 Running validation suite..."
+
+# Test 1: No external API calls
+echo "Test 1: Checking for external API calls..."
+python -m pytest tests/dry_run/test_no_external_calls.py -v
+
+# Test 2: Content generation pipeline
+echo "Test 2: Testing content generation..."
+python -m pytest tests/dry_run/test_content_generation.py -v
+
+# Test 3: Multi-channel publishing
+echo "Test 3: Testing multi-channel publishing..."
+python -m pytest tests/dry_run/test_publishing.py -v
+
+# Test 4: Performance benchmarks
+echo "Test 4: Running performance tests..."
+python -m pytest tests/dry_run/test_performance.py -v
+
+# Test 5: Error handling
+echo "Test 5: Testing error scenarios..."
+python -m pytest tests/dry_run/test_error_handling.py -v
+
+# Generate report
+python scripts/generate_test_report.py
+
+echo "✅ Dry Run Validation Complete!"
+```
+
+#### Dry Run Test Suite
+
+```python
+# tests/dry_run/test_no_external_calls.py
+import pytest
+from unittest.mock import patch, MagicMock
+import socket
+
+class TestNoExternalCalls:
+    """Ensure no external API calls in dry run mode"""
+    
+    @patch('socket.socket.connect')
+    def test_no_external_connections(self, mock_connect):
+        """Verify no external connections are made"""
         
-        # 1. Create content
-        content = await create_test_content()
+        # Configure to raise on external connection attempts
+        def check_connection(address):
+            host, port = address
+            allowed_hosts = ['localhost', '127.0.0.1', '0.0.0.0']
+            if host not in allowed_hosts:
+                raise Exception(f"External connection attempted to {host}:{port}")
         
-        # 2. Validate
-        assert await validate_content(content)
+        mock_connect.side_effect = check_connection
         
-        # 3. Dry run
-        preview = await generate_with_dry_run(content)
-        assert preview["dry_run"] == True
+        # Run content generation
+        from halcytone_content_generator import generate_content
+        content = generate_content(dry_run=True)
         
-        # 4. Publish
-        result = await publish_content(content)
-        assert all(
-            channel in result["published_to"] 
-            for channel in ["email", "web"]
-        )
-        
-        # 5. Verify distribution
-        assert await verify_email_sent()
-        assert await verify_web_published()
+        # Should complete without external calls
+        assert content is not None
+        assert content.get('dry_run') == True
+```
+
+---
+
+### Dry Run Sprint 4: Monitoring & Observability
+
+**Duration:** 1-2 days | **Priority:** MEDIUM
+
+#### Prometheus Configuration
+
+```yaml
+# monitoring/prometheus.yml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'content-generator'
+    static_configs:
+      - targets: ['localhost:8000']
+    metrics_path: '/metrics'
+
+  - job_name: 'mock-crm'
+    static_configs:
+      - targets: ['localhost:8001']
+    metrics_path: '/metrics'
+
+  - job_name: 'mock-platform'
+    static_configs:
+      - targets: ['localhost:8002']
+    metrics_path: '/metrics'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['localhost:9093']
+
+rule_files:
+  - 'alerts.yml'
+```
+
+#### Grafana Dashboard Configuration
+
+```json
+{
+  "dashboard": {
+    "title": "Halcytone Dry Run Monitor",
+    "panels": [
+      {
+        "title": "Dry Run Mode Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "dry_run_mode_enabled",
+            "legendFormat": "Status"
+          }
+        ]
+      },
+      {
+        "title": "Mock Service Health",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "up{job=~\"mock-.*\"}",
+            "legendFormat": "{{job}}"
+          }
+        ]
+      },
+      {
+        "title": "Content Generation Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "content_generation_duration_seconds",
+            "legendFormat": "Generation Time"
+          }
+        ]
+      },
+      {
+        "title": "External API Calls Blocked",
+        "type": "counter",
+        "targets": [
+          {
+            "expr": "external_api_calls_blocked_total",
+            "legendFormat": "Blocked Calls"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+---
+
+### Dry Run Sprint 5: Documentation & Production Readiness
+
+**Duration:** 1-2 days | **Priority:** MEDIUM
+
+#### Dry Run Operations Guide
+
+```markdown
+# docs/dry-run-guide.md
+
+## Dry Run System Overview
+
+The Halcytone Content Generator Dry Run System provides a complete testing environment with zero external dependencies.
+
+### Key Features
+- Complete mock service infrastructure
+- Request/response logging
+- Performance monitoring
+- Error simulation capabilities
+
+### Starting Dry Run Mode
+
+1. Set environment variable:
+   ```bash
+   export DRY_RUN_MODE=true
+   export USE_MOCK_SERVICES=true
+   ```
+
+2. Start mock services:
+   ```bash
+   docker-compose -f docker-compose.mocks.yml up
+   ```
+
+3. Start content generator:
+   ```bash
+   uvicorn main:app --reload --env-file .env.dry-run
+   ```
+
+### Validation Checklist
+- [ ] All mock services healthy
+- [ ] No external API calls detected
+- [ ] Content generation <2s
+- [ ] Error handling functional
+- [ ] Monitoring dashboards active
+
+### Common Issues & Solutions
+
+**Issue:** Mock services not responding
+**Solution:** Check Docker logs: `docker-compose logs mock-crm`
+
+**Issue:** External API calls detected
+**Solution:** Verify DRY_RUN_MODE=true in environment
+
+**Issue:** Slow performance
+**Solution:** Check mock service response times in Grafana
 ```
 
 ---
 
 ## Common Pitfalls to Avoid
 
-### Documentation Pitfalls
-- **Never** assume users know the system
-- **Always** include examples
-- **Always** document error states
-- **Never** skip configuration steps
+### Security Pitfalls
+- **NEVER** commit .env files
+- **ALWAYS** use .env.example templates
+- **ALWAYS** rotate keys after exposure
+- **NEVER** log sensitive data
+
+### Mock Service Pitfalls
+- **NEVER** connect to real APIs in dry run
+- **ALWAYS** validate mock responses match contracts
+- **ALWAYS** simulate error scenarios
+- **NEVER** skip health checks
 
 ### Testing Pitfalls
-- **Never** test only happy paths
-- **Always** test external API failures
-- **Always** mock external services
-- **Never** skip contract tests
-
-### Integration Pitfalls
-- **Never** hardcode endpoints
-- **Always** use environment variables
-- **Always** validate schemas
-- **Never** trust external data
+- **NEVER** assume mocks are running
+- **ALWAYS** verify dry run mode is active
+- **ALWAYS** test timeout scenarios
+- **NEVER** skip performance validation
 
 ---
 
 ## Quick Reference Commands
 
 ```bash
-# Sprint 1: Documentation & Testing
-pytest --cov=halcytone_content_generator --cov-report=html
-python scripts/analyze_coverage.py
+# Security Audit
+python scripts/security_audit.py
+git secrets --scan
 
-# Sprint 2: Schema & Contracts
-pytest tests/contracts/ -v
-python -m halcytone_content_generator.schemas --validate
+# Mock Services
+docker-compose -f docker-compose.mocks.yml up -d
+curl http://localhost:8001/health
+curl http://localhost:8002/health
 
-# Sprint 3: Session Support
-curl -X POST "http://localhost:8003/session/summary" -d @session_data.json
+# Dry Run Validation
+export DRY_RUN_MODE=true
+./scripts/validate-dry-run.sh
 
-# Sprint 4: Tone & Cache
-curl -X POST "http://localhost:8003/cache/invalidate?targets=cdn,api"
-curl -X POST "http://localhost:8003/content/generate?tone=professional"
+# Monitoring
+docker-compose -f docker-compose.monitoring.yml up -d
+open http://localhost:3000  # Grafana
 
-# Sprint 5: Final Testing
-pytest tests/ --cov-report=term-missing
-python scripts/load_test.py --users 100 --duration 60
+# Testing
+pytest tests/dry_run/ -v --cov
+python scripts/performance_test.py
 ```
 
 ---
 
 ## Success Metrics Per Sprint
 
-### Sprint 1
-- Documentation completeness: 100%
-- Test gaps identified: All critical modules
-- Coverage plan created: Yes
+### Dry Run Sprint 1 (Security)
+- Zero exposed credentials in repository ✓
+- All services start with new credentials ✓
+- Security scan passes ✓
 
-### Sprint 2  
-- Schema validation: 100% of content types
-- Contract tests: All external APIs
-- Config management: Environment-based
+### Dry Run Sprint 2 (Mocks)
+- All mock services respond within 100ms ✓
+- 100% API contract compliance ✓
+- Complete request logging ✓
 
-### Sprint 3
-- Session templates: Created and tested
-- Real-time support: WebSocket integration
+### Dry Run Sprint 3 (Validation)
+- 100% core workflow test coverage ✓
+- Content generation <2s ✓
+- Zero external API calls in dry run ✓
 
-### Sprint 4
-- Tone options: 4 distinct tones
-- Cache invalidation: <100ms response
+### Dry Run Sprint 4 (Monitoring)
+- All services visible in dashboards ✓
+- Alert coverage for critical paths ✓
+- Log retention configured ✓
 
-### Sprint 5
-- Test coverage: >70%
-- Documentation: All roles covered
-- Performance: <2s for batch operations
+### Dry Run Sprint 5 (Documentation)
+- Complete runbook coverage ✓
+- Team sign-off on procedures ✓
+- Successful dry run demonstration ✓
 
 ---
 
-**Remember:** Each sprint builds on the previous one. Focus on creating a robust, well-documented, and thoroughly tested content generation service that seamlessly integrates with the Halcytone ecosystem.
+**Remember:** Security is paramount. Fix exposed credentials immediately before proceeding with any other work. The dry run system ensures safe testing without risking production data or external service dependencies.

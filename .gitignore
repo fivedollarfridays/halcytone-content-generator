@@ -16,10 +16,18 @@ ENV/
 *.swo
 *~
 
-# Environment
+# Environment & Security
 .env
+.env.*
+!.env.example
 .env.local
 .env.*.local
+*.pem
+*.key
+*.crt
+*_rsa*
+secrets/
+.secrets
 
 # Testing
 .pytest_cache/

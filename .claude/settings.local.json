@@ -30,7 +30,10 @@
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest --cov=src/halcytone_content_generator/services/schema_validator --cov=src/halcytone_content_generator/publishers/web_publisher --cov=src/halcytone_content_generator/publishers/email_publisher --cov-report=term-missing --tb=no -q --disable-warnings --maxfail=1)",
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_schema_validator.py tests/unit/test_web_publisher.py tests/unit/test_email_publisher.py -v --tb=short)",
       "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest tests/unit/test_schema_validator.py tests/unit/test_web_publisher.py tests/unit/test_email_publisher.py --cov=src/halcytone_content_generator/services/schema_validator --cov=src/halcytone_content_generator/services/publishers/web_publisher --cov=src/halcytone_content_generator/services/publishers/email_publisher --cov-report=term-missing --tb=no -q --disable-warnings)",
-      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest --cov=src --cov-report=term --tb=no -q --disable-warnings --maxfail=5)"
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -m pytest --cov=src --cov-report=term --tb=no -q --disable-warnings --maxfail=5)",
+      "Bash(git stash:*)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe scripts/security_audit.py)",
+      "Bash(/c/Users/kmast/AppData/Local/Programs/Python/Python311/python.exe -c \"import os; from dotenv import load_dotenv; load_dotenv(); print(''DRY_RUN_MODE:'', os.getenv(''DRY_RUN_MODE'')); print(''SERVICE_NAME:'', os.getenv(''SERVICE_NAME'')); print(''Environment loaded successfully!'')\")"
     ],
     "deny": [],
     "ask": []
