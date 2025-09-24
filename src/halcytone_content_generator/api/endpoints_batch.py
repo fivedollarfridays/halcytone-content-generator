@@ -18,6 +18,8 @@ from ..services.document_fetcher import DocumentFetcher
 from ..services.publishers.email_publisher import EmailPublisher
 from ..services.publishers.web_publisher import WebPublisher
 from ..services.publishers.social_publisher import SocialPublisher
+from ..services.tone_manager import get_tone_manager
+from ..services.cache_manager import get_cache_manager
 from ..config import get_settings
 
 logger = logging.getLogger(__name__)

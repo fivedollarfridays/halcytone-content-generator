@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 
 from src.halcytone_content_generator.services.ai_content_enhancer import (
-    AIContentEnhancer, PromptManager, EnhancementMode, ContentType, QualityMetrics
+    AIContentEnhancer, PromptManager, EnhancementMode, ContentType, QualityScore
 )
 
 
@@ -470,10 +470,10 @@ class TestAIContentEnhancer:
 
         metrics = ai_enhancer.calculate_quality_metrics(content)
 
-        assert isinstance(metrics, QualityMetrics)
-        assert metrics.readability_score > 0
-        assert metrics.engagement_score > 0
-        assert metrics.clarity_score > 0
+        assert isinstance(metrics, QualityScore)
+        assert metrics.readability > 0
+        assert metrics.engagement_potential > 0
+        assert metrics.overall_score > 0
 
     def test_content_analysis_features(self, ai_enhancer):
         """Test content analysis features"""

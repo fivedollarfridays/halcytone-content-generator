@@ -256,7 +256,8 @@ class ContentSyncService:
 
         finally:
             job.completed_at = datetime.now()
-            self.active_jobs.remove(job.job_id)
+            if job.job_id in self.active_jobs:
+                self.active_jobs.remove(job.job_id)
 
     async def _fetch_content(self, document_id: str, correlation_id: Optional[str]) -> Dict[str, Any]:
         """

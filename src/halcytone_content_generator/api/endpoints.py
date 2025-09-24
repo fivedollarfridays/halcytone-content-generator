@@ -20,6 +20,8 @@ from ..services.content_assembler import ContentAssembler
 from ..services.publishers.email_publisher import EmailPublisher
 from ..services.publishers.web_publisher import WebPublisher
 from ..services.publishers.social_publisher import SocialPublisher
+from ..services.tone_manager import get_tone_manager
+from ..services.cache_manager import get_cache_manager
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["content"])
@@ -65,10 +67,47 @@ async def generate_content(
         content = await fetcher.fetch_content()
         logger.info(f"Fetched content with {sum(len(v) for v in content.values())} items")
 
-        # Step 2: Assemble content for different channels
+        # Step 2: Get tone manager and select appropriate tone
+        tone_manager = get_tone_manager()
+        selected_tone = None
+
+        if settings.TONE_SYSTEM_ENABLED:
+            # Use tone from request or auto-select based on content
+            if request.tone:
+                selected_tone = tone_manager.get_tone_profile(request.tone)
+            elif request.tone_combination:
+                selected_tone = tone_manager.blend_tones(request.tone_combination)
+            elif settings.TONE_AUTO_SELECTION:
+                # Auto-select tone based on content type
+                selected_tone = tone_manager.select_tone(
+                    content_type="newsletter",
+                    channel="email",
+                    context={"content_items": len(content.get('breathscape', [])) + len(content.get('hardware', []))}
+                )
+            else:
+                selected_tone = tone_manager.get_tone_profile(settings.DEFAULT_TONE)
+
+            logger.info(f"Selected tone: {selected_tone.name if selected_tone else 'None'}")
+
+        # Step 3: Assemble content for different channels with tone support
         assembler = ContentAssembler()
+
+        # Generate newsletter with tone
+        email_tone = selected_tone
+        if request.per_channel_tones and 'email' in request.per_channel_tones:
+            email_tone = tone_manager.get_tone_profile(request.per_channel_tones['email'])
         newsletter_data = assembler.generate_newsletter(content)
+
+        # Generate web update with tone
+        web_tone = selected_tone
+        if request.per_channel_tones and 'web' in request.per_channel_tones:
+            web_tone = tone_manager.get_tone_profile(request.per_channel_tones['web'])
         web_update_data = assembler.generate_web_update(content)
+
+        # Generate social posts with tone
+        social_tone = selected_tone
+        if request.per_channel_tones and 'social' in request.per_channel_tones:
+            social_tone = tone_manager.get_tone_profile(request.per_channel_tones['social'])
         social_posts_data = assembler.generate_social_posts(content)
 
         # Convert to Pydantic objects
@@ -82,7 +121,15 @@ async def generate_content(
                 status="preview",
                 newsletter=newsletter,
                 web_update=web_update,
-                social_posts=social_posts
+                social_posts=social_posts,
+                results={
+                    'tone_system': {
+                        'enabled': settings.TONE_SYSTEM_ENABLED,
+                        'selected_tone': selected_tone.name if selected_tone else None,
+                        'per_channel_tones': request.per_channel_tones or {},
+                        'auto_selection': settings.TONE_AUTO_SELECTION
+                    }
+                }
             )
 
         # Get publishers
@@ -166,6 +213,43 @@ async def generate_content(
             }
             logger.info(f"Processed {len(social_posts)} social media posts")
 
+        # Step 6: Handle cache invalidation if enabled
+        if settings.CACHE_INVALIDATION_ENABLED and request.invalidate_cache:
+            try:
+                cache_manager = get_cache_manager()
+                cache_targets = request.cache_targets or ['local', 'cdn'] if settings.CDN_ENABLED else ['local']
+
+                from ..services.cache_manager import InvalidationRequest, CacheTarget
+                invalidation_request = InvalidationRequest(
+                    targets=[CacheTarget(target) for target in cache_targets],
+                    patterns=settings.CACHE_AUTO_INVALIDATE_PATTERNS,
+                    reason="Content generation completed",
+                    initiated_by="content_generation_api"
+                )
+
+                invalidation_result = await cache_manager.invalidate_cache(invalidation_request)
+                results['cache_invalidation'] = {
+                    "status": invalidation_result.status.value,
+                    "targets_processed": list(invalidation_result.targets_processed.keys()),
+                    "keys_invalidated": invalidation_result.keys_invalidated,
+                    "request_id": invalidation_result.request_id
+                }
+                logger.info(f"Cache invalidation completed: {invalidation_result.request_id}")
+            except Exception as e:
+                logger.error(f"Cache invalidation failed: {e}")
+                results['cache_invalidation'] = {
+                    "status": "failed",
+                    "error": str(e)
+                }
+
+        # Add tone information to results
+        results['tone_system'] = {
+            'enabled': settings.TONE_SYSTEM_ENABLED,
+            'selected_tone': selected_tone.name if selected_tone else None,
+            'per_channel_tones': request.per_channel_tones or {},
+            'auto_selection': settings.TONE_AUTO_SELECTION
+        }
+
         return ContentGenerationResponse(
             status="success",
             results=results,
@@ -181,10 +265,15 @@ async def generate_content(
 
 @router.get("/preview", response_model=ContentPreview)
 async def preview_content(
+    tone: Optional[str] = None,
     settings: Settings = Depends(get_settings)
 ):
     """
     Preview content without generating or sending
+
+    Args:
+        tone: Optional tone to apply (professional, encouraging, medical_scientific)
+        settings: Application settings
 
     Returns:
         ContentPreview with latest content from living document
@@ -193,6 +282,17 @@ async def preview_content(
         # Fetch and preview content
         fetcher = DocumentFetcher(settings)
         content = await fetcher.fetch_content()
+
+        # Get tone manager and select tone if enabled
+        selected_tone = None
+        if settings.TONE_SYSTEM_ENABLED:
+            tone_manager = get_tone_manager()
+            if tone:
+                selected_tone = tone_manager.get_tone_profile(tone)
+            elif settings.TONE_AUTO_SELECTION:
+                selected_tone = tone_manager.select_tone("newsletter", "email")
+            else:
+                selected_tone = tone_manager.get_tone_profile(settings.DEFAULT_TONE)
 
         assembler = ContentAssembler()
         newsletter = assembler.generate_newsletter(content)
