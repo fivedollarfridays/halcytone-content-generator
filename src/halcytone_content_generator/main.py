@@ -95,3 +95,7 @@ app.include_router(endpoints_critical.router)
 # Include batch generation endpoints
 from .api import endpoints_batch
 app.include_router(endpoints_batch.router, prefix="/api/v1")
+
+# Include schema-validated endpoints (Sprint 2)
+from .api.endpoints_schema_validated import router as schema_validated_router
+app.include_router(schema_validated_router, prefix="/api")
