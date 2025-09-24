@@ -304,3 +304,219 @@ What would you like to see next?
             thread.append(f"{len(thread)+1}/ That's all for today! 🙏\n\nFollow for more breathing wellness tips and updates from Halcytone.")
 
         return thread
+
+
+class SocialTemplateManager:
+    """Manager for social media templates"""
+
+    def __init__(self):
+        self.templates = SocialMediaTemplates()
+        self.brand_config = {}
+        self.audience_config = {}
+        self.performance_data = {}
+
+    def get_platform_templates(self, platform: str) -> dict:
+        """Get all templates for a platform"""
+        template_map = {
+            'twitter': self.templates.TWITTER_TEMPLATES,
+            'linkedin': self.templates.LINKEDIN_TEMPLATES,
+            'instagram': self.templates.INSTAGRAM_TEMPLATES,
+            'facebook': self.templates.FACEBOOK_TEMPLATES,
+            'youtube': self.templates.YOUTUBE_TEMPLATES
+        }
+        return template_map.get(platform, {})
+
+    def get_templates(self, platform: str) -> dict:
+        """Alias for get_platform_templates for backward compatibility"""
+        return self.get_platform_templates(platform)
+
+    def get_template(self, platform: str, template_type: str) -> str:
+        """Get specific template"""
+        templates = self.get_platform_templates(platform)
+        if isinstance(templates.get(template_type), list):
+            return templates[template_type][0] if templates[template_type] else None
+        return templates.get(template_type, None)
+
+    def format_post(self, platform: str, template_type: str, data: dict) -> str:
+        """Format a social media post"""
+        template = self.get_template(platform, template_type)
+        if not template:
+            return f"Template not found: {platform}/{template_type}"
+
+        try:
+            formatted = template.format(**data)
+            return self.templates.format_for_platform(formatted, platform)
+        except KeyError as e:
+            return f"Missing variable: {e}"
+
+    def set_brand_configuration(self, config: dict):
+        """Set brand voice configuration"""
+        self.brand_config = config
+
+    def set_audience_configuration(self, config: dict):
+        """Set audience targeting configuration"""
+        self.audience_config = config
+
+    def generate_variations(self, platform: str, template_type: str, data: dict, count: int = 3) -> list:
+        """Generate multiple variations for A/B testing"""
+        templates = self.get_platform_templates(platform).get(template_type, [])
+        if not isinstance(templates, list):
+            templates = [templates]
+
+        variations = []
+        for i in range(min(count, len(templates))):
+            try:
+                formatted = templates[i].format(**data)
+                variations.append(self.templates.format_for_platform(formatted, platform))
+            except:
+                continue
+
+        # If we don't have enough variations, duplicate with slight modifications
+        while len(variations) < count and variations:
+            base = variations[0]
+            if '!' in base:
+                variations.append(base.replace('!', '.', 1))
+            elif '.' in base:
+                variations.append(base.replace('.', '!', 1))
+            else:
+                variations.append(base + '!')
+            if len(variations) >= count:
+                break
+
+        return variations[:count]
+
+    def format_seasonal_post(self, platform: str, data: dict) -> str:
+        """Format seasonal content"""
+        # Try to find a seasonal template, fallback to announcement
+        template_type = 'seasonal' if 'seasonal' in self.get_platform_templates(platform) else 'announcement'
+        return self.format_post(platform, template_type, data)
+
+    def record_performance(self, platform: str, template_type: str, engagement_rate: float, click_rate: float):
+        """Record template performance"""
+        key = f"{platform}_{template_type}"
+        self.performance_data[key] = {
+            'engagement_rate': engagement_rate,
+            'click_rate': click_rate
+        }
+
+    def get_best_performing_templates(self, platform: str) -> list:
+        """Get best performing templates"""
+        return [k for k in self.performance_data.keys() if k.startswith(platform)]
+
+    def format_compliant_post(self, platform: str, data: dict) -> str:
+        """Format compliant post with disclaimers"""
+        content = self.format_post(platform, 'announcement', data)
+        if 'health' in content.lower() or 'benefit' in content.lower():
+            content += "\n\n*Individual results may vary. Consult healthcare providers."
+        return content
+
+    def customize_template(self, template: str, customization_type: str, value: str = None) -> str:
+        """Customize a template based on brand voice or audience"""
+        if customization_type == 'brand_voice':
+            if value == 'friendly':
+                template = template.replace('{greeting}', 'Hey there')
+                template = template.replace('We are', "We're")
+            elif value == 'professional':
+                template = template.replace('{greeting}', 'Greetings')
+                template = template.replace("We're", 'We are')
+        elif customization_type == 'audience':
+            if value == 'wellness_professionals':
+                template = template.replace('{audience}', 'wellness professionals')
+                template = template.replace('users', 'practitioners')
+            elif value == 'general':
+                template = template.replace('{audience}', 'everyone')
+                template = template.replace('practitioners', 'users')
+        return template
+
+
+def get_platform_template(platform: str, template_type: str) -> str:
+    """Get a specific platform template"""
+    manager = SocialTemplateManager()
+    return manager.get_template(platform, template_type)
+
+
+def format_social_post(platform: str, content: dict, template_type: str = 'announcement') -> str:
+    """Format a social media post"""
+    manager = SocialTemplateManager()
+    return manager.format_post(platform, template_type, content)
+
+
+def generate_hashtags(content: str, platform: str = 'twitter', max_count: int = 5) -> list:
+    """Generate hashtags for content"""
+    keywords = ['breathing', 'wellness', 'tech', 'health', 'mindfulness']
+    content_lower = content.lower()
+
+    relevant_tags = []
+    for keyword in keywords:
+        if keyword in content_lower:
+            relevant_tags.append(f"#{keyword.capitalize()}")
+
+    # Always include Halcytone tag
+    relevant_tags.insert(0, "#Halcytone")
+
+    return relevant_tags[:max_count]
+
+
+def create_thread(content: str, platform: str = 'twitter', max_tweets: int = 10, max_posts: int = 3, hashtags: list = None) -> list:
+    """Create a thread from long content"""
+    # Handle max_posts parameter for LinkedIn
+    if platform == 'linkedin':
+        max_tweets = max_posts
+
+    if platform == 'twitter':
+        char_limit = 250  # Leave room for numbering
+    elif platform == 'linkedin':
+        char_limit = 2800  # Leave room for formatting
+    else:
+        char_limit = 500
+
+    if len(content) <= char_limit:
+        return [content]
+
+    # Split content into chunks
+    words = content.split()
+    chunks = []
+    current_chunk = []
+    current_length = 0
+
+    for word in words:
+        if current_length + len(word) + 1 > char_limit:
+            chunks.append(' '.join(current_chunk))
+            current_chunk = [word]
+            current_length = len(word)
+        else:
+            current_chunk.append(word)
+            current_length += len(word) + 1
+
+    if current_chunk:
+        chunks.append(' '.join(current_chunk))
+
+    # Limit to max_tweets
+    chunks = chunks[:max_tweets]
+
+    # Add numbering for Twitter
+    if platform == 'twitter':
+        numbered_chunks = []
+        for i, chunk in enumerate(chunks, 1):
+            numbered_chunks.append(f"{i}/{len(chunks)} {chunk}")
+        chunks = numbered_chunks
+
+    # Add hashtags to last chunk if provided
+    if hashtags and chunks:
+        chunks[-1] += f"\n\n{' '.join(hashtags)}"
+
+    return chunks
+
+
+def validate_character_limits(content: str, platform: str) -> bool:
+    """Validate content against platform character limits"""
+    limits = {
+        'twitter': 280,
+        'instagram': 2200,
+        'linkedin': 3000,
+        'facebook': 63206,
+        'youtube': 5000
+    }
+
+    limit = limits.get(platform, 500)
+    return len(content) <= limit

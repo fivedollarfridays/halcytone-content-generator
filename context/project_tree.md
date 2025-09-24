@@ -1,5 +1,5 @@
-# Project Tree (snapshot)
-_Generated: 2025-09-20T03:38:29Z_
+# Project Tree (Updated after Sprint 1)
+_Generated: 2025-01-17 - Post Sprint 1 Foundation & Testing Enhancement_
 
 ```
 .agentpackignore
@@ -37,6 +37,7 @@ docker-compose.yml
 docs
 docs/API.md
 docs/USER_GUIDE.md
+docs/editor-guide.md
 monitoring
 monitoring/prometheus.yml
 prompts
@@ -69,8 +70,11 @@ src/halcytone_content_generator/schemas/__init__.py
 src/halcytone_content_generator/schemas/content.py
 src/halcytone_content_generator/services
 src/halcytone_content_generator/services/__init__.py
+src/halcytone_content_generator/services/ab_testing.py
+src/halcytone_content_generator/services/ai_content_enhancer.py
 src/halcytone_content_generator/services/content_assembler.py
 src/halcytone_content_generator/services/content_assembler_v2.py
+src/halcytone_content_generator/services/content_quality_scorer.py
 src/halcytone_content_generator/services/content_sync.py
 src/halcytone_content_generator/services/content_validator.py
 src/halcytone_content_generator/services/crm_client.py
@@ -78,10 +82,20 @@ src/halcytone_content_generator/services/crm_client_v2.py
 src/halcytone_content_generator/services/document_fetcher.py
 src/halcytone_content_generator/services/email_analytics.py
 src/halcytone_content_generator/services/monitoring.py
+src/halcytone_content_generator/services/personalization.py
 src/halcytone_content_generator/services/platform_client.py
 src/halcytone_content_generator/services/platform_client_v2.py
+src/halcytone_content_generator/services/publishers/
+src/halcytone_content_generator/services/publishers/__init__.py
+src/halcytone_content_generator/services/publishers/base.py
+src/halcytone_content_generator/services/publishers/email_publisher.py
+src/halcytone_content_generator/services/publishers/social_publisher.py
+src/halcytone_content_generator/services/publishers/web_publisher.py
+src/halcytone_content_generator/services/user_segmentation.py
 src/halcytone_content_generator/templates
 src/halcytone_content_generator/templates/__init__.py
+src/halcytone_content_generator/templates/ai_prompts.py
+src/halcytone_content_generator/templates/breathscape_templates.py
 src/halcytone_content_generator/templates/email_templates.py
 src/halcytone_content_generator/templates/social_templates.py
 templates
@@ -94,15 +108,37 @@ tests/example_integration
 tests/example_integration/README.md
 tests/integration
 tests/integration/test_end_to_end.py
-tests/unit
+tests/unit (33 test files total)
+tests/unit/test_ab_testing.py
+tests/unit/test_ai_content_enhancer.py
+tests/unit/test_ai_content_enhancer_comprehensive.py
+tests/unit/test_ai_prompts.py
+tests/unit/test_breathscape_templates.py
 tests/unit/test_content_assembler.py
 tests/unit/test_content_assembler_v2.py
+tests/unit/test_content_quality_scorer.py
 tests/unit/test_content_validator.py
+tests/unit/test_contract_tests.py
+tests/unit/test_crm_client.py
+tests/unit/test_crm_client_v2.py
 tests/unit/test_crm_integration.py
 tests/unit/test_document_fetcher.py
+tests/unit/test_document_fetcher_enhanced.py
+tests/unit/test_dry_run_integration.py
+tests/unit/test_email_templates.py
 tests/unit/test_endpoints.py
+tests/unit/test_endpoints_batch.py
 tests/unit/test_endpoints_v2.py
 tests/unit/test_main.py
+tests/unit/test_monitoring.py
+tests/unit/test_monitoring_simple.py
+tests/unit/test_personalization.py
 tests/unit/test_platform_client.py
+tests/unit/test_platform_client_v2_enhanced.py
 tests/unit/test_platform_integration.py
+tests/unit/test_publisher_integration.py
+tests/unit/test_publishers_enhanced.py
+tests/unit/test_social_publisher_automated.py
+tests/unit/test_social_templates.py
+tests/unit/test_user_segmentation.py
 ```

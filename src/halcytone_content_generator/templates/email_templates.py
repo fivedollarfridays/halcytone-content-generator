@@ -1,6 +1,8 @@
 """
 Professional email newsletter templates for Halcytone
 """
+from jinja2 import Template
+import html2text
 
 MODERN_TEMPLATE = """
 <!DOCTYPE html>
@@ -440,3 +442,126 @@ You're receiving this because you subscribed to Halcytone updates.
 
 To unsubscribe: {{ unsubscribe_url|default('Reply with UNSUBSCRIBE') }}
 """
+
+BREATHSCAPE_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            margin: 0;
+            padding: 20px;
+            color: #2d3436;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px;
+        }
+        .breathing-section {
+            background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: white;
+        }
+        .footer {
+            background: #2d3436;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🫁 Breathscape</h1>
+            <p>{{ month_year }}</p>
+        </div>
+        <div class="content">
+            {% if breathscape_updates %}
+            {% for update in breathscape_updates %}
+            <div class="breathing-section">
+                <h2>{{ update.title }}</h2>
+                <p>{{ update.content }}</p>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        <div class="footer">
+            <p><a href="{{ unsubscribe_url }}">Unsubscribe</a></p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+PLAIN_TEMPLATE = PLAIN_TEXT_TEMPLATE
+
+def get_email_template(template_name: str) -> str:
+    """Get email template by name"""
+    templates = {
+        'modern': MODERN_TEMPLATE,
+        'minimal': MINIMAL_TEMPLATE,
+        'plain': PLAIN_TEMPLATE,
+        'breathscape': BREATHSCAPE_TEMPLATE
+    }
+    return templates.get(template_name)
+
+def render_email_template(template_name: str, data: dict) -> dict:
+    """Render email template with data"""
+    try:
+        template_str = get_email_template(template_name)
+        if not template_str:
+            return {'success': False, 'error': 'Template not found'}
+
+        template = Template(template_str)
+        html_content = template.render(**data)
+
+        # Generate text version
+        h = html2text.HTML2Text()
+        h.ignore_links = False
+        text_content = h.handle(html_content)
+
+        return {
+            'success': True,
+            'html': html_content,
+            'text': text_content
+        }
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+def validate_template_variables(variables: dict, template_name: str) -> dict:
+    """Validate template variables"""
+    required_vars = {
+        'modern': ['subject', 'month_year', 'unsubscribe_url'],
+        'minimal': ['month_year', 'unsubscribe_url'],
+        'plain': ['month_year', 'unsubscribe_url'],
+        'breathscape': ['subject', 'month_year', 'unsubscribe_url']
+    }
+
+    required = required_vars.get(template_name, [])
+    missing = [var for var in required if var not in variables]
+
+    return {
+        'valid': len(missing) == 0,
+        'missing_variables': missing
+    }
