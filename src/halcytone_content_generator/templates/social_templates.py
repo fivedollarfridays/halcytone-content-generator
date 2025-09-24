@@ -48,6 +48,34 @@ What are your thoughts on this? I'd love to hear your experiences in the comment
 
 {hashtags}
         """,
+        'update': """
+📊 {title}
+
+{summary}
+
+{details}
+
+{hashtags}
+        """,
+        'professional': """
+🏢 {title}
+
+{content}
+
+{call_to_action}
+
+{hashtags}
+        """,
+        'educational': """
+📚 {title}
+
+{content}
+
+Key Takeaways:
+• {details}
+
+{hashtags}
+        """,
         'product_update': """
 Exciting news from Halcytone! 🚀
 
@@ -99,12 +127,37 @@ Join our mission: {careers_link}
 
     # Instagram Templates (2200 character limit, optimized for visual)
     INSTAGRAM_TEMPLATES = {
+        'announcement': """
+🎉 {title} 🎉
+
+{summary}
+
+{hashtags}
+        """,
         'carousel_intro': """
 {title} ✨
 
 Swipe to learn more →
 
 {teaser}
+
+{hashtags}
+        """,
+        'story': """
+{title}
+
+{tip}
+
+{visual_cue}
+
+{hashtags}
+        """,
+        'inspiration': """
+✨ {title} ✨
+
+{inspiration}
+
+Tag someone who needs this reminder! 🌟
 
 {hashtags}
         """,
@@ -144,6 +197,19 @@ Link in bio for more info! 🔗
 
     # Facebook Templates (63,206 character limit but optimal is 40-80)
     FACEBOOK_TEMPLATES = {
+        'community': """
+Hello Halcytone Community! 👋
+
+{title}
+
+{content}
+
+{call_to_action}
+
+Share your thoughts and experiences below! We love hearing from you. 💬
+
+{hashtags}
+        """,
         'community_post': """
 {greeting} Halcytone Community! 👋
 
@@ -156,6 +222,17 @@ Link in bio for more info! 🔗
 Share your thoughts and experiences below! We love hearing from you. 💬
 
 {link}
+
+{hashtags}
+        """,
+        'engagement': """
+{title}
+
+{content}
+
+{engagement_question}
+
+Let us know your thoughts! 💭
 
 {hashtags}
         """,
@@ -343,8 +420,35 @@ class SocialTemplateManager:
         if not template:
             return f"Template not found: {platform}/{template_type}"
 
+        # Provide default values for common variables
+        defaults = {
+            'hashtags': data.get('hashtags', ''),
+            'greeting': data.get('greeting', 'Hello'),
+            'summary': data.get('summary', ''),
+            'content': data.get('content', ''),
+            'title': data.get('title', ''),
+            'introduction': data.get('introduction', ''),
+            'bullet_points': data.get('bullet_points', ''),
+            'main_content': data.get('main_content', ''),
+            'call_to_action': data.get('call_to_action', ''),
+            'details': data.get('details', ''),
+            'link': data.get('link', ''),
+            'scientific_content': data.get('scientific_content', ''),
+            'emoji': data.get('emoji', '✨'),
+            'tips': data.get('tips', ''),
+            'features': data.get('features', ''),
+            'benefit_1': data.get('benefit_1', ''),
+            'benefit_2': data.get('benefit_2', ''),
+            'benefit_3': data.get('benefit_3', ''),
+            'practical_content': data.get('practical_content', ''),
+            'conclusion': data.get('conclusion', '')
+        }
+
+        # Merge with actual data (actual data takes precedence)
+        merged_data = {**defaults, **data}
+
         try:
-            formatted = template.format(**data)
+            formatted = template.format(**merged_data)
             return self.templates.format_for_platform(formatted, platform)
         except KeyError as e:
             return f"Missing variable: {e}"
@@ -361,27 +465,62 @@ class SocialTemplateManager:
         """Generate multiple variations for A/B testing"""
         templates = self.get_platform_templates(platform).get(template_type, [])
         if not isinstance(templates, list):
-            templates = [templates]
+            templates = [templates] if templates else []
+
+        # Provide defaults for all variables
+        defaults = {
+            'hashtags': data.get('hashtags', ''),
+            'greeting': data.get('greeting', 'Hello'),
+            'summary': data.get('summary', ''),
+            'content': data.get('content', ''),
+            'title': data.get('title', ''),
+            'introduction': data.get('introduction', ''),
+            'bullet_points': data.get('bullet_points', ''),
+            'main_content': data.get('main_content', ''),
+            'call_to_action': data.get('call_to_action', ''),
+            'details': data.get('details', ''),
+            'link': data.get('link', ''),
+            'scientific_content': data.get('scientific_content', ''),
+            'emoji': data.get('emoji', '✨'),
+            'practical_content': data.get('practical_content', ''),
+            'conclusion': data.get('conclusion', '')
+        }
+        merged_data = {**defaults, **data}
 
         variations = []
         for i in range(min(count, len(templates))):
             try:
-                formatted = templates[i].format(**data)
+                formatted = templates[i].format(**merged_data)
                 variations.append(self.templates.format_for_platform(formatted, platform))
-            except:
+            except Exception:
                 continue
 
-        # If we don't have enough variations, duplicate with slight modifications
-        while len(variations) < count and variations:
+        # If we have at least one variation, create more by modifying it
+        if variations and len(variations) < count:
             base = variations[0]
-            if '!' in base:
-                variations.append(base.replace('!', '.', 1))
-            elif '.' in base:
-                variations.append(base.replace('.', '!', 1))
-            else:
-                variations.append(base + '!')
-            if len(variations) >= count:
-                break
+            # Create variations with different punctuation and emojis
+            modifications = [
+                base.replace('!', '.') if '!' in base else base + '!',
+                base.replace('🎉', '✨') if '🎉' in base else base.replace('✨', '🎉'),
+                base.replace('.', '!') if '.' in base else base
+            ]
+
+            for mod in modifications:
+                if len(variations) >= count:
+                    break
+                if mod != base and mod not in variations:
+                    variations.append(mod)
+
+        # If still no variations, create a basic one
+        if not variations:
+            basic = f"{data.get('title', 'Update')}\n\n{data.get('summary', '')}\n\n{data.get('hashtags', '')}"
+            variations.append(self.templates.format_for_platform(basic.strip(), platform))
+
+            # Create simple variations
+            for i in range(1, count):
+                emoji = ['🎉', '✨', '🚀'][i % 3] if i < 3 else '💫'
+                var = f"{emoji} {data.get('title', 'Update')}\n\n{data.get('summary', '')}\n\n{data.get('hashtags', '')}"
+                variations.append(self.templates.format_for_platform(var.strip(), platform))
 
         return variations[:count]
 
@@ -405,8 +544,13 @@ class SocialTemplateManager:
 
     def format_compliant_post(self, platform: str, data: dict) -> str:
         """Format compliant post with disclaimers"""
-        content = self.format_post(platform, 'announcement', data)
-        if 'health' in content.lower() or 'benefit' in content.lower():
+        # Ensure content is mapped to summary for Twitter announcement template
+        enhanced_data = data.copy()
+        if 'content' in enhanced_data and 'summary' not in enhanced_data:
+            enhanced_data['summary'] = enhanced_data['content']
+
+        content = self.format_post(platform, 'announcement', enhanced_data)
+        if 'health' in content.lower() or 'benefit' in content.lower() or 'may help' in data.get('content', '').lower():
             content += "\n\n*Individual results may vary. Consult healthcare providers."
         return content
 
@@ -471,6 +615,10 @@ def create_thread(content: str, platform: str = 'twitter', max_tweets: int = 10,
         char_limit = 500
 
     if len(content) <= char_limit:
+        # Add hashtags even for single tweet if provided
+        if hashtags:
+            content_with_hashtags = f"{content}\n\n{' '.join(hashtags)}"
+            return [content_with_hashtags]
         return [content]
 
     # Split content into chunks

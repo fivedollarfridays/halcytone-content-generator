@@ -24,6 +24,14 @@ MODERN_TEMPLATE = """
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body { background: #121212; color: #ffffff; }
+            .wrapper { background: #1e1e1e; }
+            .content { background: #1e1e1e; color: #ffffff; }
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             line-height: 1.6;
@@ -218,13 +226,13 @@ MODERN_TEMPLATE = """
     <span class="preheader">{{ preview_text|default('Your monthly dose of breathing wellness and tech updates from Halcytone') }}</span>
 
     <div class="wrapper">
-        <div class="header">
+        <div class="header" role="banner">
             <div class="logo">🫁</div>
             <h1>Halcytone Monthly Update</h1>
             <p>{{ month_year }}</p>
         </div>
 
-        <div class="content">
+        <div class="content" role="main">
             {% if intro_text %}
             <p style="font-size: 16px; color: #555; margin-bottom: 30px;">{{ intro_text }}</p>
             {% endif %}
@@ -351,8 +359,9 @@ MINIMAL_TEMPLATE = """
     </style>
 </head>
 <body>
-    <h1>Halcytone Update - {{ month_year }}</h1>
+    <h1 role="banner">Halcytone Update - {{ month_year }}</h1>
 
+    <main role="main">
     {% if breathscape_updates %}
     <h2>Breathscape Updates</h2>
     {% for update in breathscape_updates %}
@@ -382,6 +391,7 @@ MINIMAL_TEMPLATE = """
     </div>
     {% endfor %}
     {% endif %}
+    </main>
 
     <div class="footer">
         <p><strong>{{ vision }}</strong></p>
@@ -472,6 +482,13 @@ BREATHSCAPE_TEMPLATE = """
             padding: 30px;
             text-align: center;
         }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #121212; }
+            .container { background: #1e1e1e; }
+            .content { background: #1e1e1e; color: #ffffff; }
+        }
         .content {
             padding: 30px;
         }
@@ -492,11 +509,11 @@ BREATHSCAPE_TEMPLATE = """
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <div class="header" role="banner">
             <h1>🫁 Breathscape</h1>
             <p>{{ month_year }}</p>
         </div>
-        <div class="content">
+        <div class="content" role="main">
             {% if breathscape_updates %}
             {% for update in breathscape_updates %}
             <div class="breathing-section">
