@@ -1,29 +1,5 @@
-# Project Tree (Updated after Sprint 3 Completion)
-_Generated: 2025-09-24T15:55:00Z - Post Sprint 3 Halcytone Live Support_
-_Test Coverage: 70%+ - Production-ready with comprehensive real-time features_
-
-## Sprint 3 Key Additions
-**Halcytone Live Support - Real-time session content generation**
-
-### New Services
-- `src/halcytone_content_generator/services/websocket_manager.py` - WebSocket connection management
-- `src/halcytone_content_generator/services/breathscape_event_listener.py` - Live event processing
-- `src/halcytone_content_generator/services/session_summary_generator.py` - Session content generation
-
-### New API Endpoints
-- `src/halcytone_content_generator/api/websocket_endpoints.py` - WebSocket and event APIs
-
-### Enhanced Data Models
-- `src/halcytone_content_generator/schemas/content_types.py` - SessionContentStrict with auto-calculation
-
-### New Templates
-- `src/halcytone_content_generator/templates/breathscape_templates.py` - Session email/web templates
-
-### Testing Enhancements
-- `tests/unit/test_session_summary_generator.py` - 90% coverage
-- `tests/unit/test_websocket_manager.py` - 86% coverage
-- `tests/unit/test_breathscape_event_listener.py` - 83% coverage
-- `tests/integration/test_simple_workflow.py` - End-to-end integration tests (9 passing)
+# Project Tree (snapshot)
+_Generated: 2025-09-25T03:28:44Z_
 
 ```
 .agentpackignore
@@ -57,15 +33,61 @@ context/directory_notes
 context/directory_notes/.gitkeep
 context/project_tree.md
 docker-compose.dev.yml
+docker-compose.mocks.yml
+docker-compose.monitoring.yml
 docker-compose.yml
 docs
 docs/API.md
 docs/AUTOMATED_SOCIAL_POSTING.md
 docs/USER_GUIDE.md
+docs/api-mocks.md
+docs/approval-pipeline.md
+docs/deployment-procedures.md
+docs/deployment-runbook.md
+docs/dry-run-guide.md
 docs/editor-guide.md
+docs/example-session-templates.md
+docs/go-live-checklist.md
+docs/incident-response-playbook.md
+docs/key-user-workflows.md
+docs/marketing-editor-guide.md
+docs/monitoring-runbook.md
+docs/openapi-spec.yaml
+docs/publishing-workflow.md
+docs/session-content-workflow.md
+docs/sprint3-completion-report.md
+docs/sprint4-ecosystem-integration.md
 docs/test-coverage-summary.md
+docs/troubleshooting.md
+docs/websocket-integration-guide.md
+docs/weekly-updates-process.md
+mocks
+mocks/Dockerfile.crm
+mocks/Dockerfile.platform
+mocks/crm_service.py
+mocks/platform_service.py
+mocks/requirements.txt
 monitoring
+monitoring/alertmanager
+monitoring/alertmanager/alertmanager.yml
+monitoring/grafana
+monitoring/grafana/dashboards
+monitoring/grafana/dashboards/halcytone-overview.json
+monitoring/grafana/dashboards/mock-services.json
+monitoring/grafana/provisioning
+monitoring/grafana/provisioning/dashboards
+monitoring/grafana/provisioning/dashboards/dashboards.yml
+monitoring/grafana/provisioning/datasources
+monitoring/grafana/provisioning/datasources/datasources.yml
+monitoring/loki
+monitoring/loki/loki-config.yml
+monitoring/prometheus
 monitoring/prometheus.yml
+monitoring/prometheus/prometheus.yml
+monitoring/prometheus/rules
+monitoring/prometheus/rules/halcytone-alerts.yml
+monitoring/promtail
+monitoring/promtail/promtail-config.yml
 prompts
 prompts/deep_research.yml
 prompts/implementation.yml
@@ -74,16 +96,22 @@ requirements.txt
 run_dev.py
 scripts
 scripts/README.md
+scripts/security_audit.py
+scripts/start-monitoring.sh
+scripts/validate-dry-run.sh
 src
 src/.gitkeep
 src/halcytone_content_generator
 src/halcytone_content_generator/__init__.py
 src/halcytone_content_generator/api
 src/halcytone_content_generator/api/__init__.py
+src/halcytone_content_generator/api/cache_endpoints.py
 src/halcytone_content_generator/api/endpoints.py
 src/halcytone_content_generator/api/endpoints_batch.py
 src/halcytone_content_generator/api/endpoints_critical.py
+src/halcytone_content_generator/api/endpoints_schema_validated.py
 src/halcytone_content_generator/api/endpoints_v2.py
+src/halcytone_content_generator/api/websocket_endpoints.py
 src/halcytone_content_generator/config.py
 src/halcytone_content_generator/core
 src/halcytone_content_generator/core/__init__.py
@@ -95,10 +123,13 @@ src/halcytone_content_generator/main.py
 src/halcytone_content_generator/schemas
 src/halcytone_content_generator/schemas/__init__.py
 src/halcytone_content_generator/schemas/content.py
+src/halcytone_content_generator/schemas/content_types.py
 src/halcytone_content_generator/services
 src/halcytone_content_generator/services/__init__.py
 src/halcytone_content_generator/services/ab_testing.py
 src/halcytone_content_generator/services/ai_content_enhancer.py
+src/halcytone_content_generator/services/breathscape_event_listener.py
+src/halcytone_content_generator/services/cache_manager.py
 src/halcytone_content_generator/services/content_assembler.py
 src/halcytone_content_generator/services/content_assembler_v2.py
 src/halcytone_content_generator/services/content_quality_scorer.py
@@ -118,35 +149,57 @@ src/halcytone_content_generator/services/publishers/base.py
 src/halcytone_content_generator/services/publishers/email_publisher.py
 src/halcytone_content_generator/services/publishers/social_publisher.py
 src/halcytone_content_generator/services/publishers/web_publisher.py
+src/halcytone_content_generator/services/schema_validator.py
+src/halcytone_content_generator/services/session_summary_generator.py
+src/halcytone_content_generator/services/tone_manager.py
 src/halcytone_content_generator/services/user_segmentation.py
+src/halcytone_content_generator/services/websocket_manager.py
 src/halcytone_content_generator/templates
 src/halcytone_content_generator/templates/__init__.py
 src/halcytone_content_generator/templates/ai_prompts.py
 src/halcytone_content_generator/templates/breathscape_templates.py
 src/halcytone_content_generator/templates/email_templates.py
 src/halcytone_content_generator/templates/social_templates.py
+src/halcytone_content_generator/templates/tones
+src/halcytone_content_generator/templates/tones/__init__.py
+src/halcytone_content_generator/templates/tones/encouraging.py
+src/halcytone_content_generator/templates/tones/medical_scientific.py
+src/halcytone_content_generator/templates/tones/professional.py
 templates
 templates/adr.md
 templates/directory_note.md
 tests
+tests/contracts
+tests/contracts/test_content_api.py
 tests/example_contract
 tests/example_contract/README.md
 tests/example_integration
 tests/example_integration/README.md
 tests/integration
+tests/integration/__init__.py
+tests/integration/test_cache_invalidation_integration.py
 tests/integration/test_end_to_end.py
-tests/unit (34 test files total - enhanced with comprehensive coverage)
+tests/integration/test_key_workflows.py
+tests/integration/test_multi_tone_generation.py
+tests/integration/test_simple_workflow.py
+tests/performance
+tests/performance/test_batch_performance.py
+tests/performance/test_cache_invalidation_load.py
+tests/performance/test_load_testing.py
+tests/performance/test_tone_switching_performance.py
+tests/unit
 tests/unit/test_ab_testing.py
 tests/unit/test_ai_content_enhancer.py
 tests/unit/test_ai_content_enhancer_comprehensive.py
 tests/unit/test_ai_prompts.py
+tests/unit/test_auth.py
+tests/unit/test_breathscape_event_listener.py
 tests/unit/test_breathscape_templates.py
+tests/unit/test_cache_manager.py
 tests/unit/test_content_assembler.py
 tests/unit/test_content_assembler_v2.py
 tests/unit/test_content_quality_scorer.py
-tests/unit/test_content_validator.py (NEW: 26 comprehensive tests, 97% coverage)
-tests/unit/test_endpoints_comprehensive.py (NEW: API v1 comprehensive testing)
-tests/unit/test_endpoints_v2_comprehensive.py (NEW: API v2 comprehensive testing)
+tests/unit/test_content_validator.py
 tests/unit/test_contract_tests.py
 tests/unit/test_crm_client.py
 tests/unit/test_crm_client_v2.py
@@ -154,10 +207,14 @@ tests/unit/test_crm_integration.py
 tests/unit/test_document_fetcher.py
 tests/unit/test_document_fetcher_enhanced.py
 tests/unit/test_dry_run_integration.py
+tests/unit/test_email_publisher.py
 tests/unit/test_email_templates.py
 tests/unit/test_endpoints.py
 tests/unit/test_endpoints_batch.py
+tests/unit/test_endpoints_comprehensive.py
 tests/unit/test_endpoints_v2.py
+tests/unit/test_endpoints_v2_comprehensive.py
+tests/unit/test_event_listener_coverage.py
 tests/unit/test_main.py
 tests/unit/test_monitoring.py
 tests/unit/test_monitoring_simple.py
@@ -166,8 +223,18 @@ tests/unit/test_platform_client.py
 tests/unit/test_platform_client_v2_enhanced.py
 tests/unit/test_platform_integration.py
 tests/unit/test_publisher_integration.py
+tests/unit/test_publishers.py
 tests/unit/test_publishers_enhanced.py
+tests/unit/test_schema_validation.py
+tests/unit/test_schema_validator.py
+tests/unit/test_session_content.py
+tests/unit/test_session_summary_generator.py
 tests/unit/test_social_publisher_automated.py
 tests/unit/test_social_templates.py
+tests/unit/test_tone_manager.py
+tests/unit/test_tone_templates.py
 tests/unit/test_user_segmentation.py
+tests/unit/test_web_publisher.py
+tests/unit/test_websocket_coverage.py
+tests/unit/test_websocket_manager.py
 ```
