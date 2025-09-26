@@ -119,14 +119,22 @@ class EnhancedPlatformClient:
         self.dry_run_mode = settings.DRY_RUN_MODE or settings.DRY_RUN
         self.use_mock_services = settings.USE_MOCK_SERVICES
 
-        # Use mock service URL if in dry run mode
-        if self.dry_run_mode and self.use_mock_services:
+        # Environment-based service selection
+        self.environment = getattr(settings, 'ENVIRONMENT', 'development').lower()
+
+        if self.use_mock_services or (self.dry_run_mode and self.environment != 'production'):
             self.base_url = "http://localhost:8002"  # Mock Platform service
             self.api_key = "mock-platform-api-key"
-            logger.info("Platform Client: Using mock service for dry run mode")
+            logger.info(f"Platform Client: Using mock service (environment: {self.environment}, dry_run: {self.dry_run_mode})")
         else:
             self.base_url = settings.PLATFORM_BASE_URL
             self.api_key = settings.PLATFORM_API_KEY
+
+            # Validate production configuration
+            if self.environment == 'production':
+                self._validate_production_config()
+
+        logger.info(f"Platform Client initialized for {self.environment} environment: {self.base_url}")
 
         self.service_name = settings.SERVICE_NAME
 
@@ -153,6 +161,40 @@ class EnhancedPlatformClient:
         # Monitoring hooks
         self.monitoring_enabled = settings.ENABLE_METRICS
         self.monitoring_events: List[MonitoringEvent] = []
+
+    def _validate_production_config(self):
+        """Validate configuration for production environment"""
+        validation_errors = []
+
+        # Validate base URL
+        if not self.base_url:
+            validation_errors.append("PLATFORM_BASE_URL is required in production")
+        elif not self.base_url.startswith('https://'):
+            validation_errors.append("PLATFORM_BASE_URL must use HTTPS in production")
+
+        # Validate API key
+        if not self.api_key:
+            validation_errors.append("PLATFORM_API_KEY is required in production")
+        elif len(self.api_key) < 16:
+            validation_errors.append("PLATFORM_API_KEY should be at least 16 characters in production")
+        elif any(pattern in self.api_key.lower() for pattern in ['dev', 'test', 'mock', 'example']):
+            validation_errors.append("PLATFORM_API_KEY appears to be a development placeholder")
+
+        # Validate endpoints are not localhost
+        if 'localhost' in self.base_url or '127.0.0.1' in self.base_url:
+            validation_errors.append("PLATFORM_BASE_URL cannot be localhost in production")
+
+        # Log warnings/errors
+        if validation_errors:
+            for error in validation_errors:
+                logger.error(f"Production Platform config validation: {error}")
+
+            if any('required' in error or 'must use HTTPS' in error for error in validation_errors):
+                raise ValueError(f"Critical Platform configuration errors: {validation_errors}")
+            else:
+                logger.warning("Platform configuration has non-critical issues in production")
+
+        logger.info("Platform production configuration validation passed")
 
     async def publish_content(
         self,

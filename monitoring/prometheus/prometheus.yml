@@ -2,8 +2,8 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    monitor: 'halcytone-content-generator'
-    environment: 'dry-run'
+    cluster: 'halcytone-production'
+    environment: '${ENVIRONMENT:-production}'
 
 # Rules configuration
 rule_files:

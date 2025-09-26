@@ -1,0 +1,302 @@
+groups:
+  - name: halcytone-application
+    rules:
+      # Application Health Alerts
+      - alert: ApplicationDown
+        expr: up{job="halcytone-content-generator"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "Halcytone Content Generator is down"
+          description: "The Halcytone Content Generator application has been down for more than 1 minute."
+          runbook: "https://docs.halcytone.com/runbooks/application-down"
+
+      - alert: ApplicationUnhealthy
+        expr: app_component_health{service="halcytone-content-generator"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "Application component {{ $labels.component }} is unhealthy"
+          description: "Component {{ $labels.component }} in Halcytone Content Generator has been unhealthy for more than 2 minutes."
+          runbook: "https://docs.halcytone.com/runbooks/component-unhealthy"
+
+      - alert: HighErrorRate
+        expr: (rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}% which is above 5% threshold for 5 minutes."
+          runbook: "https://docs.halcytone.com/runbooks/high-error-rate"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s which is above 2s threshold."
+          runbook: "https://docs.halcytone.com/runbooks/high-response-time"
+
+      - alert: LowHealthCheckSuccess
+        expr: (rate(probe_success{job="blackbox-http"}[5m]) * 100) < 95
+        for: 3m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "Health check success rate is low"
+          description: "Health check success rate for {{ $labels.instance }} is {{ $value }}% which is below 95%."
+
+      # Database Connectivity
+      - alert: DatabaseConnectionFailed
+        expr: app_component_health{component="database"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "Database connection failed"
+          description: "Database connection health check has been failing for more than 1 minute."
+          runbook: "https://docs.halcytone.com/runbooks/database-connection"
+
+      # External Services
+      - alert: ExternalServiceUnavailable
+        expr: app_component_health{component="external_services"} == 0
+        for: 3m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "External services unavailable"
+          description: "External service connectivity has been failing for more than 3 minutes."
+          runbook: "https://docs.halcytone.com/runbooks/external-services"
+
+      # Performance Alerts
+      - alert: HighMemoryUsage
+        expr: app_memory_usage_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}% which is above 85% threshold."
+          runbook: "https://docs.halcytone.com/runbooks/high-memory"
+
+      - alert: CriticalMemoryUsage
+        expr: app_memory_usage_percent > 95
+        for: 1m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "Critical memory usage"
+          description: "Memory usage is {{ $value }}% which is above 95% critical threshold."
+          runbook: "https://docs.halcytone.com/runbooks/critical-memory"
+
+      - alert: HighCPUUsage
+        expr: app_cpu_usage_percent > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% which is above 80% threshold for 10 minutes."
+
+      - alert: HighDiskUsage
+        expr: app_disk_usage_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          team: platform
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is {{ $value }}% which is above 85% threshold."
+          runbook: "https://docs.halcytone.com/runbooks/high-disk-usage"
+
+      # Content Generation Specific
+      - alert: ContentGenerationFailureRate
+        expr: (rate(content_generation_failures_total[5m]) / rate(content_generation_requests_total[5m])) * 100 > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          team: content
+        annotations:
+          summary: "High content generation failure rate"
+          description: "Content generation failure rate is {{ $value }}% which is above 10% threshold."
+
+      - alert: SlowContentGeneration
+        expr: histogram_quantile(0.95, rate(content_generation_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          team: content
+        annotations:
+          summary: "Slow content generation"
+          description: "95th percentile content generation time is {{ $value }}s which is above 30s threshold."
+
+  - name: halcytone-infrastructure
+    rules:
+      # System Resource Alerts
+      - alert: HighSystemMemory
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High system memory usage"
+          description: "System memory usage is {{ $value }}% on {{ $labels.instance }}."
+
+      - alert: HighSystemCPU
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High system CPU usage"
+          description: "System CPU usage is {{ $value }}% on {{ $labels.instance }}."
+
+      - alert: SystemDiskSpaceLow
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 < 15
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Low system disk space"
+          description: "Disk space is {{ $value }}% full on {{ $labels.instance }} mount {{ $labels.mountpoint }}."
+
+      # Container Resource Alerts
+      - alert: ContainerHighMemory
+        expr: (container_memory_usage_bytes{name=~"halcytone.*"} / container_spec_memory_limit_bytes{name=~"halcytone.*"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Container high memory usage"
+          description: "Container {{ $labels.name }} memory usage is {{ $value }}%."
+
+      - alert: ContainerHighCPU
+        expr: (rate(container_cpu_usage_seconds_total{name=~"halcytone.*"}[5m])) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Container high CPU usage"
+          description: "Container {{ $labels.name }} CPU usage is {{ $value }}%."
+
+      - alert: ContainerRestarted
+        expr: increase(container_start_time_seconds{name=~"halcytone.*"}[10m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Container restarted"
+          description: "Container {{ $labels.name }} has restarted."
+
+  - name: halcytone-business-metrics
+    rules:
+      # Business Logic Alerts
+      - alert: LowContentGenerationRate
+        expr: rate(content_generation_requests_total[1h]) < 10
+        for: 30m
+        labels:
+          severity: warning
+          team: content
+        annotations:
+          summary: "Low content generation rate"
+          description: "Content generation rate is {{ $value }} requests per second, which is unusually low."
+
+      - alert: HighAPIKeyUsage
+        expr: rate(api_requests_total[1h]) > 1000
+        for: 15m
+        labels:
+          severity: info
+          team: platform
+        annotations:
+          summary: "High API usage detected"
+          description: "API request rate is {{ $value }} requests per second."
+
+      - alert: UnusualTrafficPattern
+        expr: abs(rate(http_requests_total[5m]) - rate(http_requests_total[5m] offset 1w)) > 100
+        for: 10m
+        labels:
+          severity: info
+          team: platform
+        annotations:
+          summary: "Unusual traffic pattern detected"
+          description: "Current traffic differs significantly from last week's pattern."
+
+  - name: halcytone-external-dependencies
+    rules:
+      # External Service Monitoring
+      - alert: MockCRMServiceDown
+        expr: up{job="mock-crm-service"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: mock-crm
+          team: platform
+        annotations:
+          summary: "Mock CRM service is down"
+          description: "Mock CRM service has been down for more than 2 minutes."
+
+      - alert: MockPlatformServiceDown
+        expr: up{job="mock-platform-service"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: mock-platform
+          team: platform
+        annotations:
+          summary: "Mock Platform service is down"
+          description: "Mock Platform service has been down for more than 2 minutes."
+
+      # Prometheus and Monitoring Infrastructure
+      - alert: PrometheusConfigReloadFailed
+        expr: prometheus_config_last_reload_successful == 0
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Prometheus configuration reload failed"
+          description: "Prometheus configuration reload has failed."
+
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Prometheus target is down"
+          description: "Prometheus target {{ $labels.instance }} in job {{ $labels.job }} is down."

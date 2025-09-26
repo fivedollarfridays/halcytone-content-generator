@@ -64,6 +64,10 @@ class ContentBaseStrict(BaseModel):
         frozen=False
     )
 
+    type: ContentType = Field(
+        description="Content type (update, blog, announcement, session)"
+    )
+
     title: Annotated[str, Field(
         min_length=1,
         max_length=200,

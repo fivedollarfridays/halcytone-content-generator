@@ -1,4 +1,4 @@
-.PHONY: help install test run build docker-build docker-run docker-stop clean lint format
+.PHONY: help install test run build docker-build docker-run docker-stop clean lint format mock-start mock-stop mock-status mock-logs
 
 # Variables
 PYTHON := python
@@ -115,3 +115,38 @@ deploy-staging: ## Deploy to staging environment
 deploy-production: ## Deploy to production environment
 	@echo "Deploying to production..."
 	# Add production deployment commands
+
+# Mock Services Management
+mock-start: ## Start mock services for development/testing
+	@echo "Starting mock services..."
+	$(PYTHON) scripts/start_mock_services.py
+
+mock-stop: ## Stop mock services
+	@echo "Stopping mock services..."
+	docker-compose -f docker-compose.mocks.yml down
+
+mock-status: ## Check mock service status and health
+	@echo "Mock service status:"
+	@docker-compose -f docker-compose.mocks.yml ps
+	@echo "\nHealth checks:"
+	@curl -s http://localhost:8001/health >/dev/null && echo "✓ CRM Service (8001) - Healthy" || echo "✗ CRM Service (8001) - Unhealthy"
+	@curl -s http://localhost:8002/health >/dev/null && echo "✓ Platform Service (8002) - Healthy" || echo "✗ Platform Service (8002) - Unhealthy"
+
+mock-logs: ## View mock service logs
+	@echo "Mock service logs (press Ctrl+C to exit):"
+	docker-compose -f docker-compose.mocks.yml logs -f
+
+mock-rebuild: ## Rebuild mock service containers
+	@echo "Rebuilding mock services..."
+	docker-compose -f docker-compose.mocks.yml build --no-cache
+	docker-compose -f docker-compose.mocks.yml up -d
+
+mock-clean: ## Clean mock services (stop + remove containers)
+	@echo "Cleaning mock services..."
+	docker-compose -f docker-compose.mocks.yml down --rmi all --volumes --remove-orphans
+
+test-contracts: ## Run API contract tests with mock services
+	@echo "Running API contract tests..."
+	$(MAKE) mock-start
+	$(PYTEST) tests/contracts/ -v
+	@echo "Contract tests completed"

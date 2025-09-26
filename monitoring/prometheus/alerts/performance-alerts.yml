@@ -1,0 +1,355 @@
+# Performance-based alert rules for Halcytone Content Generator
+# Based on established performance baselines
+
+groups:
+  - name: halcytone.performance
+    rules:
+      # Response Time Alerts - Based on P95 baselines
+      - alert: HighResponseTimeWarning
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone"}[5m])) > 3.75
+        for: 2m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: performance
+        annotations:
+          summary: "High P95 response time detected"
+          description: "P95 response time is {{ $value | humanizeDuration }} (25% above 3s baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#high-response-time"
+
+      - alert: HighResponseTimeCritical
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone"}[5m])) > 4.5
+        for: 1m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: performance
+        annotations:
+          summary: "Critical P95 response time detected"
+          description: "P95 response time is {{ $value | humanizeDuration }} (50% above 3s baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#critical-response-time"
+
+      # Content Generation Specific Alerts
+      - alert: ContentGenerationSlowWarning
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone", endpoint=~"/api/v2/content/.*"}[5m])) > 6.25
+        for: 3m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: performance
+          operation: content_generation
+        annotations:
+          summary: "Content generation response time elevated"
+          description: "Content generation P95 is {{ $value | humanizeDuration }} (25% above 5s baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#slow-content-generation"
+
+      - alert: ContentGenerationSlowCritical
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone", endpoint=~"/api/v2/content/.*"}[5m])) > 7.5
+        for: 1m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: performance
+          operation: content_generation
+        annotations:
+          summary: "Content generation critically slow"
+          description: "Content generation P95 is {{ $value | humanizeDuration }} (50% above 5s baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#critical-content-generation"
+
+      # Health Check Performance Alerts
+      - alert: HealthCheckSlowWarning
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone", endpoint=~"/health|/ready|/live"}[5m])) > 0.125
+        for: 2m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: performance
+          operation: health_check
+        annotations:
+          summary: "Health check response time elevated"
+          description: "Health check P95 is {{ $value | humanizeDuration }} (25% above 100ms baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#slow-health-checks"
+
+      - alert: HealthCheckSlowCritical
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone", endpoint=~"/health|/ready|/live"}[5m])) > 0.15
+        for: 1m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: performance
+          operation: health_check
+        annotations:
+          summary: "Health checks critically slow"
+          description: "Health check P95 is {{ $value | humanizeDuration }} (50% above 100ms baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#critical-health-checks"
+
+      # Throughput Alerts - Based on RPS baselines
+      - alert: LowThroughputWarning
+        expr: rate(http_requests_total{job="halcytone"}[5m]) < 9
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: performance
+        annotations:
+          summary: "Low request throughput detected"
+          description: "Request rate is {{ $value | humanize }} RPS (10% below 10 RPS baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#low-throughput"
+
+      - alert: LowThroughputCritical
+        expr: rate(http_requests_total{job="halcytone"}[5m]) < 8
+        for: 3m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: performance
+        annotations:
+          summary: "Critical throughput degradation"
+          description: "Request rate is {{ $value | humanize }} RPS (20% below 10 RPS baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#critical-throughput"
+
+      # Content Generation Throughput
+      - alert: ContentGenerationLowThroughputWarning
+        expr: rate(http_requests_total{job="halcytone", endpoint=~"/api/v2/content/.*"}[5m]) < 4.5
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: performance
+          operation: content_generation
+        annotations:
+          summary: "Content generation throughput low"
+          description: "Content generation rate is {{ $value | humanize }} RPS (10% below 5 RPS baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#low-content-throughput"
+
+      - alert: ContentGenerationLowThroughputCritical
+        expr: rate(http_requests_total{job="halcytone", endpoint=~"/api/v2/content/.*"}[5m]) < 4
+        for: 3m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: performance
+          operation: content_generation
+        annotations:
+          summary: "Content generation throughput critically low"
+          description: "Content generation rate is {{ $value | humanize }} RPS (20% below 5 RPS baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#critical-content-throughput"
+
+      # Error Rate Alerts - Based on baseline error rates
+      - alert: HighErrorRateWarning
+        expr: rate(http_requests_total{job="halcytone", status!~"2.."}[5m]) / rate(http_requests_total{job="halcytone"}[5m]) > 0.022
+        for: 3m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: performance
+        annotations:
+          summary: "Elevated error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (1% above 2% baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#high-error-rate"
+
+      - alert: HighErrorRateCritical
+        expr: rate(http_requests_total{job="halcytone", status!~"2.."}[5m]) / rate(http_requests_total{job="halcytone"}[5m]) > 0.07
+        for: 1m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: performance
+        annotations:
+          summary: "Critical error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (5% above 2% baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#critical-error-rate"
+
+      # Content Generation Error Rate
+      - alert: ContentGenerationHighErrorRateWarning
+        expr: rate(http_requests_total{job="halcytone", endpoint=~"/api/v2/content/.*", status!~"2.."}[5m]) / rate(http_requests_total{job="halcytone", endpoint=~"/api/v2/content/.*"}[5m]) > 0.06
+        for: 3m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: performance
+          operation: content_generation
+        annotations:
+          summary: "Content generation error rate elevated"
+          description: "Content generation error rate is {{ $value | humanizePercentage }} (1% above 5% baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#content-generation-errors"
+
+      - alert: ContentGenerationHighErrorRateCritical
+        expr: rate(http_requests_total{job="halcytone", endpoint=~"/api/v2/content/.*", status!~"2.."}[5m]) / rate(http_requests_total{job="halcytone", endpoint=~"/api/v2/content/.*"}[5m]) > 0.10
+        for: 1m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: performance
+          operation: content_generation
+        annotations:
+          summary: "Content generation error rate critical"
+          description: "Content generation error rate is {{ $value | humanizePercentage }} (5% above 5% baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#critical-content-generation-errors"
+
+      # Health Check Error Rate (Should be near zero)
+      - alert: HealthCheckErrorsWarning
+        expr: rate(http_requests_total{job="halcytone", endpoint=~"/health|/ready|/live", status!~"2.."}[5m]) / rate(http_requests_total{job="halcytone", endpoint=~"/health|/ready|/live"}[5m]) > 0.002
+        for: 2m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: performance
+          operation: health_check
+        annotations:
+          summary: "Health check errors detected"
+          description: "Health check error rate is {{ $value | humanizePercentage }} (0.1% above 0.1% baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#health-check-errors"
+
+      - alert: HealthCheckErrorsCritical
+        expr: rate(http_requests_total{job="halcytone", endpoint=~"/health|/ready|/live", status!~"2.."}[5m]) / rate(http_requests_total{job="halcytone", endpoint=~"/health|/ready|/live"}[5m]) > 0.005
+        for: 1m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: performance
+          operation: health_check
+        annotations:
+          summary: "Critical health check failures"
+          description: "Health check error rate is {{ $value | humanizePercentage }} (0.4% above 0.1% baseline)"
+          runbook_url: "https://github.com/halcytone/runbooks/performance#critical-health-check-errors"
+
+  - name: halcytone.sli_compliance
+    rules:
+      # Service Level Indicator compliance monitoring
+      - alert: LatencySLIViolation
+        expr: avg_over_time((histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone"}[5m])) < 5)[1h:]) < 0.99
+        for: 0m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: sli
+          sli_type: latency
+        annotations:
+          summary: "Latency SLI compliance below target"
+          description: "Latency SLI compliance is {{ $value | humanizePercentage }} (below 99% target)"
+          runbook_url: "https://github.com/halcytone/runbooks/sli#latency-sli"
+
+      - alert: AvailabilitySLIViolation
+        expr: avg_over_time((rate(http_requests_total{job="halcytone", status!~"2.."}[5m]) / rate(http_requests_total{job="halcytone"}[5m]) < 0.001)[1h:]) < 0.999
+        for: 0m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: sli
+          sli_type: availability
+        annotations:
+          summary: "Availability SLI compliance below target"
+          description: "Availability SLI compliance is {{ $value | humanizePercentage }} (below 99.9% target)"
+          runbook_url: "https://github.com/halcytone/runbooks/sli#availability-sli"
+
+      - alert: ThroughputSLIViolation
+        expr: avg_over_time((rate(http_requests_total{job="halcytone"}[5m]) > 10)[1h:]) < 0.95
+        for: 0m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: sli
+          sli_type: throughput
+        annotations:
+          summary: "Throughput SLI compliance below target"
+          description: "Throughput SLI compliance is {{ $value | humanizePercentage }} (below 95% target)"
+          runbook_url: "https://github.com/halcytone/runbooks/sli#throughput-sli"
+
+  - name: halcytone.capacity_planning
+    rules:
+      # Capacity and resource utilization alerts
+      - alert: HighCPUUsageWarning
+        expr: rate(process_cpu_seconds_total{job="halcytone"}[5m]) * 100 > 70
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: capacity
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanize }}% (approaching capacity limits)"
+          runbook_url: "https://github.com/halcytone/runbooks/capacity#high-cpu"
+
+      - alert: HighCPUUsageCritical
+        expr: rate(process_cpu_seconds_total{job="halcytone"}[5m]) * 100 > 85
+        for: 2m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: capacity
+        annotations:
+          summary: "Critical CPU usage detected"
+          description: "CPU usage is {{ $value | humanize }}% (near capacity limits)"
+          runbook_url: "https://github.com/halcytone/runbooks/capacity#critical-cpu"
+
+      - alert: HighMemoryUsageWarning
+        expr: process_resident_memory_bytes{job="halcytone"} > 1073741824  # 1GB
+        for: 5m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: capacity
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanizeBytes }} (approaching limits)"
+          runbook_url: "https://github.com/halcytone/runbooks/capacity#high-memory"
+
+      - alert: HighMemoryUsageCritical
+        expr: process_resident_memory_bytes{job="halcytone"} > 1610612736  # 1.5GB
+        for: 2m
+        labels:
+          severity: critical
+          service: halcytone-content-generator
+          category: capacity
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is {{ $value | humanizeBytes }} (near limits)"
+          runbook_url: "https://github.com/halcytone/runbooks/capacity#critical-memory"
+
+      - alert: TooManyOpenFiles
+        expr: process_open_fds{job="halcytone"} > 800
+        for: 3m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: capacity
+        annotations:
+          summary: "High number of open file descriptors"
+          description: "Open file descriptors: {{ $value }} (approaching system limits)"
+          runbook_url: "https://github.com/halcytone/runbooks/capacity#too-many-files"
+
+  - name: halcytone.performance_regression
+    rules:
+      # Performance regression detection (requires historical data)
+      - alert: PerformanceRegression
+        expr: |
+          (
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone"}[5m])) -
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone"}[5m] offset 1d))
+          ) / histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="halcytone"}[5m] offset 1d)) > 0.20
+        for: 10m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: regression
+        annotations:
+          summary: "Performance regression detected"
+          description: "P95 response time increased by {{ $value | humanizePercentage }} compared to yesterday"
+          runbook_url: "https://github.com/halcytone/runbooks/regression#performance-regression"
+
+      - alert: ThroughputRegression
+        expr: |
+          (
+            rate(http_requests_total{job="halcytone"}[5m] offset 1d) -
+            rate(http_requests_total{job="halcytone"}[5m])
+          ) / rate(http_requests_total{job="halcytone"}[5m] offset 1d) > 0.15
+        for: 10m
+        labels:
+          severity: warning
+          service: halcytone-content-generator
+          category: regression
+        annotations:
+          summary: "Throughput regression detected"
+          description: "Request rate decreased by {{ $value | humanizePercentage }} compared to yesterday"
+          runbook_url: "https://github.com/halcytone/runbooks/regression#throughput-regression"

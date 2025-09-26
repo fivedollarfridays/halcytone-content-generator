@@ -2,12 +2,13 @@
 Enhanced API endpoints with template selection and customization
 """
 from fastapi import APIRouter, HTTPException, Depends, Query, Request
-from typing import Optional, List
+from typing import Optional, List, Union
 import logging
+from pydantic import ValidationError
 
 from ..config import Settings, get_settings
 from ..schemas.content import (
-    ContentGenerationRequest, ContentGenerationResponse,
+    ContentGenerationRequest, ContentGenerationResponse, ContentValidationRequest,
     Content, NewsletterContent, WebUpdateContent, SocialPost
 )
 from ..services.document_fetcher import DocumentFetcher
@@ -42,7 +43,6 @@ def get_publishers(settings: Settings):
 
 @router.post("/generate-content")
 async def generate_enhanced_content(
-    request: ContentGenerationRequest,
     raw_request: Request,
     template_style: str = Query(default="modern", description="Email template style (modern, minimal, plain)"),
     social_platforms: Optional[List[str]] = Query(default=None, description="Social platforms to generate for"),
@@ -54,7 +54,7 @@ async def generate_enhanced_content(
     Generate enhanced content with template selection and validation
 
     Args:
-        request: Content generation parameters
+        raw_request: Raw HTTP request
         template_style: Email template style
         social_platforms: List of social platforms
         seo_optimize: Enable SEO features
@@ -62,16 +62,44 @@ async def generate_enhanced_content(
         settings: Application settings
     """
     try:
-        # Handle legacy payload format - check for content.dry_run
-        try:
-            raw_body = await raw_request.json()
-            if isinstance(raw_body, dict) and "content" in raw_body:
-                content_section = raw_body["content"]
-                if isinstance(content_section, dict) and content_section.get("dry_run", False):
-                    request.preview_only = True
-                    logger.info("Legacy dry_run detected, enabling preview_only mode")
-        except Exception as e:
-            logger.debug(f"Could not parse raw request for legacy format: {e}")
+        # Parse raw request body
+        raw_body = await raw_request.json()
+
+        # Check if this is a content validation request (has nested 'content' field)
+        if isinstance(raw_body, dict) and "content" in raw_body:
+            try:
+                # Try to validate as ContentValidationRequest
+                validation_request = ContentValidationRequest(**raw_body)
+                # Convert to regular ContentGenerationRequest for processing
+                request = ContentGenerationRequest(
+                    send_email=validation_request.send_email,
+                    publish_web=validation_request.publish_web,
+                    generate_social=validation_request.generate_social,
+                    tone=validation_request.tone,
+                    invalidate_cache=validation_request.invalidate_cache,
+                    preview_only=validation_request.preview_only,
+                    include_preview=validation_request.include_preview
+                )
+                logger.info("Processing content validation request")
+            except ValidationError as e:
+                # Return 422 for validation errors as expected by the test
+                logger.warning(f"Content validation failed: {e}")
+                raise HTTPException(status_code=422, detail=e.errors())
+        else:
+            # Standard ContentGenerationRequest
+            try:
+                request = ContentGenerationRequest(**raw_body)
+                logger.info("Processing standard content generation request")
+            except ValidationError as e:
+                logger.warning(f"Request validation failed: {e}")
+                raise HTTPException(status_code=422, detail=e.errors())
+
+        # Handle legacy dry_run detection
+        if isinstance(raw_body, dict) and "content" in raw_body:
+            content_section = raw_body["content"]
+            if isinstance(content_section, dict) and content_section.get("dry_run", False):
+                request.preview_only = True
+                logger.info("Legacy dry_run detected, enabling preview_only mode")
 
         # Step 1: Fetch living document content
         fetcher = DocumentFetcher(settings)
@@ -362,6 +390,9 @@ async def generate_enhanced_content(
             social_posts=social_posts if request.include_preview else None
         )
 
+    except HTTPException:
+        # Re-raise HTTPExceptions (like validation errors) without converting to 500
+        raise
     except Exception as e:
         logger.error(f"Enhanced content generation failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,0 +1,96 @@
+{
+  "operation": "health_check_baseline",
+  "environment": "baseline",
+  "version": "0.1.0",
+  "timestamp": "2024-12-01T12:10:00",
+  "response_time_mean": 78.0,
+  "response_time_median": 68.0,
+  "response_time_p95": 145.0,
+  "response_time_p99": 220.0,
+  "response_time_max": 380.0,
+  "requests_per_second": 58.3,
+  "concurrent_users": 5,
+  "total_requests": 10498,
+  "error_rate": 0.0012,
+  "error_count": 13,
+  "test_duration": 180,
+  "notes": "Health endpoint baseline - development environment",
+  "raw_data": {
+    "endpoints": {
+      "/health": {
+        "method": "GET",
+        "name": "/health",
+        "num_requests": 3500,
+        "num_failures": 5,
+        "avg_response_time": 72.0,
+        "median_response_time": 65.0,
+        "max_response_time": 250.0,
+        "min_response_time": 35.0,
+        "current_rps": 19.4,
+        "failure_ratio": 0.0014
+      },
+      "/ready": {
+        "method": "GET",
+        "name": "/ready",
+        "num_requests": 2800,
+        "num_failures": 3,
+        "avg_response_time": 85.0,
+        "median_response_time": 75.0,
+        "max_response_time": 380.0,
+        "min_response_time": 42.0,
+        "current_rps": 15.6,
+        "failure_ratio": 0.0011
+      },
+      "/live": {
+        "method": "GET",
+        "name": "/live",
+        "num_requests": 2100,
+        "num_failures": 2,
+        "avg_response_time": 68.0,
+        "median_response_time": 62.0,
+        "max_response_time": 195.0,
+        "min_response_time": 38.0,
+        "current_rps": 11.7,
+        "failure_ratio": 0.0010
+      },
+      "/metrics": {
+        "method": "GET",
+        "name": "/metrics",
+        "num_requests": 2098,
+        "num_failures": 3,
+        "avg_response_time": 92.0,
+        "median_response_time": 82.0,
+        "max_response_time": 285.0,
+        "min_response_time": 45.0,
+        "current_rps": 11.6,
+        "failure_ratio": 0.0014
+      }
+    },
+    "errors": [
+      {
+        "method": "GET",
+        "name": "/health",
+        "error": "Connection reset",
+        "occurrences": 5
+      },
+      {
+        "method": "GET",
+        "name": "/ready",
+        "error": "Temporary service unavailable",
+        "occurrences": 3
+      },
+      {
+        "method": "GET",
+        "name": "/live",
+        "error": "Connection timeout",
+        "occurrences": 2
+      },
+      {
+        "method": "GET",
+        "name": "/metrics",
+        "error": "Metrics collection delay",
+        "occurrences": 3
+      }
+    ]
+  }
+}

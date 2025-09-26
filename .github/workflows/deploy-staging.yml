@@ -1,0 +1,298 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - develop
+      - staging
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'develop'
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  # Build and basic tests for staging
+  build-test:
+    name: Build and Test for Staging
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      pr_number: ${{ steps.pr.outputs.pr_number }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
+
+      - name: Get PR number
+        id: pr
+        if: github.event_name == 'pull_request'
+        run: echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+
+      - name: Calculate version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            VERSION="pr-${{ steps.pr.outputs.pr_number }}-$(git rev-parse --short HEAD)"
+          else
+            VERSION="staging-$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD)"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Version: ${VERSION}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run quick tests
+        run: |
+          # Run unit tests only for faster feedback
+          pytest tests/unit/ -v --tb=short
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg VERSION=${{ steps.version.outputs.version }} \
+            --build-arg ENV=staging \
+            --tag halcytone-staging:${{ steps.version.outputs.version }} \
+            --tag halcytone-staging:latest \
+            .
+
+      - name: Push to registry
+        env:
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          echo "$REGISTRY_PASSWORD" | docker login $REGISTRY_URL -u $REGISTRY_USERNAME --password-stdin
+
+          docker tag halcytone-staging:latest $REGISTRY_URL/halcytone-staging:${{ steps.version.outputs.version }}
+          docker tag halcytone-staging:latest $REGISTRY_URL/halcytone-staging:latest
+
+          docker push $REGISTRY_URL/halcytone-staging:${{ steps.version.outputs.version }}
+          docker push $REGISTRY_URL/halcytone-staging:latest
+
+  # Deploy to staging environment
+  deploy:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-test
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Kubernetes
+        id: deploy
+        env:
+          KUBE_CONFIG: ${{ secrets.STAGING_KUBE_CONFIG }}
+          NAMESPACE: staging
+          VERSION: ${{ needs.build-test.outputs.version }}
+        run: |
+          # Setup kubectl
+          echo "$KUBE_CONFIG" | base64 -d > /tmp/kubeconfig
+          export KUBECONFIG=/tmp/kubeconfig
+
+          # Update deployment
+          kubectl set image deployment/content-generator \
+            content-generator=${{ secrets.REGISTRY_URL }}/halcytone-staging:${VERSION} \
+            -n ${NAMESPACE}
+
+          # Wait for rollout
+          kubectl rollout status deployment/content-generator -n ${NAMESPACE}
+
+          # Get staging URL
+          STAGING_URL=$(kubectl get ingress content-generator -n ${NAMESPACE} \
+            -o jsonpath='{.spec.rules[0].host}')
+
+          echo "url=https://${STAGING_URL}" >> $GITHUB_OUTPUT
+          echo "Deployed to: https://${STAGING_URL}"
+
+      - name: Run database migrations
+        env:
+          KUBE_CONFIG: ${{ secrets.STAGING_KUBE_CONFIG }}
+          NAMESPACE: staging
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+
+          # Run migrations as a Job
+          kubectl apply -f - <<EOF
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: migrate-${{ needs.build-test.outputs.version }}
+            namespace: ${NAMESPACE}
+          spec:
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                - name: migrate
+                  image: ${{ secrets.REGISTRY_URL }}/halcytone-staging:${{ needs.build-test.outputs.version }}
+                  command: ["python", "-m", "alembic", "upgrade", "head"]
+                  envFrom:
+                  - secretRef:
+                      name: content-generator-secrets
+                  - configMapRef:
+                      name: content-generator-config
+          EOF
+
+          # Wait for migration to complete
+          kubectl wait --for=condition=complete \
+            job/migrate-${{ needs.build-test.outputs.version }} \
+            -n ${NAMESPACE} \
+            --timeout=300s
+
+      - name: Verify deployment
+        env:
+          STAGING_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          # Wait for service to be ready
+          for i in {1..30}; do
+            if curl -f ${STAGING_URL}/health; then
+              echo "Service is healthy"
+              break
+            fi
+            sleep 10
+          done
+
+          # Check version
+          DEPLOYED_VERSION=$(curl -s ${STAGING_URL}/version | jq -r '.version')
+          echo "Deployed version: ${DEPLOYED_VERSION}"
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Deployed to staging!\n\nURL: ${{ steps.deploy.outputs.url }}\nVersion: ${{ needs.build-test.outputs.version }}\n\nPlease review and test your changes.`
+            })
+
+  # Integration tests on staging
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install test dependencies
+        run: |
+          pip install pytest pytest-asyncio httpx
+
+      - name: Run integration tests
+        env:
+          STAGING_URL: https://staging.halcytone.com
+          API_KEY: ${{ secrets.STAGING_API_KEY }}
+        run: |
+          pytest tests/integration/ \
+            --base-url ${STAGING_URL} \
+            --api-key ${API_KEY} \
+            -v --tb=short
+
+      - name: Run contract tests
+        run: |
+          pytest tests/contracts/ \
+            --base-url ${STAGING_URL} \
+            --api-key ${API_KEY} \
+            -v
+
+  # Performance testing on staging
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.event_name != 'pull_request'  # Skip for PRs
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run load tests
+        run: |
+          pip install locust
+
+          # Run load test
+          locust \
+            --host https://staging.halcytone.com \
+            --users 50 \
+            --spawn-rate 5 \
+            --time 300s \
+            --headless \
+            --html performance-report.html \
+            --csv performance-report
+
+      - name: Analyze results
+        run: |
+          # Check if response times are acceptable
+          AVG_RESPONSE=$(tail -n 1 performance-report_stats.csv | cut -d',' -f6)
+          if (( $(echo "$AVG_RESPONSE > 500" | bc -l) )); then
+            echo "::warning::Average response time ${AVG_RESPONSE}ms exceeds target"
+          fi
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-report
+          path: |
+            performance-report.html
+            performance-report*.csv
+
+  # Cleanup old staging deployments
+  cleanup:
+    name: Cleanup Old Deployments
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    if: always()
+
+    steps:
+      - name: Cleanup old PR deployments
+        if: github.event_name == 'pull_request'
+        env:
+          KUBE_CONFIG: ${{ secrets.STAGING_KUBE_CONFIG }}
+          NAMESPACE: staging
+        run: |
+          echo "$KUBE_CONFIG" | base64 -d > /tmp/kubeconfig
+          export KUBECONFIG=/tmp/kubeconfig
+
+          # Delete deployments older than 7 days
+          kubectl get deployments -n ${NAMESPACE} \
+            -o json | jq -r '.items[] | select(.metadata.labels.pr_number != null) |
+            select(.metadata.creationTimestamp | fromdateiso8601 < (now - 604800)) |
+            .metadata.name' | \
+            xargs -I {} kubectl delete deployment {} -n ${NAMESPACE}

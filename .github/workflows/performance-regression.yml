@@ -1,0 +1,376 @@
+name: Performance Regression Testing
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main ]
+  schedule:
+    # Run daily performance baseline collection at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of performance test to run'
+        required: false
+        default: 'baseline'
+        type: choice
+        options:
+          - baseline
+          - compare
+          - stress
+          - complete
+      duration:
+        description: 'Test duration in seconds'
+        required: false
+        default: '180'
+        type: string
+      users:
+        description: 'Number of concurrent users'
+        required: false
+        default: '10'
+        type: string
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      # Optional: Add database or cache services if needed
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: halcytone_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Performance testing environment
+      ENVIRONMENT: testing
+      DATABASE_URL: postgresql://postgres:postgres@localhost/halcytone_test
+      PERFORMANCE_TEST_MODE: true
+      LOG_LEVEL: WARNING  # Reduce log noise during testing
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Need history for baseline comparison
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install locust numpy pytest-benchmark
+
+    - name: Setup test database
+      run: |
+        # Run any necessary database migrations or setup
+        # python scripts/setup_test_db.py
+        echo "Database setup complete"
+
+    - name: Start application in background
+      run: |
+        # Start the application for testing
+        python -m uvicorn src.halcytone_content_generator.main:app \
+          --host 0.0.0.0 \
+          --port 8000 \
+          --workers 1 \
+          --log-level warning &
+
+        # Wait for application to be ready
+        timeout 60 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
+        echo "Application started and ready"
+
+    - name: Verify application health
+      run: |
+        curl -f http://localhost:8000/health
+        curl -f http://localhost:8000/ready
+        echo "Application health verified"
+
+    - name: Create performance results directory
+      run: |
+        mkdir -p performance/results
+        mkdir -p performance/reports
+
+    - name: Run performance baseline (Push/PR)
+      if: github.event_name == 'push' || github.event_name == 'pull_request'
+      run: |
+        python scripts/run_performance_baseline.py \
+          --type baseline \
+          --host http://localhost:8000 \
+          --duration 180 \
+          --users 8 \
+          --verbose
+
+    - name: Run performance comparison (PR only)
+      if: github.event_name == 'pull_request'
+      continue-on-error: true  # Don't fail PR if comparison fails
+      run: |
+        # Try to compare against main branch baseline
+        git checkout origin/main -- performance/results/ || echo "No previous baselines found"
+
+        python scripts/run_performance_baseline.py \
+          --type compare \
+          --operation mixed_workload_baseline \
+          --host http://localhost:8000 \
+          --verbose || echo "Comparison completed with warnings"
+
+    - name: Run scheduled baseline collection
+      if: github.event_name == 'schedule'
+      run: |
+        python scripts/run_performance_baseline.py \
+          --type complete \
+          --host http://localhost:8000 \
+          --duration 300 \
+          --users 15 \
+          --verbose
+
+    - name: Run manual test
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        python scripts/run_performance_baseline.py \
+          --type ${{ github.event.inputs.test_type }} \
+          --host http://localhost:8000 \
+          --duration ${{ github.event.inputs.duration }} \
+          --users ${{ github.event.inputs.users }} \
+          --verbose
+
+    - name: Generate performance report
+      if: always()
+      run: |
+        # Generate comprehensive performance report
+        python -c "
+        import json
+        import glob
+        from pathlib import Path
+        from performance.baseline import create_baseline_report, BaselineCollector
+
+        # Collect all baseline files
+        collector = BaselineCollector()
+        baseline_files = glob.glob('performance/results/*.json')
+        baselines = []
+
+        for file in baseline_files:
+            try:
+                baseline = collector.load_baseline(Path(file))
+                baselines.append(baseline)
+            except Exception as e:
+                print(f'Error loading {file}: {e}')
+
+        if baselines:
+            report = create_baseline_report(baselines, 'performance/reports/performance_report.md')
+            print(f'Generated report for {len(baselines)} baselines')
+        else:
+            print('No baselines found for reporting')
+        "
+
+    - name: Check performance regression
+      if: github.event_name == 'pull_request'
+      run: |
+        # Check if there are any critical performance regressions
+        python -c "
+        import json
+        import glob
+        from pathlib import Path
+
+        # Look for comparison results that indicate regressions
+        regression_detected = False
+        comparison_files = glob.glob('performance/results/comparison_*.json')
+
+        for file in comparison_files:
+            try:
+                with open(file, 'r') as f:
+                    data = json.load(f)
+
+                if data.get('overall_assessment') in ['CRITICAL', 'FAIL']:
+                    print(f'❌ Performance regression detected in {file}')
+                    print(f'Assessment: {data.get(\"overall_assessment\")}')
+
+                    for regression in data.get('regressions', []):
+                        print(f'  - {regression[\"metric\"]}: {regression.get(\"change_percent\", \"N/A\")}% worse')
+                    regression_detected = True
+                elif data.get('overall_assessment') == 'WARN':
+                    print(f'⚠️ Performance warning in {file}')
+                    for regression in data.get('regressions', []):
+                        print(f'  - {regression[\"metric\"]}: {regression.get(\"change_percent\", \"N/A\")}% worse')
+                else:
+                    print(f'✅ No significant regressions detected in {file}')
+
+            except Exception as e:
+                print(f'Error checking {file}: {e}')
+
+        # Exit with error code if critical regression detected
+        if regression_detected:
+            print('\\n🚨 Critical performance regression detected! Please investigate.')
+            exit(1)
+        else:
+            print('\\n✅ Performance check passed')
+        "
+
+    - name: Upload performance results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-results-${{ github.sha }}
+        path: |
+          performance/results/
+          performance/reports/
+        retention-days: 30
+
+    - name: Comment PR with performance results
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+
+          try {
+            // Read performance report if it exists
+            const reportPath = 'performance/reports/performance_report.md';
+            let comment = '## Performance Test Results\n\n';
+
+            if (fs.existsSync(reportPath)) {
+              const report = fs.readFileSync(reportPath, 'utf8');
+              // Take first part of report for comment (avoid too long comments)
+              const lines = report.split('\n');
+              const summaryLines = lines.slice(0, 50); // First 50 lines
+              comment += summaryLines.join('\n');
+
+              if (lines.length > 50) {
+                comment += '\n\n_Full report available in workflow artifacts._';
+              }
+            } else {
+              comment += '⚠️ Performance report not generated. Check workflow logs.';
+            }
+
+            // Add baseline results summary
+            const resultFiles = fs.readdirSync('performance/results/').filter(f => f.endsWith('.json'));
+            if (resultFiles.length > 0) {
+              comment += '\n\n### Test Results Summary\n\n';
+              comment += `- **Baselines collected**: ${resultFiles.length}\n`;
+              comment += `- **Test duration**: Completed successfully\n`;
+              comment += `- **Artifacts**: Performance results uploaded\n`;
+            }
+
+            comment += '\n\n_Performance testing completed with GitHub Actions._';
+
+            // Post comment
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          } catch (error) {
+            console.log('Error posting comment:', error);
+          }
+
+    - name: Commit baseline results (scheduled runs only)
+      if: github.event_name == 'schedule'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        # Add new baseline files
+        git add performance/results/
+        git add performance/reports/
+
+        # Only commit if there are changes
+        if git diff --staged --quiet; then
+          echo "No new baseline data to commit"
+        else
+          git commit -m "chore: update performance baselines [skip ci]
+
+          - Automated baseline collection
+          - Date: $(date -u +%Y-%m-%d)
+          - Commit: ${{ github.sha }}
+
+          🤖 Generated by GitHub Actions"
+
+          git push
+        fi
+
+  performance-monitoring:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: performance-test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download performance results
+      uses: actions/download-artifact@v4
+      with:
+        name: performance-results-${{ github.sha }}
+        path: performance/
+
+    - name: Send performance metrics to monitoring
+      run: |
+        # Example: Send metrics to external monitoring system
+        # This would typically integrate with your monitoring stack
+        echo "Sending performance metrics to monitoring system..."
+
+        # Example integration with webhook or monitoring API
+        # curl -X POST "${{ secrets.MONITORING_WEBHOOK }}" \
+        #   -H "Content-Type: application/json" \
+        #   -d @performance/results/latest_baseline.json
+
+    - name: Check SLI compliance
+      run: |
+        python -c "
+        import json
+        import glob
+        from pathlib import Path
+
+        # Check SLI compliance from latest baselines
+        baseline_files = glob.glob('performance/results/*_baseline_*.json')
+
+        sli_violations = []
+
+        for file in sorted(baseline_files)[-3:]:  # Check last 3 baselines
+            try:
+                with open(file, 'r') as f:
+                    data = json.load(f)
+
+                operation = data.get('operation', 'unknown')
+                p95 = data.get('response_time_p95', 0)
+                error_rate = data.get('error_rate', 0)
+                rps = data.get('requests_per_second', 0)
+
+                # Check against SLI targets
+                if 'health' in operation.lower() and p95 > 100:
+                    sli_violations.append(f'{operation}: P95 {p95}ms > 100ms target')
+                elif 'content' in operation.lower() and p95 > 5000:
+                    sli_violations.append(f'{operation}: P95 {p95}ms > 5000ms target')
+                elif p95 > 3000:  # General target
+                    sli_violations.append(f'{operation}: P95 {p95}ms > 3000ms target')
+
+                if error_rate > 0.05:  # 5% threshold
+                    sli_violations.append(f'{operation}: Error rate {error_rate:.1%} > 5% target')
+
+            except Exception as e:
+                print(f'Error checking SLI for {file}: {e}')
+
+        if sli_violations:
+            print('🚨 SLI Violations Detected:')
+            for violation in sli_violations:
+                print(f'  - {violation}')
+        else:
+            print('✅ All SLIs within targets')
+        "

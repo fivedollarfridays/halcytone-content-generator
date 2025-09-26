@@ -1,0 +1,46 @@
+# Logstash configuration for Halcytone monitoring
+node.name: halcytone-logstash
+path.data: /usr/share/logstash/data
+path.logs: /usr/share/logstash/logs
+path.settings: /usr/share/logstash/config
+
+# Pipeline configuration
+pipeline.workers: 2
+pipeline.batch.size: 1000
+pipeline.batch.delay: 100
+
+# HTTP API settings
+http.host: "0.0.0.0"
+http.port: 9600
+
+# Logging
+log.level: info
+path.logs: /usr/share/logstash/logs
+
+# JVM options
+pipeline.java_execution: true
+
+# Monitoring
+xpack.monitoring.enabled: false
+xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
+
+# Security
+xpack.security.enabled: false
+
+# Performance settings
+pipeline.unsafe_shutdown: false
+pipeline.plugin_classloaders: false
+
+# Queue settings
+queue.type: memory
+queue.max_events: 2000
+queue.max_bytes: 1gb
+
+# Dead letter queue
+dead_letter_queue.enable: true
+dead_letter_queue.max_bytes: 1gb
+
+# Slowlog
+slowlog.threshold.warn: 2s
+slowlog.threshold.info: 1s
+slowlog.threshold.debug: 500ms

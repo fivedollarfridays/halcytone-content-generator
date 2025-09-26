@@ -1,90 +1,500 @@
-
-name: CI
+name: Continuous Integration
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - master
+      - develop
+      - 'feature/**'
+      - 'hotfix/**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - master
+      - develop
+    types: [opened, synchronize, reopened]
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+  MIN_COVERAGE: 80
+  DOCKER_BUILDKIT: 1
 
 permissions:
   contents: read
+  pull-requests: write  # For PR comments
+  security-events: write  # For security scanning
+  checks: write  # For check runs
 
 jobs:
-  node:
-    name: Node CI
+  # Python Tests and Quality Checks
+  python-quality:
+    name: Python Quality Checks
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Detect package.json
-        id: detect
-        run: |
-          if [ -f package.json ]; then echo "has_node=true" >> $GITHUB_OUTPUT; else echo "has_node=false" >> $GITHUB_OUTPUT; fi
-      - name: Setup Node
-        if: steps.detect.outputs.has_node == true
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: npm
-      - name: Install deps
-        if: steps.detect.outputs.has_node == true
-        run: npm ci --ignore-scripts
-      - name: Format & Lint
-        if: steps.detect.outputs.has_node == true
-        run: |
-          (npm run -s fmt || npx --yes prettier -c .) || true
-          (npm run -s lint || npx --yes eslint .)
-      - name: Type Check
-        if: steps.detect.outputs.has_node == true && hashFiles(tsconfig.json) != 
-        run: (npm run -s typecheck || npx --yes tsc -p . --noEmit)
-      - name: Test
-        if: steps.detect.outputs.has_node == true
-        run: |
-          npm test --silent || npm run -s test
-      - name: Audit (non-blocking)
-        if: steps.detect.outputs.has_node == true
-        run: npm audit --audit-level=high || true
+    outputs:
+      coverage: ${{ steps.coverage.outputs.coverage }}
 
-  python:
-    name: Python CI
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Detect Python project
-        id: detect
-        run: |
-          if [ -f requirements.txt ] || [ -f pyproject.toml ]; then echo "has_py=true" >> $GITHUB_OUTPUT; else echo "has_py=false" >> $GITHUB_OUTPUT; fi
-      - name: Setup Python
-        if: steps.detect.outputs.has_py == true
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for analysis
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
-          cache: pip
-      - name: Install deps
-        if: steps.detect.outputs.has_py == true
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            .venv
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install ruff pytest mypy pip-audit
-      - name: Format & Lint
-        if: steps.detect.outputs.has_py == true
-        run: |
-          ruff format --check . || true
-          ruff check .
-      - name: Type Check
-        if: steps.detect.outputs.has_py == true
-        run: mypy . || true
-      - name: Test
-        if: steps.detect.outputs.has_py == true
-        run: pytest -q
-      - name: Audit (non-blocking)
-        if: steps.detect.outputs.has_py == true
-        run: pip-audit || true
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-  gates:
-    name: Quality Gates
+      - name: Run linting with ruff
+        run: |
+          pip install ruff
+          ruff check src/ tests/ --output-format=github
+          ruff format --check src/ tests/
+
+      - name: Run type checking with mypy
+        run: |
+          pip install mypy types-requests types-python-dateutil
+          mypy src/ --ignore-missing-imports --show-error-codes
+
+      - name: Run flake8
+        run: |
+          pip install flake8
+          flake8 src/ tests/ --max-line-length=120 --extend-ignore=E203,W503
+
+      - name: Run black formatter check
+        run: |
+          pip install black
+          black --check src/ tests/ --line-length=120
+
+  # Security Scanning
+  security-scan:
+    name: Security Scanning
     runs-on: ubuntu-latest
-    needs: [node, python]
+
     steps:
-      - name: All language jobs completed
-        run: echo "Downstream jobs succeeded"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install bandit safety pip-audit
+
+      - name: Run Bandit security scan
+        run: |
+          bandit -r src/ -f json -o bandit-report.json
+          bandit -r src/ -f github
+
+      - name: Run Safety check
+        run: |
+          safety check --json --continue-on-error
+
+      - name: Run pip-audit
+        run: |
+          pip-audit --desc --format json --output pip-audit-report.json || true
+          pip-audit --desc
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            pip-audit-report.json
+
+      - name: Run Trivy security scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Unit Tests with Coverage
+  unit-tests:
+    name: Unit Tests & Coverage
+    runs-on: ubuntu-latest
+    outputs:
+      coverage: ${{ steps.coverage.outputs.coverage }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Start mock services
+        run: |
+          python scripts/start_mock_services.py --background &
+          sleep 5
+
+          # Verify mock services are running
+          curl -f http://localhost:8001/health || exit 1
+          curl -f http://localhost:8002/health || exit 1
+
+      - name: Run unit tests with coverage
+        run: |
+          pytest tests/unit/ \
+            --cov=src \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term \
+            --junit-xml=test-results.xml \
+            -v
+
+      - name: Calculate coverage percentage
+        id: coverage
+        run: |
+          COVERAGE=$(python -c "import xml.etree.ElementTree as ET; \
+            tree = ET.parse('coverage.xml'); \
+            root = tree.getroot(); \
+            print(root.attrib.get('line-rate', '0'))")
+          COVERAGE_PCT=$(echo "$COVERAGE * 100" | bc -l | cut -d. -f1)
+          echo "coverage=${COVERAGE_PCT}" >> $GITHUB_OUTPUT
+          echo "Coverage: ${COVERAGE_PCT}%"
+
+          # Fail if coverage is below threshold
+          if [ "$COVERAGE_PCT" -lt "${{ env.MIN_COVERAGE }}" ]; then
+            echo "::error::Test coverage ${COVERAGE_PCT}% is below required ${{ env.MIN_COVERAGE }}%"
+            exit 1
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            test-results.xml
+            coverage.xml
+            htmlcov/
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const coverage = '${{ steps.coverage.outputs.coverage }}';
+            const emoji = coverage >= 90 ? '🟢' : coverage >= 80 ? '🟡' : '🔴';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${emoji} **Test Coverage:** ${coverage}%\n\nMinimum required: ${{ env.MIN_COVERAGE }}%`
+            })
+
+  # Integration Tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Start services with docker-compose
+        run: |
+          docker-compose -f docker-compose.test.yml up -d
+
+          # Wait for services to be ready
+          for i in {1..30}; do
+            if curl -f http://localhost:8000/health; then
+              echo "Services are ready"
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Run integration tests
+        run: |
+          pytest tests/integration/ -v --tb=short
+
+      - name: Run API contract tests
+        run: |
+          pytest tests/contracts/ -v --tb=short
+
+      - name: Stop services
+        if: always()
+        run: |
+          docker-compose -f docker-compose.test.yml down
+
+  # Docker Build Test
+  docker-build:
+    name: Docker Build & Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg VERSION=${{ github.sha }} \
+            --tag halcytone-ci:${{ github.sha }} \
+            --tag halcytone-ci:latest \
+            .
+
+      - name: Run Trivy container scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'halcytone-ci:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+
+      - name: Test container startup
+        run: |
+          # Run container with test configuration
+          docker run -d \
+            --name test-container \
+            -p 8000:8000 \
+            -e ENVIRONMENT=test \
+            -e DRY_RUN_MODE=true \
+            halcytone-ci:latest
+
+          # Wait for container to be ready
+          sleep 10
+
+          # Check health endpoint
+          curl -f http://localhost:8000/health || exit 1
+
+          # Cleanup
+          docker stop test-container
+          docker rm test-container
+
+  # Code Quality Metrics
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install analysis tools
+        run: |
+          pip install radon xenon prospector pylint
+
+      - name: Run cyclomatic complexity check
+        run: |
+          radon cc src/ -s -nb --total-average
+
+      - name: Run maintainability index
+        run: |
+          radon mi src/ -s
+
+      - name: Check code complexity thresholds
+        run: |
+          xenon --max-absolute B --max-modules B --max-average A src/ || true
+
+      - name: Run prospector
+        run: |
+          prospector src/ --strictness medium --max-line-length 120 || true
+
+      - name: Generate quality report
+        run: |
+          echo "## Code Quality Report" > quality-report.md
+          echo "### Cyclomatic Complexity" >> quality-report.md
+          radon cc src/ -s -nb --total-average >> quality-report.md
+          echo "### Maintainability Index" >> quality-report.md
+          radon mi src/ -s >> quality-report.md
+
+      - name: Upload quality report
+        uses: actions/upload-artifact@v3
+        with:
+          name: quality-report
+          path: quality-report.md
+
+  # Dependency Check
+  dependency-check:
+    name: Dependency Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Check for outdated dependencies
+        run: |
+          pip install pip-outdated
+          pip-outdated requirements.txt || true
+
+      - name: License check
+        run: |
+          pip install pip-licenses
+          pip-licenses --summary --output-file licenses.txt
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v3
+        with:
+          name: license-report
+          path: licenses.txt
+
+  # Final Quality Gate
+  quality-gate:
+    name: Quality Gate Check
+    runs-on: ubuntu-latest
+    needs: [
+      python-quality,
+      security-scan,
+      unit-tests,
+      integration-tests,
+      docker-build,
+      code-quality
+    ]
+    if: always()
+
+    steps:
+      - name: Check job statuses
+        run: |
+          echo "Python Quality: ${{ needs.python-quality.result }}"
+          echo "Security Scan: ${{ needs.security-scan.result }}"
+          echo "Unit Tests: ${{ needs.unit-tests.result }}"
+          echo "Integration Tests: ${{ needs.integration-tests.result }}"
+          echo "Docker Build: ${{ needs.docker-build.result }}"
+          echo "Code Quality: ${{ needs.code-quality.result }}"
+
+          # Fail if any critical job failed
+          if [ "${{ needs.unit-tests.result }}" != "success" ] || \
+             [ "${{ needs.security-scan.result }}" != "success" ] || \
+             [ "${{ needs.docker-build.result }}" != "success" ]; then
+            echo "::error::Quality gate failed - critical checks did not pass"
+            exit 1
+          fi
+
+      - name: Create deployment readiness report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const coverage = '${{ needs.unit-tests.outputs.coverage }}' || 'N/A';
+            const unitTests = '${{ needs.unit-tests.result }}';
+            const integrationTests = '${{ needs.integration-tests.result }}';
+            const securityScan = '${{ needs.security-scan.result }}';
+            const dockerBuild = '${{ needs.docker-build.result }}';
+
+            let deploymentReady = unitTests === 'success' &&
+                                  securityScan === 'success' &&
+                                  dockerBuild === 'success';
+
+            const statusEmoji = deploymentReady ? '✅' : '❌';
+            const readyText = deploymentReady ? 'Ready for deployment' : 'Not ready for deployment';
+
+            const comment = `## ${statusEmoji} Deployment Readiness Report
+
+            **Status:** ${readyText}
+
+            | Check | Status |
+            |-------|--------|
+            | Unit Tests | ${unitTests === 'success' ? '✅' : '❌'} |
+            | Integration Tests | ${integrationTests === 'success' ? '✅' : '⚠️'} |
+            | Security Scan | ${securityScan === 'success' ? '✅' : '❌'} |
+            | Docker Build | ${dockerBuild === 'success' ? '✅' : '❌'} |
+            | Test Coverage | ${coverage}% |
+
+            ${deploymentReady ? '🚀 This PR can be safely deployed to production.' : '⚠️ Please address the failing checks before deployment.'}`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Auto-merge for Dependabot
+  auto-merge-dependabot:
+    name: Auto-merge Dependabot PRs
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
+
+    steps:
+      - name: Auto-merge minor updates
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (pr.user.login === 'dependabot[bot]') {
+              // Only auto-merge minor and patch updates
+              const title = pr.title.toLowerCase();
+              if (title.includes('bump') && !title.includes('major')) {
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  merge_method: 'squash'
+                });
+              }
+            }

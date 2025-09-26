@@ -1,9 +1,10 @@
 """
 Pydantic models for content generation
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
+from .content_types import ContentBaseStrict, ContentType
 
 
 class ContentItem(BaseModel):
@@ -246,3 +247,18 @@ class BatchStatusResponse(BaseModel):
     items_failed: int = Field(..., description="Items that failed to publish")
     last_updated: datetime = Field(..., description="Last status update time")
     errors: List[str] = Field(default_factory=list, description="Any errors encountered")
+
+
+class ContentValidationRequest(BaseModel):
+    """Request model that includes content validation (for API contract tests)"""
+    content: ContentBaseStrict
+    # Include options from ContentGenerationRequest
+    send_email: bool = Field(default=True, description="Send newsletter via CRM")
+    publish_web: bool = Field(default=True, description="Publish to website")
+    generate_social: bool = Field(default=True, description="Generate social media posts")
+
+    # Optional parameters
+    tone: Optional[str] = Field(default=None, description="Content tone")
+    invalidate_cache: bool = Field(default=True, description="Invalidate cache after update")
+    preview_only: bool = Field(default=False, description="Only preview without sending")
+    include_preview: bool = Field(default=True, description="Include preview in response")

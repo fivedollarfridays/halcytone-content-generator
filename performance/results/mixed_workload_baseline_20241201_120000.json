@@ -1,0 +1,90 @@
+{
+  "operation": "mixed_workload_baseline",
+  "environment": "baseline",
+  "version": "0.1.0",
+  "timestamp": "2024-12-01T12:00:00",
+  "response_time_mean": 2500.0,
+  "response_time_median": 2000.0,
+  "response_time_p95": 4500.0,
+  "response_time_p99": 8000.0,
+  "response_time_max": 12000.0,
+  "requests_per_second": 12.5,
+  "concurrent_users": 20,
+  "total_requests": 3750,
+  "error_rate": 0.015,
+  "error_count": 56,
+  "test_duration": 300,
+  "notes": "Baseline established for development environment",
+  "raw_data": {
+    "endpoints": {
+      "/api/v2/content/generate": {
+        "method": "POST",
+        "name": "/api/v2/content/generate",
+        "num_requests": 1200,
+        "num_failures": 45,
+        "avg_response_time": 3500.0,
+        "median_response_time": 3000.0,
+        "max_response_time": 8500.0,
+        "min_response_time": 1200.0,
+        "current_rps": 4.0,
+        "failure_ratio": 0.0375
+      },
+      "/api/v2/content/validate": {
+        "method": "POST",
+        "name": "/api/v2/content/validate",
+        "num_requests": 800,
+        "num_failures": 8,
+        "avg_response_time": 450.0,
+        "median_response_time": 380.0,
+        "max_response_time": 1200.0,
+        "min_response_time": 120.0,
+        "current_rps": 2.7,
+        "failure_ratio": 0.01
+      },
+      "/health": {
+        "method": "GET",
+        "name": "/health",
+        "num_requests": 950,
+        "num_failures": 2,
+        "avg_response_time": 85.0,
+        "median_response_time": 75.0,
+        "max_response_time": 250.0,
+        "min_response_time": 45.0,
+        "current_rps": 3.2,
+        "failure_ratio": 0.002
+      },
+      "/api/v1/services/status": {
+        "method": "GET",
+        "name": "/api/v1/services/status",
+        "num_requests": 800,
+        "num_failures": 1,
+        "avg_response_time": 120.0,
+        "median_response_time": 110.0,
+        "max_response_time": 450.0,
+        "min_response_time": 65.0,
+        "current_rps": 2.6,
+        "failure_ratio": 0.00125
+      }
+    },
+    "errors": [
+      {
+        "method": "POST",
+        "name": "/api/v2/content/generate",
+        "error": "Connection timeout",
+        "occurrences": 35
+      },
+      {
+        "method": "POST",
+        "name": "/api/v2/content/generate",
+        "error": "Validation error",
+        "occurrences": 10
+      },
+      {
+        "method": "POST",
+        "name": "/api/v2/content/validate",
+        "error": "Schema validation failed",
+        "occurrences": 8
+      }
+    ]
+  }
+}

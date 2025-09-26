@@ -264,7 +264,7 @@ class TestContentAPIContract:
 
         for template in templates:
             response = client.post(
-                f"/v2/generate-content?template_style={template}",
+                f"/api/v2/generate-content?template_style={template}",
                 json=valid_update_payload
             )
 
@@ -277,7 +277,7 @@ class TestContentAPIContract:
 
         for platform in platforms:
             response = client.post(
-                f"/v2/generate-content?social_platforms={platform}",
+                f"/api/v2/generate-content?social_platforms={platform}",
                 json=valid_update_payload
             )
 
@@ -426,7 +426,7 @@ class TestContentValidationContract:
         }
 
         # Use generation endpoint with validation enabled
-        response = client.post("/v2/generate-content?validate_content=true", json=payload)
+        response = client.post("/api/v2/generate-content?validate_content=true", json=payload)
 
         if response.status_code in [200, 201]:
             data = response.json()

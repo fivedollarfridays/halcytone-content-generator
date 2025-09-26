@@ -1,0 +1,207 @@
+# Filebeat configuration for Halcytone log collection
+
+# Global configuration
+name: halcytone-filebeat
+tags: ["halcytone", "production", "filebeat"]
+
+# Input configuration
+filebeat.inputs:
+  # Application logs
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/halcytone/*.log
+      - /var/log/halcytone/application/*.log
+    fields:
+      log_type: application
+      service: halcytone-content-generator
+    fields_under_root: true
+    multiline.pattern: '^\d{4}-\d{2}-\d{2}'
+    multiline.negate: true
+    multiline.match: after
+    scan_frequency: 10s
+    harvester_buffer_size: 16384
+    max_bytes: 10485760  # 10MB
+
+  # Docker container logs
+  - type: container
+    enabled: true
+    paths:
+      - '/var/lib/docker/containers/*/*.log'
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+      - decode_json_fields:
+          fields: ["message"]
+          target: "json"
+          overwrite_keys: true
+    fields:
+      log_type: container
+    fields_under_root: true
+    condition:
+      contains:
+        container.image.name: "halcytone"
+
+  # System logs
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/syslog
+      - /var/log/auth.log
+      - /var/log/nginx/*.log
+    fields:
+      log_type: system
+    fields_under_root: true
+    exclude_lines: ['DEBUG']
+
+  # Nginx access logs (if present)
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/access.log
+      - /var/log/nginx/halcytone.access.log
+    fields:
+      log_type: access
+      service: nginx
+    fields_under_root: true
+
+  # Nginx error logs
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/error.log
+      - /var/log/nginx/halcytone.error.log
+    fields:
+      log_type: error
+      service: nginx
+    fields_under_root: true
+
+# Processors for data enhancement
+processors:
+  # Add host metadata
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+
+  # Add Docker metadata
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+      match_fields: ["container.id"]
+      match_pids: ["process.pid"]
+      match_source: true
+      match_source_index: 4
+      match_short_id: false
+      cleanup_timeout: 60
+      labels.dedot: false
+      env.dedot: false
+
+  # Add Kubernetes metadata (if running on K8s)
+  - add_kubernetes_metadata:
+      host: ${NODE_NAME}
+      matchers:
+        - logs_path:
+            logs_path: "/var/log/containers/"
+
+  # Drop health check logs to reduce noise
+  - drop_event:
+      when:
+        and:
+          - regexp:
+              message: '(health|ready|live|metrics)'
+          - not:
+              regexp:
+                message: '(ERROR|CRITICAL|error|critical)'
+
+  # Extract JSON fields from structured logs
+  - decode_json_fields:
+      fields: ["message"]
+      process_array: false
+      max_depth: 3
+      target: "app"
+      overwrite_keys: false
+      add_error_key: true
+
+  # Add environment labels
+  - add_fields:
+      target: ''
+      fields:
+        environment: ${ENVIRONMENT:production}
+        cluster: halcytone-production
+        datacenter: ${DATACENTER:us-east-1}
+
+  # Fingerprint for deduplication
+  - fingerprint:
+      fields: ["message", "@timestamp", "host.name"]
+      target_field: "@metadata.fingerprint"
+
+# Output configuration
+output.logstash:
+  hosts: ["logstash:5044"]
+  worker: 1
+  compression_level: 3
+  escape_html: false
+  loadbalance: true
+  pipelining: 2
+  slow_start: true
+  timeout: 30s
+  max_retries: 3
+  backoff.init: 1s
+  backoff.max: 60s
+
+# Alternative direct Elasticsearch output (uncomment if not using Logstash)
+# output.elasticsearch:
+#   hosts: ["elasticsearch:9200"]
+#   protocol: "http"
+#   index: "halcytone-logs-%{+yyyy.MM.dd}"
+#   template.name: "halcytone-logs"
+#   template.pattern: "halcytone-logs-*"
+#   template.settings:
+#     index.number_of_shards: 1
+#     index.number_of_replicas: 0
+#     index.refresh_interval: 5s
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+  rotateeverybytes: 10485760  # 10MB
+
+# Monitoring
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  metrics.period: 10s
+  state.period: 1m
+
+# HTTP endpoint for monitoring
+http.enabled: true
+http.port: 5066
+
+# Security
+ssl.verification_mode: none
+
+# Performance tuning
+queue.mem:
+  events: 4096
+  flush.min_events: 512
+  flush.timeout: 1s
+
+# Registry file for tracking
+filebeat.registry.path: /usr/share/filebeat/data/registry
+filebeat.registry.file_permissions: 0600
+filebeat.registry.flush: 0s
+
+# Ignore older files
+ignore_older: 24h
+close_older: 1h
+close_renamed: false
+close_removed: true
+close_eof: false
+
+# Harvester limits
+harvester_limit: 0
+clean_inactive: 72h
+clean_removed: true
