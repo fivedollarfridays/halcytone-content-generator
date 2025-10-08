@@ -1,4 +1,4 @@
-# Halcytone Content Generator
+# Toombos Backend
 
 Automated multi-channel content generation and distribution system for marketing communications.
 
@@ -6,7 +6,7 @@ Automated multi-channel content generation and distribution system for marketing
 
 **This is the backend API repository**. The frontend dashboard is in a separate repository:
 
-**Dashboard**: https://github.com/fivedollarfridays/content-generator-dashboard
+**Dashboard**: https://github.com/fivedollarfridays/toombos-frontend
 - Next.js 15.5.4 + TypeScript + Tailwind CSS
 - All UI components for content generation, job management, and monitoring
 - Standalone deployment (Vercel recommended)
@@ -139,8 +139,8 @@ The Halcytone Content Generator is a microservice that automates the process of 
 
 ```bash
 # Clone the repository
-git clone https://github.com/fivedollarfridays/halcytone-content-generator.git
-cd halcytone-content-generator
+git clone https://github.com/fivedollarfridays/toombos-backend.git
+cd toombos-backend
 
 # Create virtual environment
 python -m venv venv
@@ -312,9 +312,9 @@ coverage html
 ## Project Structure
 
 ```
-halcytone-content-generator/
+toombos-backend/
 ├── src/
-│   └── halcytone_content_generator/
+│   └── halcytone_content_generator/  # Python package (internal name)
 │       ├── api/              # API endpoints
 │       ├── core/             # Core utilities
 │       ├── services/         # Business logic
@@ -332,4 +332,4 @@ halcytone-content-generator/
 
 ## License
 
-Proprietary - Halcytone Technologies
+Proprietary - Toombos Technologies

@@ -1,6 +1,6 @@
 # Test Coverage Roadmap: 30% → 70%
 
-**Project**: Halcytone Content Generator
+**Project**: Toombos
 **Current Coverage**: 30%
 **Target Coverage**: 70%
 **Timeline**: 2-3 Sprints (4-6 weeks)

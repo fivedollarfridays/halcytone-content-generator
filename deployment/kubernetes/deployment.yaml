@@ -1,4 +1,4 @@
-# Kubernetes Deployment for Halcytone Content Generator
+# Kubernetes Deployment for Toombos
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -55,7 +55,7 @@ spec:
 
         env:
         - name: APP_NAME
-          value: "Halcytone Content Generator"
+          value: "Toombos"
         - name: ENVIRONMENT
           value: "production"
         - name: DEBUG

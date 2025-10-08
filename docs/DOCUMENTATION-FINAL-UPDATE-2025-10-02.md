@@ -142,7 +142,7 @@ Phase 3: Production Deployment (1-2 weeks) - Pending 🚀
 | Overall Progress | 40% | 55% | +15% |
 | Dashboard Status | Not created | Repository live on GitHub | ✅ |
 | Components Migrated | 0/6 | 6/6 | ✅ |
-| GitHub Repository | None | https://github.com/fivedollarfridays/content-generator-dashboard | ✅ |
+| GitHub Repository | None | https://github.com/fivedollarfridays/toombos-frontend | ✅ |
 | Documentation Complete | Partial | Complete | ✅ |
 | Frontend Directory | Active | Deprecated | ⚠️ |
 
@@ -179,7 +179,7 @@ Phase 3: Production Deployment (1-2 weeks) - Pending 🚀
 ## Dashboard Repository Information
 
 ### Repository Details
-- **URL**: https://github.com/fivedollarfridays/content-generator-dashboard
+- **URL**: https://github.com/fivedollarfridays/toombos-frontend
 - **Organization**: fivedollarfridays
 - **Visibility**: Public
 - **Framework**: Next.js 15.5.4
@@ -194,7 +194,7 @@ Phase 3: Production Deployment (1-2 weeks) - Pending 🚀
 
 ### Local Path
 ```
-C:\Users\kmast\PycharmProjects\content-generator-dashboard
+C:\Users\kmast\PycharmProjects\toombos-frontend
 ```
 
 ### Components Migrated (All 6)
@@ -215,7 +215,7 @@ C:\Users\kmast\PycharmProjects\content-generator-dashboard
 - ❌ `frontend/` directory - Marked DEPRECATED
 
 ### New/Updated References
-- ✅ `docs/content-generator-dashboard.md` - Dashboard setup guide
+- ✅ `docs/toombos-frontend.md` - Dashboard setup guide
 - ✅ `docs/ARCHITECTURE-STANDALONE-PRODUCT.md` - Architecture overview
 - ✅ `docs/dashboard-repository-created-2025-10-02.md` - Migration summary
 - ✅ `frontend/DEPRECATED.md` - Deprecation notice
@@ -257,7 +257,7 @@ C:\Users\kmast\PycharmProjects\content-generator-dashboard
 ### Primary Sources of Truth ✅
 - ✅ `context/development.md` - Current development state (UPDATED)
 - ✅ `docs/ARCHITECTURE-STANDALONE-PRODUCT.md` - Architecture overview
-- ✅ `docs/content-generator-dashboard.md` - Dashboard guide
+- ✅ `docs/toombos-frontend.md` - Dashboard guide
 - ✅ `docs/status-review-2025-10-02.md` - Current status & roadmap
 - ✅ `README.md` - Project overview (UPDATED)
 
@@ -316,13 +316,13 @@ C:\Users\kmast\PycharmProjects\content-generator-dashboard
 ## Quick Reference Links
 
 ### Backend Repository
-- **Repository**: https://github.com/fivedollarfridays/halcytone-content-generator
+- **Repository**: https://github.com/fivedollarfridays/toombos-backend
 - **README**: Updated with dashboard info
 - **Development Guide**: `context/development.md` (updated)
 - **Architecture**: `docs/ARCHITECTURE-STANDALONE-PRODUCT.md`
 
 ### Dashboard Repository
-- **Repository**: https://github.com/fivedollarfridays/content-generator-dashboard
+- **Repository**: https://github.com/fivedollarfridays/toombos-frontend
 - **README**: Comprehensive setup guide
 - **Setup Summary**: SETUP-SUMMARY.md
 
@@ -366,7 +366,7 @@ C:\Users\kmast\PycharmProjects\content-generator-dashboard
 All project documentation now accurately reflects:
 
 1. **Dashboard Repository Created** ✅
-   - Repository: https://github.com/fivedollarfridays/content-generator-dashboard
+   - Repository: https://github.com/fivedollarfridays/toombos-frontend
    - All components migrated
    - Build passing, docs complete
 
@@ -419,7 +419,7 @@ context/
 
 docs/
   ├── ARCHITECTURE-STANDALONE-PRODUCT.md ✅
-  ├── content-generator-dashboard.md ✅
+  ├── toombos-frontend.md ✅
   ├── dashboard-repository-created-2025-10-02.md ✅ (NEW)
   ├── documentation-updates-dashboard-complete-2025-10-02.md ✅ (NEW)
   ├── DOCUMENTATION-FINAL-UPDATE-2025-10-02.md ✅ (NEW - This File)

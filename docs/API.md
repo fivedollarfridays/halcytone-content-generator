@@ -1,8 +1,8 @@
-# Halcytone Content Generator API Documentation
+# Toombos API Documentation
 
 ## Overview
 
-The Halcytone Content Generator is a microservice that automates multi-channel content distribution for marketing communications. It fetches content from living documents (Google Docs, Notion) and distributes it across email newsletters, website updates, and social media platforms.
+The Toombos is a microservice that automates multi-channel content distribution for marketing communications. It fetches content from living documents (Google Docs, Notion) and distributes it across email newsletters, website updates, and social media platforms.
 
 ## Base URL
 

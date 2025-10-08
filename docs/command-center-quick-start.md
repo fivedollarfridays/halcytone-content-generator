@@ -6,7 +6,7 @@
 
 ## 🎯 What You're Building
 
-A **web-based command center** that connects to the Halcytone Content Generator API to:
+A **web-based command center** that connects to the Toombos API to:
 - Monitor system health
 - Generate content
 - Manage jobs and batches
@@ -32,8 +32,8 @@ A **web-based command center** that connects to the Halcytone Content Generator 
 
 ```bash
 # Clone backend repo (if not already)
-git clone https://github.com/your-org/halcytone-content-generator.git
-cd halcytone-content-generator
+git clone https://github.com/your-org/toombos-backend.git
+cd toombos-backend
 
 # Start with Docker
 docker-compose up -d

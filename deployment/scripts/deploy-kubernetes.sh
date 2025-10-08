@@ -1,5 +1,5 @@
 #!/bin/bash
-# Kubernetes deployment script for Halcytone Content Generator
+# Kubernetes deployment script for Toombos
 # Usage: ./deploy-kubernetes.sh [environment] [namespace]
 
 set -e
@@ -9,7 +9,7 @@ NAMESPACE=${2:-halcytone}
 DEPLOYMENT_DIR="deployment/kubernetes"
 
 echo "==================================="
-echo "Halcytone Content Generator"
+echo "Toombos"
 echo "Kubernetes Deployment"
 echo "Environment: ${ENVIRONMENT}"
 echo "Namespace: ${NAMESPACE}"

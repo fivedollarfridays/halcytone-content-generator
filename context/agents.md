@@ -1,6 +1,6 @@
-# AI Agents Playbook - Halcytone Content Generator Standalone
+# AI Agents Playbook - Toombos Backend
 
-This playbook guides AI agents working on the Halcytone Content Generator as a **standalone product**. The system is an independent, commercially viable SaaS and enterprise solution.
+This playbook guides AI agents working on the Toombos backend as a **standalone product**. The system is an independent, commercially viable SaaS and enterprise solution.
 
 ## 🎉 PRODUCTION READY STATUS - 73.23% Test Coverage Achieved
 
@@ -34,18 +34,18 @@ git add -A && git commit -m "feat: [component] - description" && git push
 
 **Repository Structure:**
 ```
-content-generator/
-├── core/                 # Generation engine (ACTIVE)
-├── plugins/              # Plugin interfaces and implementations (ACTIVE)
-│   ├── email/
-│   ├── publishing/
-│   └── storage/
-├── api/                  # FastAPI application
-├── admin/                # React/Next.js admin dashboard
-├── migrations/           # Database schemas
-├── docker/               # Containerization
-├── helm/                 # Kubernetes charts (future)
-└── tools/                # Migration and CLI utilities
+toombos-backend/
+├── src/halcytone_content_generator/  # Python package (internal name)
+│   ├── api/              # FastAPI application
+│   ├── core/             # Core utilities and auth
+│   ├── services/         # Business logic services
+│   ├── publishers/       # Multi-channel publishing
+│   ├── config/           # Configuration management
+│   └── monitoring/       # Prometheus metrics, tracing
+├── tests/                # Comprehensive test suite
+├── deployment/           # Kubernetes configs
+├── monitoring/           # Grafana dashboards
+└── docs/                 # Documentation
 ```
 
 ---
@@ -563,4 +563,4 @@ kubectl rollout status deployment/content-generator
 
 ---
 
-**MISSION:** Transform the Halcytone Content Generator from an embedded Command Center component into a standalone, commercially viable product that can be sold, deployed, and operated independently while maintaining backward compatibility.
+**MISSION:** Transform Toombos from an embedded Command Center component into a standalone, commercially viable product that can be sold, deployed, and operated independently while maintaining backward compatibility.

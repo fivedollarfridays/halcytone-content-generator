@@ -9,7 +9,7 @@ COMPOSE_FILE="docker-compose.prod.yml"
 ENV_FILE=".env.${ENVIRONMENT}"
 
 echo "==================================="
-echo "Halcytone Content Generator"
+echo "Toombos"
 echo "Docker Compose Deployment"
 echo "Environment: ${ENVIRONMENT}"
 echo "==================================="

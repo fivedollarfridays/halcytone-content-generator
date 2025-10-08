@@ -28,8 +28,8 @@ scrape_configs:
     static_configs:
       - targets: ['node-exporter:9100']
 
-  # Halcytone Content Generator - Main Application
-  - job_name: 'halcytone-content-generator'
+  # Toombos - Main Application
+  - job_name: 'toombos-backend'
     static_configs:
       - targets: ['host.docker.internal:8000']
     metrics_path: '/metrics'

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document establishes performance baselines for the Halcytone Content Generator API to enable detection of performance degradation and support capacity planning decisions. These baselines were established through comprehensive load testing using realistic usage patterns.
+This document establishes performance baselines for the Toombos API to enable detection of performance degradation and support capacity planning decisions. These baselines were established through comprehensive load testing using realistic usage patterns.
 
 ## Baseline Collection Methodology
 

@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-**Halcytone Content Generator** is a **standalone commercial SaaS product** with its own dedicated dashboard, **separate and independent from the existing Command Center platform**.
+**Toombos** is a **standalone commercial SaaS product** with its own dedicated dashboard, **separate and independent from the existing Command Center platform**.
 
 ---
 
@@ -17,7 +17,7 @@
 
 | Product | Description | Repository | Purpose |
 |---------|-------------|------------|---------|
-| **Content Generator** | AI-powered content generation platform | `halcytone-content-generator` (backend)<br>`halcytone-content-generator-dashboard` (frontend) | Commercial SaaS product for content creation |
+| **Content Generator** | AI-powered content generation platform | `toombos-backend` (backend)<br>`toombos-backend-dashboard` (frontend) | Commercial SaaS product for content creation |
 | **Command Center** | Broader platform management system | Existing separate codebase | Internal/commercial platform for multiple services |
 
 ### Relationship
@@ -39,14 +39,14 @@
 └─────────────────────────────────────────────┘
          │
          ├── Backend API
-         │   ├── Repository: halcytone-content-generator
+         │   ├── Repository: toombos-backend
          │   ├── Framework: FastAPI (Python 3.11+)
          │   ├── Status: ✅ Production-ready
          │   ├── Features: REST API, WebSocket, Auth, Monitoring
          │   └── Current: 13.3% test coverage → 70% target
          │
          └── Dashboard (Frontend)
-             ├── Repository: halcytone-content-generator-dashboard
+             ├── Repository: toombos-backend-dashboard
              ├── Framework: Next.js 14 + TypeScript
              ├── Status: ⏸️ To be created (after 70% backend coverage)
              ├── Components: Prototype components exist in frontend/
@@ -55,14 +55,14 @@
 
 ### Tech Stack
 
-**Backend (halcytone-content-generator)**:
+**Backend (toombos-backend)**:
 - FastAPI + Python 3.11+
 - PostgreSQL + Redis
 - Docker containerization
 - Prometheus/Grafana monitoring
 - JWT + API key authentication
 
-**Dashboard (halcytone-content-generator-dashboard - To Be Created)**:
+**Dashboard (toombos-backend-dashboard - To Be Created)**:
 - Next.js 14 + TypeScript
 - Tailwind CSS + Shadcn/ui
 - React Query for API state
@@ -83,7 +83,7 @@
 **Duration**: 2 weeks
 **Starts After**: 70% coverage achieved
 **Tasks**:
-- Create `halcytone-content-generator-dashboard` repo
+- Create `toombos-backend-dashboard` repo
 - Set up Next.js 14 + TypeScript
 - Install bpsai-pair
 - Migrate components from `frontend/`
@@ -119,7 +119,7 @@
 ## File Organization
 
 ### Updated Documentation
-- ✅ `docs/content-generator-dashboard.md` - Dashboard setup guide (NEW)
+- ✅ `docs/toombos-frontend.md` - Dashboard setup guide (NEW)
 - ✅ `context/development.md` - Updated with standalone architecture
 - ✅ `docs/DEPRECATED-command-center-integration.md` - Deprecated old doc
 - ✅ `docs/ARCHITECTURE-STANDALONE-PRODUCT.md` - This file (NEW)
@@ -149,7 +149,7 @@
 - **Backend API Docs**: http://localhost:8000/docs
 - **Monitoring**: Grafana dashboard (when running)
 - **Development Guide**: `context/development.md`
-- **Dashboard Guide**: `docs/content-generator-dashboard.md`
+- **Dashboard Guide**: `docs/toombos-frontend.md`
 
 ### Future (After Deployment)
 - **Production API**: TBD (e.g., api.contentgenerator.halcytone.com)

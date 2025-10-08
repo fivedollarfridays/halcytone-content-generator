@@ -1,4 +1,4 @@
-# Repository Rename Plan: halcytone-content-generator → toombos-backend
+# Repository Rename Plan: toombos-backend → toombos-backend
 
 **Created:** 2025-10-07
 **Updated:** 2025-10-07
@@ -8,14 +8,14 @@
 
 ## Executive Summary
 
-This document outlines the comprehensive plan to rename the repository from `halcytone-content-generator` to `toombos-backend`, including all code, documentation, configuration, and infrastructure references.
+This document outlines the comprehensive plan to rename the repository from `toombos-backend` to `toombos-backend`, including all code, documentation, configuration, and infrastructure references.
 
 **Scope:** 241 files contain references to "halcytone" (case-insensitive search)
 
 ## Objectives
 
 1. Rename Python package from `halcytone_content_generator` to `toombos`
-2. Rename repository from `halcytone-content-generator` to `toombos-backend`
+2. Rename repository from `toombos-backend` to `toombos-backend`
 3. Update all import statements across the codebase
 4. Rename directory structure to reflect new name
 5. Update all documentation and configuration files
@@ -186,7 +186,7 @@ All files in `docs/` directory (50+ files):
 - [ ] `docs/command-center-integration.md` (DEPRECATED - can remove references)
 - [ ] `docs/DEPRECATED-command-center-integration.md`
 - [ ] `docs/command-center-quick-start.md`
-- [ ] `docs/content-generator-dashboard.md`
+- [ ] `docs/toombos-frontend.md`
 - [ ] `docs/dashboard-repository-created-2025-10-02.md`
 - [ ] `docs/database-configuration.md`
 - [ ] `docs/secrets-management.md`
@@ -288,14 +288,14 @@ from toombos.api.endpoints import router
 #### 6.1 Repository Rename
 **Note:** This should be done LAST after all code changes are merged
 
-- [ ] Rename GitHub repository: `halcytone-content-generator` → `toombos-backend`
+- [ ] Rename GitHub repository: `toombos-backend` → `toombos-backend`
 - [ ] Update repository description to "Toombos Backend API"
 - [ ] Update repository topics/tags
 - [ ] Set up redirect (GitHub does this automatically)
 
 #### 6.2 Dashboard Repository Updates
 - [ ] Update dashboard repository API client to reference new backend name
-- [ ] Update dashboard documentation: https://github.com/fivedollarfridays/content-generator-dashboard
+- [ ] Update dashboard documentation: https://github.com/fivedollarfridays/toombos-frontend
 - [ ] Update environment variable examples
 
 #### 6.3 External Service Updates (if applicable)
@@ -345,11 +345,11 @@ REPLACEMENTS = [
     (r'import halcytone_content_generator', 'import toombos'),
 
     # Repository and text references
-    (r'halcytone-content-generator', 'toombos-backend'),
+    (r'toombos-backend', 'toombos-backend'),
     (r'halcytone_content_generator', 'toombos'),
 
     # Capitalized versions
-    (r'Halcytone Content Generator', 'Toombos Backend'),
+    (r'Toombos', 'Toombos Backend'),
     (r'Halcytone', 'Toombos'),
 
     # Service names in configs
@@ -542,9 +542,9 @@ This rename task will be added to the sprint plan as either:
 
 ## References
 
-- Original repository: https://github.com/<owner>/halcytone-content-generator
+- Original repository: https://github.com/<owner>/toombos-backend
 - New repository name: `toombos-backend`
-- Dashboard repository: https://github.com/fivedollarfridays/content-generator-dashboard
+- Dashboard repository: https://github.com/fivedollarfridays/toombos-frontend
 - Current branch: `feature/production-deployment`
 - Sprint documentation: `context/development.md`
 

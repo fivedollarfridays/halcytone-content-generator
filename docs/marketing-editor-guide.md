@@ -12,7 +12,7 @@
 
 ## Overview
 
-The Halcytone Content Generator is a comprehensive content management and distribution system designed to streamline content creation, approval, and multi-channel publication. This guide provides complete documentation for Marketing and Editorial teams.
+The Toombos is a comprehensive content management and distribution system designed to streamline content creation, approval, and multi-channel publication. This guide provides complete documentation for Marketing and Editorial teams.
 
 ### Key Features
 - **Multi-channel Publishing**: Email, Web, Social Media (Twitter, LinkedIn, Instagram, Facebook)

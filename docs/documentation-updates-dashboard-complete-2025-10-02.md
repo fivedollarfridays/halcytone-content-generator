@@ -10,7 +10,7 @@
 
 Updated all documentation to reflect the successful creation and deployment of the Content Generator Dashboard repository to GitHub.
 
-**Dashboard Repository**: https://github.com/fivedollarfridays/content-generator-dashboard
+**Dashboard Repository**: https://github.com/fivedollarfridays/toombos-frontend
 
 ---
 
@@ -21,7 +21,7 @@ Updated all documentation to reflect the successful creation and deployment of t
 #### Phase 2: Marked as COMPLETE ✅
 **Before**: Phase 2 was listed as "PENDING"
 **After**: Phase 2 marked as "COMPLETE" with full details:
-- Repository created: `content-generator-dashboard`
+- Repository created: `toombos-frontend`
 - Next.js 15.5.4 + TypeScript + Tailwind CSS
 - All 6 components migrated
 - GitHub repository created and pushed
@@ -63,7 +63,7 @@ Week 6: Production deployment (Phase 3)
 **Key additions**:
 - ✅ Dashboard repository created with Next.js 15.5.4
 - ✅ All 6 components migrated
-- ✅ Dashboard on GitHub: fivedollarfridays/content-generator-dashboard
+- ✅ Dashboard on GitHub: fivedollarfridays/toombos-frontend
 - ✅ Build passing, docs complete, bpsai-pair configured
 - ⚠️ Old frontend/ directory now deprecated (cleanup needed)
 
@@ -175,7 +175,7 @@ Already documented the architecture clarification changes.
 ## Repository Information
 
 ### Dashboard Repository
-- **URL**: https://github.com/fivedollarfridays/content-generator-dashboard
+- **URL**: https://github.com/fivedollarfridays/toombos-frontend
 - **Organization**: fivedollarfridays
 - **Visibility**: Public
 - **Framework**: Next.js 15.5.4
@@ -184,7 +184,7 @@ Already documented the architecture clarification changes.
 
 ### Local Path
 ```
-C:\Users\kmast\PycharmProjects\content-generator-dashboard
+C:\Users\kmast\PycharmProjects\toombos-frontend
 ```
 
 ### Git Status
@@ -203,7 +203,7 @@ a1127fb feat: Add bpsai-pair configuration
 
 ## Components Migrated
 
-All 6 components successfully migrated from `halcytone-content-generator/frontend/`:
+All 6 components successfully migrated from `toombos-backend/frontend/`:
 
 | Component | Status | Location in Dashboard |
 |-----------|--------|----------------------|
@@ -376,18 +376,18 @@ Phase 3: Production Deployment (1-2 weeks) - Pending
 ## References
 
 ### Documentation
-- Dashboard Setup: `docs/content-generator-dashboard.md`
+- Dashboard Setup: `docs/toombos-frontend.md`
 - Architecture Overview: `docs/ARCHITECTURE-STANDALONE-PRODUCT.md`
 - Dashboard Creation: `docs/dashboard-repository-created-2025-10-02.md`
 - Development Roadmap: `context/development.md`
 
 ### Repositories
-- **Backend**: https://github.com/fivedollarfridays/halcytone-content-generator
-- **Dashboard**: https://github.com/fivedollarfridays/content-generator-dashboard
+- **Backend**: https://github.com/fivedollarfridays/toombos-backend
+- **Dashboard**: https://github.com/fivedollarfridays/toombos-frontend
 
 ### Quick Links
-- Dashboard README: https://github.com/fivedollarfridays/content-generator-dashboard/blob/master/README.md
-- Dashboard Setup: https://github.com/fivedollarfridays/content-generator-dashboard/blob/master/SETUP-SUMMARY.md
+- Dashboard README: https://github.com/fivedollarfridays/toombos-frontend/blob/master/README.md
+- Dashboard Setup: https://github.com/fivedollarfridays/toombos-frontend/blob/master/SETUP-SUMMARY.md
 
 ---
 

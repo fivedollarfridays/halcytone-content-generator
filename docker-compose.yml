@@ -5,12 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: halcytone-content-generator
+    container_name: toombos-backend
     ports:
       - "8000:8000"
     environment:
       # Application settings
-      - APP_NAME=Halcytone Content Generator
+      - APP_NAME=Toombos Backend
       - ENVIRONMENT=development
       - DEBUG=true
       - LOG_LEVEL=INFO
@@ -59,7 +59,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: halcytone-redis
+    container_name: toombos-redis
     ports:
       - "6379:6379"
     volumes:
@@ -77,7 +77,7 @@ services:
   # Optional: PostgreSQL for persistence
   postgres:
     image: postgres:15-alpine
-    container_name: halcytone-postgres
+    container_name: toombos-postgres
     environment:
       - POSTGRES_USER=contentuser
       - POSTGRES_PASSWORD=contentpass
@@ -98,7 +98,7 @@ services:
   # Optional: Monitoring with Prometheus
   prometheus:
     image: prom/prometheus:latest
-    container_name: halcytone-prometheus
+    container_name: toombos-prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -114,7 +114,7 @@ services:
   # Optional: Grafana for visualization
   grafana:
     image: grafana/grafana:latest
-    container_name: halcytone-grafana
+    container_name: toombos-grafana
     ports:
       - "3000:3000"
     environment:
@@ -134,7 +134,7 @@ services:
   # Optional: Jaeger for distributed tracing
   jaeger:
     image: jaegertracing/all-in-one:latest
-    container_name: halcytone-jaeger
+    container_name: toombos-jaeger
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     ports:

@@ -125,8 +125,8 @@ jobs:
         run: |
           docker build \
             --build-arg VERSION=${{ steps.version.outputs.version }} \
-            --tag halcytone-content-generator:${{ steps.version.outputs.version }} \
-            --tag halcytone-content-generator:latest \
+            --tag toombos-backend:${{ steps.version.outputs.version }} \
+            --tag toombos-backend:latest \
             .
 
       - name: Run container security scan
@@ -136,17 +136,17 @@ jobs:
             aquasec/trivy image \
             --severity HIGH,CRITICAL \
             --exit-code 1 \
-            halcytone-content-generator:latest
+            toombos-backend:latest
 
       - name: Save Docker image
         run: |
-          docker save halcytone-content-generator:latest | gzip > halcytone-content-generator.tar.gz
+          docker save toombos-backend:latest | gzip > toombos-backend.tar.gz
 
       - name: Upload Docker image
         uses: actions/upload-artifact@v3
         with:
           name: docker-image
-          path: halcytone-content-generator.tar.gz
+          path: toombos-backend.tar.gz
           retention-days: 7
 
   # Step 2: Configuration validation
@@ -208,7 +208,7 @@ jobs:
 
       - name: Load Docker image
         run: |
-          gunzip -c halcytone-content-generator.tar.gz | docker load
+          gunzip -c toombos-backend.tar.gz | docker load
 
       - name: Deploy to staging
         env:
@@ -224,7 +224,7 @@ jobs:
           # Copy Docker image to staging
           scp -i ~/.ssh/staging_key \
             -o StrictHostKeyChecking=no \
-            halcytone-content-generator.tar.gz \
+            toombos-backend.tar.gz \
             ${STAGING_USER}@${STAGING_HOST}:/tmp/
 
           # Deploy on staging server
@@ -234,7 +234,7 @@ jobs:
             cd /opt/halcytone
 
             # Load new image
-            gunzip -c /tmp/halcytone-content-generator.tar.gz | docker load
+            gunzip -c /tmp/toombos-backend.tar.gz | docker load
 
             # Run database migrations
             docker-compose -f docker-compose.staging.yml run --rm app \
@@ -330,7 +330,7 @@ jobs:
             mkdir -p /backups/${BACKUP_NAME}
 
             # Save current Docker images
-            docker save halcytone-content-generator:latest | \
+            docker save toombos-backend:latest | \
               gzip > /backups/${BACKUP_NAME}/docker-image.tar.gz
 
             # Backup database
@@ -355,7 +355,7 @@ jobs:
           # Copy new image to production
           scp -i ~/.ssh/prod_key \
             -o StrictHostKeyChecking=no \
-            halcytone-content-generator.tar.gz \
+            toombos-backend.tar.gz \
             ${PROD_USER}@${PROD_HOST}:/tmp/
 
           # Deploy with blue-green strategy
@@ -365,8 +365,8 @@ jobs:
             cd /opt/halcytone
 
             # Load new image
-            gunzip -c /tmp/halcytone-content-generator.tar.gz | docker load
-            docker tag halcytone-content-generator:latest halcytone-content-generator:blue
+            gunzip -c /tmp/toombos-backend.tar.gz | docker load
+            docker tag toombos-backend:latest toombos-backend:blue
 
             # Start blue environment
             docker-compose -f docker-compose.production.yml up -d app-blue
@@ -390,7 +390,7 @@ jobs:
             docker-compose -f docker-compose.production.yml stop app-green
 
             # Tag blue as new green for next deployment
-            docker tag halcytone-content-generator:blue halcytone-content-generator:green
+            docker tag toombos-backend:blue toombos-backend:green
           ENDSSH
 
       - name: Verify production deployment

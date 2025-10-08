@@ -89,13 +89,13 @@ pytest tests/ --cov=src --cov-report=term-missing
 # Ensure coverage > 70%
 
 # Step 4: Build Docker image
-docker build -t halcytone-content-generator:v1.0.0 .
+docker build -t toombos-backend:v1.0.0 .
 
 # Step 5: Run security scan
-docker scan halcytone-content-generator:v1.0.0
+docker scan toombos-backend:v1.0.0
 
 # Step 6: Tag image
-docker tag halcytone-content-generator:v1.0.0 \
+docker tag toombos-backend:v1.0.0 \
   registry.halcytone.com/content-generator:v1.0.0
 
 # Step 7: Push to registry
@@ -178,7 +178,7 @@ python scripts/performance_test.py --env production
 ```bash
 # Core Settings
 ENVIRONMENT=production
-APP_NAME=halcytone-content-generator
+APP_NAME=toombos-backend
 LOG_LEVEL=INFO
 DEBUG=false
 

@@ -1,4 +1,4 @@
-# Horizontal Pod Autoscaler for Halcytone Content Generator
+# Horizontal Pod Autoscaler for Toombos
 # Scales based on CPU, memory, and custom metrics
 
 ---

@@ -1,6 +1,6 @@
-# Editor Guide - Halcytone Content Generator
+# Editor Guide - Toombos
 
-A comprehensive guide for content editors using the Halcytone Content Generator system.
+A comprehensive guide for content editors using the Toombos system.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ A comprehensive guide for content editors using the Halcytone Content Generator 
 
 ## Overview
 
-The Halcytone Content Generator automates multi-channel content distribution from living documents (Google Docs, Notion) to:
+The Toombos automates multi-channel content distribution from living documents (Google Docs, Notion) to:
 - Email newsletters (CRM integration)
 - Website content (Platform API)
 - Social media posts (Twitter, LinkedIn, Facebook, Instagram)
@@ -809,4 +809,4 @@ Day 3: <!-- channels: email --> (Newsletter inclusion)
 - [ ] Scheduled timing optimal for audience
 - [ ] Cross-channel coordination planned
 
-This guide serves as your comprehensive reference for effective content creation and management within the Halcytone Content Generator system. Bookmark this page and refer to it regularly to ensure consistent, high-quality content across all channels.
+This guide serves as your comprehensive reference for effective content creation and management within the Toombos system. Bookmark this page and refer to it regularly to ensure consistent, high-quality content across all channels.

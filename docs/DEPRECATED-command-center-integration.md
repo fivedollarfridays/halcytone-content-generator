@@ -2,7 +2,7 @@
 
 **Status**: ❌ **DEPRECATED as of 2025-10-02**
 **Reason**: Outdated architecture assumptions
-**Replacement**: See `docs/content-generator-dashboard.md`
+**Replacement**: See `docs/toombos-frontend.md`
 
 ---
 
@@ -29,7 +29,7 @@ This document was written under the assumption that:
 ## See Updated Documentation
 
 **For Dashboard Development:**
-👉 **`docs/content-generator-dashboard.md`**
+👉 **`docs/toombos-frontend.md`**
 - Standalone dashboard architecture
 - Dashboard repository setup guide
 - Next.js project structure
@@ -57,7 +57,7 @@ If you were following this document:
    - Dashboard is in separate repository
 
 2. **Follow new dashboard guide:**
-   - Create `halcytone-content-generator-dashboard` repository
+   - Create `toombos-backend-dashboard` repository
    - Use Next.js 14 + TypeScript
    - Migrate components from `frontend/` directory
 
@@ -69,7 +69,7 @@ If you were following this document:
 ---
 
 **Document Deprecated**: 2025-10-02
-**Superseded By**: `docs/content-generator-dashboard.md`
+**Superseded By**: `docs/toombos-frontend.md`
 **Reason**: Architecture clarification - standalone product vs Command Center integration
 
 ---
@@ -91,4 +91,4 @@ git log -- docs/command-center-integration.md
 ---
 
 **Do not use this document for new development.**
-**Refer to `docs/content-generator-dashboard.md` instead.**
+**Refer to `docs/toombos-frontend.md` instead.**
