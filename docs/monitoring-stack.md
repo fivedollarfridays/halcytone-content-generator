@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Halcytone Content Generator production monitoring stack provides comprehensive observability through metrics, logs, distributed tracing, and alerting. The stack is designed for production environments with high availability, scalability, and operational efficiency.
+The Toombos production monitoring stack provides comprehensive observability through metrics, logs, distributed tracing, and alerting. The stack is designed for production environments with high availability, scalability, and operational efficiency.
 
 ## Architecture
 
@@ -146,14 +146,14 @@ from src.halcytone_content_generator.monitoring import (
 
 # Setup metrics
 setup_metrics({
-    "service.name": "halcytone-content-generator",
+    "service.name": "toombos-backend",
     "service.version": "0.1.0",
     "environment": "production"
 })
 
 # Setup tracing
 setup_tracing(
-    service_name="halcytone-content-generator",
+    service_name="toombos-backend",
     jaeger_endpoint="http://jaeger:14268/api/traces"
 )
 
@@ -264,7 +264,7 @@ LOG_LEVEL=INFO
 {
   "timestamp": "2024-01-01T12:00:00Z",
   "level": "INFO",
-  "service": "halcytone-content-generator",
+  "service": "toombos-backend",
   "logger": "content.generation",
   "message": "Content generation completed",
   "request_id": "req-12345",

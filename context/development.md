@@ -46,9 +46,9 @@
 
 ## Project Overview
 
-**Project Name:** Halcytone Content Generator - Standalone Product
-**Repository:** halcytone-content-generator (Backend API)
-**Dashboard Repository:** content-generator-dashboard (Separate Next.js app)
+**Project Name:** Toombos - Standalone Product
+**Repository:** toombos-backend (Backend API)
+**Dashboard Repository:** toombos-frontend (Separate Next.js app)
 **Framework:** FastAPI Backend + Next.js Dashboard
 **Production Status:** ✅ **PRODUCTION READY** - 73.23% test coverage achieved
 
@@ -193,7 +193,7 @@
 - **Testing:** pytest, pytest-cov, pytest-asyncio
 - **API Documentation:** OpenAPI/Swagger (auto-generated)
 
-### Frontend (Separate Repository: content-generator-dashboard)
+### Frontend (Separate Repository: toombos-frontend)
 - **Framework:** Next.js 15.5.4
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
@@ -220,8 +220,8 @@
 ## Repository Structure
 
 ```
-halcytone-content-generator/
-├── src/halcytone_content_generator/
+toombos-backend/
+├── src/halcytone_content_generator/  # Python package (internal name)
 │   ├── api/                 # FastAPI endpoints
 │   ├── core/                # Core utilities and auth
 │   ├── services/            # Business logic services

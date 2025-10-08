@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Halcytone Content Generator dry run system includes comprehensive mock services that simulate external API behavior without making actual external calls. This documentation covers the Mock CRM Service and Mock Platform Service APIs.
+The Toombos dry run system includes comprehensive mock services that simulate external API behavior without making actual external calls. This documentation covers the Mock CRM Service and Mock Platform Service APIs.
 
 **Version:** Sprint 5 - Documentation & Production Readiness
 **Last Updated:** 2025-01-24

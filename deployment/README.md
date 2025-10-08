@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-Comprehensive deployment configuration for Halcytone Content Generator with support for Docker Compose and Kubernetes.
+Comprehensive deployment configuration for Toombos Backend with support for Docker Compose and Kubernetes.
 
 ## Table of Contents
 
@@ -39,8 +39,8 @@ Before deployment, ensure you have:
 
 ```bash
 # Clone repository
-git clone <repository-url>
-cd halcytone-content-generator
+git clone https://github.com/fivedollarfridays/toombos-backend.git
+cd toombos-backend
 
 # Copy environment template
 cp .env.production.template .env.production

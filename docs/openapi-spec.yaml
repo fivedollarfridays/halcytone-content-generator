@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Halcytone Content Generator API
+  title: Toombos API
   description: |
     RESTful API for content generation, validation, and multi-channel distribution.
 

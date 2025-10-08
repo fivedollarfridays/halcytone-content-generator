@@ -1,8 +1,8 @@
-# Halcytone Content Generator - Troubleshooting Guide
+# Toombos - Troubleshooting Guide
 
 ## Overview
 
-This troubleshooting guide provides systematic approaches to diagnosing and resolving issues with the Halcytone Content Generator dry run system.
+This troubleshooting guide provides systematic approaches to diagnosing and resolving issues with the Toombos dry run system.
 
 **Version:** Sprint 5 - Documentation & Production Readiness
 **Last Updated:** 2025-01-24
@@ -806,14 +806,14 @@ EOF
 chmod +x scripts/health-check-cron.sh
 
 # Add to crontab
-echo "*/5 * * * * /path/to/halcytone-content-generator/scripts/health-check-cron.sh" | crontab -
+echo "*/5 * * * * /path/to/toombos-backend/scripts/health-check-cron.sh" | crontab -
 ```
 
 #### Log Rotation Setup
 ```bash
 # Configure log rotation
 sudo cat > /etc/logrotate.d/halcytone << 'EOF'
-/path/to/halcytone-content-generator/logs/*.log {
+/path/to/toombos-backend/logs/*.log {
     daily
     rotate 30
     compress
@@ -853,7 +853,7 @@ EOF
 chmod +x scripts/daily-backup.sh
 
 # Add to crontab
-echo "0 2 * * * /path/to/halcytone-content-generator/scripts/daily-backup.sh" | crontab -
+echo "0 2 * * * /path/to/toombos-backend/scripts/daily-backup.sh" | crontab -
 ```
 
 ---
@@ -951,7 +951,7 @@ EOF
 4. **Run Diagnostics**: Use provided diagnostic scripts
 
 #### External Support
-- **GitHub Issues**: https://github.com/company/halcytone-content-generator/issues
+- **GitHub Issues**: https://github.com/company/toombos-backend/issues
 - **Slack Channel**: #halcytone-support
 - **Email**: support@halcytone.local
 

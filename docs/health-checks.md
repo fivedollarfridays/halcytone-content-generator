@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Halcytone Content Generator implements comprehensive health checks for production monitoring, container orchestration, and operational visibility. The system provides multiple endpoints optimized for different use cases.
+The Toombos implements comprehensive health checks for production monitoring, container orchestration, and operational visibility. The system provides multiple endpoints optimized for different use cases.
 
 ## Health Check Endpoints
 
@@ -62,7 +62,7 @@ The system monitors the following components:
 {
   "status": "healthy",
   "timestamp": "2024-01-01T12:00:00Z",
-  "service": "halcytone-content-generator",
+  "service": "toombos-backend",
   "version": "0.1.0",
   "environment": "production",
   "uptime_seconds": 3600.5
@@ -74,7 +74,7 @@ The system monitors the following components:
 {
   "status": "healthy",
   "timestamp": "2024-01-01T12:00:00Z",
-  "service": "halcytone-content-generator",
+  "service": "toombos-backend",
   "version": "0.1.0",
   "environment": "production",
   "uptime_seconds": 3600.5,
@@ -207,15 +207,15 @@ The `/metrics` endpoint provides Prometheus-compatible metrics:
 ```
 # HELP app_uptime_seconds Application uptime in seconds
 # TYPE app_uptime_seconds gauge
-app_uptime_seconds{service="halcytone-content-generator",environment="production"} 3600.5
+app_uptime_seconds{service="toombos-backend",environment="production"} 3600.5
 
 # HELP app_component_health Component health status (1=healthy, 0=unhealthy)
 # TYPE app_component_health gauge
-app_component_health{component="database",service="halcytone-content-generator",environment="production"} 1
+app_component_health{component="database",service="toombos-backend",environment="production"} 1
 
 # HELP app_memory_usage_percent Memory usage percentage
 # TYPE app_memory_usage_percent gauge
-app_memory_usage_percent{service="halcytone-content-generator",environment="production"} 45.2
+app_memory_usage_percent{service="toombos-backend",environment="production"} 45.2
 ```
 
 ### Alerting Rules
@@ -227,7 +227,7 @@ groups:
 - name: halcytone-health
   rules:
   - alert: ServiceUnhealthy
-    expr: app_component_health{service="halcytone-content-generator"} == 0
+    expr: app_component_health{service="toombos-backend"} == 0
     for: 2m
     labels:
       severity: critical
@@ -235,7 +235,7 @@ groups:
       summary: "Halcytone component {{ $labels.component }} is unhealthy"
 
   - alert: HighMemoryUsage
-    expr: app_memory_usage_percent{service="halcytone-content-generator"} > 80
+    expr: app_memory_usage_percent{service="toombos-backend"} > 80
     for: 5m
     labels:
       severity: warning

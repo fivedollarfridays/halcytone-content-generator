@@ -12,7 +12,7 @@
 
 ## Executive Summary
 
-The Halcytone Content Generator codebase has achieved **40% test coverage** (up from 37%), with **4,522 lines covered** out of 11,320 total statements. While significant progress has been made in core modules like caching (84%), content validation (79%), and enhanced config (80%), substantial gaps remain in critical business logic, integration tests, and observability systems.
+The Toombos codebase has achieved **40% test coverage** (up from 37%), with **4,522 lines covered** out of 11,320 total statements. While significant progress has been made in core modules like caching (84%), content validation (79%), and enhanced config (80%), substantial gaps remain in critical business logic, integration tests, and observability systems.
 
 ### Key Achievements ✅
 - **+69 new tests** added in recent sessions

@@ -9,13 +9,13 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  # Halcytone Content Generator Logs
-  - job_name: halcytone-content-generator
+  # Toombos Logs
+  - job_name: toombos-backend
     static_configs:
       - targets:
           - localhost
         labels:
-          job: halcytone-content-generator
+          job: toombos-backend
           service: content-generator
           environment: dry-run
           __path__: /var/log/halcytone/content-generator.log

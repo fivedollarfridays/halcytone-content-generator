@@ -17,7 +17,7 @@ Updated all documentation to clarify that **Content Generator is a standalone co
 
 ### New Documentation Created
 
-1. **`docs/content-generator-dashboard.md`** (New - 636 lines)
+1. **`docs/toombos-frontend.md`** (New - 636 lines)
    - Standalone dashboard architecture guide
    - Repository setup instructions
    - Tech stack recommendations
@@ -60,7 +60,7 @@ Updated all documentation to clarify that **Content Generator is a standalone co
 ### Documentation Deprecated
 
 1. **`docs/command-center-integration.md`** → **DEPRECATED**
-   - Superseded by: `docs/content-generator-dashboard.md`
+   - Superseded by: `docs/toombos-frontend.md`
    - Reason: Assumed CG would integrate into Command Center
    - Reality: CG is standalone with own dashboard
 
@@ -110,7 +110,7 @@ Updated all documentation to clarify that **Content Generator is a standalone co
 
 ### If You Were Following Old Docs
 1. **Ignore "Command Center integration" references**
-   - Use `docs/content-generator-dashboard.md` instead
+   - Use `docs/toombos-frontend.md` instead
    - Use `docs/ARCHITECTURE-STANDALONE-PRODUCT.md` for overview
 
 2. **Current priorities are:**
@@ -126,7 +126,7 @@ Updated all documentation to clarify that **Content Generator is a standalone co
 ### New Developer Onboarding
 1. Read `docs/ARCHITECTURE-STANDALONE-PRODUCT.md` first
 2. Review `context/development.md` for current state
-3. Follow `docs/content-generator-dashboard.md` when ready for dashboard work
+3. Follow `docs/toombos-frontend.md` when ready for dashboard work
 4. Ignore any docs marked "DEPRECATED"
 
 ---
@@ -136,7 +136,7 @@ Updated all documentation to clarify that **Content Generator is a standalone co
 ### Primary Sources of Truth (Updated)
 - ✅ `context/development.md` - Current development state
 - ✅ `docs/ARCHITECTURE-STANDALONE-PRODUCT.md` - Architecture overview
-- ✅ `docs/content-generator-dashboard.md` - Dashboard guide
+- ✅ `docs/toombos-frontend.md` - Dashboard guide
 - ✅ `docs/status-review-2025-10-02.md` - Current status & roadmap
 
 ### Supporting Documentation (Still Valid)
@@ -146,7 +146,7 @@ Updated all documentation to clarify that **Content Generator is a standalone co
 - ✅ `docs/phase-1-completion-summary.md` - Test coverage progress
 
 ### Deprecated Documentation
-- ❌ `docs/command-center-integration.md` → Use `content-generator-dashboard.md`
+- ❌ `docs/command-center-integration.md` → Use `toombos-frontend.md`
 - ❌ References to "decoupling from Command Center" → Standalone product
 
 ---
@@ -184,7 +184,7 @@ Updated all documentation to clarify that **Content Generator is a standalone co
 ### Completed ✅
 - [x] Create new architecture overview document
 - [x] Update context/development.md with current state
-- [x] Create dashboard guide (content-generator-dashboard.md)
+- [x] Create dashboard guide (toombos-frontend.md)
 - [x] Deprecate old Command Center integration doc
 - [x] Document coverage investigation results
 - [x] Update Context Sync in development.md
@@ -203,7 +203,7 @@ Updated all documentation to clarify that **Content Generator is a standalone co
 | File | Type | Lines | Impact |
 |------|------|-------|--------|
 | `context/development.md` | Updated | ~450 | High |
-| `docs/content-generator-dashboard.md` | New | 636 | High |
+| `docs/toombos-frontend.md` | New | 636 | High |
 | `docs/ARCHITECTURE-STANDALONE-PRODUCT.md` | New | 248 | High |
 | `docs/DEPRECATED-command-center-integration.md` | New | 90 | Medium |
 | `docs/DOCUMENTATION-UPDATE-2025-10-02.md` | New | This file | Medium |

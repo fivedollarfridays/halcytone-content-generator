@@ -11,7 +11,7 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│  Halcytone Content Generator Dashboard      │
+│  Toombos Dashboard      │
 │  (Dedicated Repository - To Be Created)     │
 │  - Next.js/React Application                │
 │  - Content Management UI                    │
@@ -23,7 +23,7 @@
                  │ HTTP/REST + WebSocket
                  ▼
 ┌─────────────────────────────────────────────┐
-│  Halcytone Content Generator API            │
+│  Toombos API            │
 │  (This Repository)                          │
 │  - FastAPI Backend                          │
 │  - REST Endpoints                           │
@@ -43,8 +43,8 @@
 - **Target**: Direct customers (not internal tool)
 - **Dashboard**: Dedicated UI for content generator customers
 - **Repository Structure**:
-  - Backend API: `halcytone-content-generator` (this repo)
-  - Dashboard UI: `halcytone-content-generator-dashboard` (to be created)
+  - Backend API: `toombos-backend` (this repo)
+  - Dashboard UI: `toombos-backend-dashboard` (to be created)
 
 ### Existing Command Center
 - **Product**: Separate internal/commercial platform
@@ -92,7 +92,7 @@ The backend API is production-ready and waiting for its dedicated dashboard:
 ## Dashboard Repository Requirements
 
 ### Repository Name
-`halcytone-content-generator-dashboard`
+`toombos-backend-dashboard`
 
 ### Recommended Tech Stack
 
@@ -124,8 +124,8 @@ Styling: Tailwind CSS
 
 ```bash
 # Create new repository
-mkdir halcytone-content-generator-dashboard
-cd halcytone-content-generator-dashboard
+mkdir toombos-backend-dashboard
+cd toombos-backend-dashboard
 git init
 
 # Option 1: Next.js
@@ -158,7 +158,7 @@ echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
 
 ### Available Components (To Be Migrated)
 
-Located in `halcytone-content-generator/frontend/src/components/`:
+Located in `toombos-backend/frontend/src/components/`:
 
 1. **ContentGeneratorHealth.tsx** (285 lines)
    - Health status monitoring
@@ -190,13 +190,13 @@ Located in `halcytone-content-generator/frontend/src/components/`:
    ```bash
    # From content-generator repo
    cp -r frontend/src/components/* \
-     ../halcytone-content-generator-dashboard/src/components/
+     ../toombos-backend-dashboard/src/components/
 
    cp -r frontend/src/lib/* \
-     ../halcytone-content-generator-dashboard/src/lib/
+     ../toombos-backend-dashboard/src/lib/
 
    cp -r frontend/src/types/* \
-     ../halcytone-content-generator-dashboard/src/types/
+     ../toombos-backend-dashboard/src/types/
    ```
 
 2. **Update Imports**
@@ -338,8 +338,8 @@ See **API Documentation**: http://localhost:8000/docs
 
 ```bash
 # Create new repo
-mkdir halcytone-content-generator-dashboard
-cd halcytone-content-generator-dashboard
+mkdir toombos-backend-dashboard
+cd toombos-backend-dashboard
 git init
 
 # Set up Next.js
@@ -371,7 +371,7 @@ NEXT_PUBLIC_WS_URL=ws://localhost:8000
 ### Step 4: Set Up Project Structure
 
 ```
-halcytone-content-generator-dashboard/
+toombos-backend-dashboard/
 ├── src/
 │   ├── app/                 # Next.js app router
 │   │   ├── page.tsx        # Dashboard home
@@ -392,11 +392,11 @@ halcytone-content-generator-dashboard/
 
 ```bash
 # Terminal 1: Backend API
-cd halcytone-content-generator
+cd toombos-backend
 python -m uvicorn src.halcytone_content_generator.main:app --reload
 
 # Terminal 2: Dashboard
-cd halcytone-content-generator-dashboard
+cd toombos-backend-dashboard
 npm run dev
 ```
 
@@ -476,7 +476,7 @@ allow_origins=[
 ## Next Steps
 
 ### Immediate (After 70% Test Coverage)
-1. **Create Repository**: `halcytone-content-generator-dashboard`
+1. **Create Repository**: `toombos-backend-dashboard`
 2. **Set Up Next.js**: Initialize project with TypeScript + Tailwind
 3. **Install bpsai-pair**: `pip install bpsai-pair` and configure
 4. **Migrate Components**: Copy from `frontend/` and adapt
@@ -496,13 +496,13 @@ allow_origins=[
 
 ### ⚠️ Key Distinctions
 
-**This Repository** (`halcytone-content-generator`):
+**This Repository** (`toombos-backend`):
 - Backend API for standalone content generation product
 - FastAPI service
 - Headless architecture
 - Will be consumed by dedicated dashboard
 
-**Dashboard Repository** (`halcytone-content-generator-dashboard`):
+**Dashboard Repository** (`toombos-backend-dashboard`):
 - Frontend UI for content generator customers
 - Standalone Next.js application
 - Dedicated to content generator product only
@@ -515,6 +515,6 @@ allow_origins=[
 ---
 
 **Status**: ⏸️ **Waiting for Test Coverage Completion (70%)**
-**Next**: Create `halcytone-content-generator-dashboard` repository (Sprint 2)
+**Next**: Create `toombos-backend-dashboard` repository (Sprint 2)
 **Timeline**: 2-3 weeks (after current test coverage work)
 

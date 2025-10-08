@@ -3,14 +3,14 @@ groups:
     rules:
       # Service Health Alerts
       - alert: HalcytoneServiceDown
-        expr: up{job="halcytone-content-generator"} == 0
+        expr: up{job="toombos-backend"} == 0
         for: 30s
         labels:
           severity: critical
           service: halcytone
         annotations:
-          summary: "Halcytone Content Generator service is down"
-          description: "The main Halcytone Content Generator service has been down for more than 30 seconds."
+          summary: "Toombos service is down"
+          description: "The main Toombos service has been down for more than 30 seconds."
 
       - alert: MockCRMServiceDown
         expr: up{job="mock-crm-service"} == 0

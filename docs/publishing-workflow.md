@@ -17,7 +17,7 @@ Complete documentation of the content lifecycle from creation to multi-channel d
 
 ## Overview
 
-The Halcytone Content Generator follows a structured workflow that ensures content quality, brand consistency, and optimal distribution across multiple channels. The system implements a **creation → review → publish** pipeline with comprehensive validation at each stage.
+The Toombos follows a structured workflow that ensures content quality, brand consistency, and optimal distribution across multiple channels. The system implements a **creation → review → publish** pipeline with comprehensive validation at each stage.
 
 ### Workflow Stages
 

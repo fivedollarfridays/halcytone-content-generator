@@ -1,6 +1,6 @@
 # Production Deployment Checklist
 
-Complete checklist for deploying the Halcytone Content Generator to production.
+Complete checklist for deploying the Toombos to production.
 
 **Deployment Date**: _____________
 **Deployment Manager**: _____________

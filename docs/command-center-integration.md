@@ -7,7 +7,7 @@
 
 ## Overview
 
-The **Halcytone Content Generator** is a **headless backend service** designed to be consumed by a separate **Command Center/Hub UI application**. This document describes the integration points and APIs available for building a front-end dashboard.
+The **Toombos** is a **headless backend service** designed to be consumed by a separate **Command Center/Hub UI application**. This document describes the integration points and APIs available for building a front-end dashboard.
 
 ---
 
@@ -24,7 +24,7 @@ The **Halcytone Content Generator** is a **headless backend service** designed t
                  │ HTTP/REST + WebSocket
                  ▼
 ┌─────────────────────────────────────┐
-│  Halcytone Content Generator API    │
+│  Toombos API    │
 │  (This Repository)                   │
 │  - FastAPI Backend                   │
 │  - REST Endpoints                    │
@@ -525,7 +525,7 @@ Charts: Tremor or Recharts
 
 ```bash
 # Start the content generator API
-cd halcytone-content-generator
+cd toombos-backend
 docker-compose up -d
 
 # Or run locally

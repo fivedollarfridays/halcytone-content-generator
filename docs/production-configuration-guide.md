@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers the comprehensive production configuration management system for the Halcytone Content Generator, including secure secrets management, environment-specific settings, and deployment validation.
+This guide covers the comprehensive production configuration management system for the Toombos, including secure secrets management, environment-specific settings, and deployment validation.
 
 ## Table of Contents
 
@@ -515,7 +515,7 @@ python -c "import asyncio; from src.db import test_connection; asyncio.run(test_
 version: '3.8'
 services:
   content-generator:
-    image: halcytone-content-generator:latest
+    image: toombos-backend:latest
     environment:
       - ENVIRONMENT=production
       - SECRETS_PROVIDER=azure_key_vault
@@ -537,7 +537,7 @@ spec:
     spec:
       containers:
       - name: content-generator
-        image: halcytone-content-generator:latest
+        image: toombos-backend:latest
         env:
         - name: ENVIRONMENT
           value: "production"

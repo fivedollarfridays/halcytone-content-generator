@@ -14,7 +14,7 @@ filebeat.inputs:
       - /var/log/halcytone/application/*.log
     fields:
       log_type: application
-      service: halcytone-content-generator
+      service: toombos-backend
     fields_under_root: true
     multiline.pattern: '^\d{4}-\d{2}-\d{2}'
     multiline.negate: true

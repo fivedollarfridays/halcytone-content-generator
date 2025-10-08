@@ -1,8 +1,8 @@
-# Halcytone Content Generator - Incident Response Playbook
+# Toombos - Incident Response Playbook
 
 ## Overview
 
-This incident response playbook provides structured procedures for identifying, responding to, and resolving incidents in the Halcytone Content Generator dry run system.
+This incident response playbook provides structured procedures for identifying, responding to, and resolving incidents in the Toombos dry run system.
 
 **Version:** Sprint 5 - Documentation & Production Readiness
 **Last Updated:** 2025-01-24

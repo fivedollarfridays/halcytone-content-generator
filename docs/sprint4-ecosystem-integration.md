@@ -2,7 +2,7 @@
 
 ## Overview
 
-Sprint 4 introduces advanced tone management and cache invalidation systems to the Halcytone Content Generator, enabling sophisticated content personalization and optimized performance across all channels.
+Sprint 4 introduces advanced tone management and cache invalidation systems to the Toombos, enabling sophisticated content personalization and optimized performance across all channels.
 
 ## 🎯 Features Implemented
 

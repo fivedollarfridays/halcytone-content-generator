@@ -1,8 +1,8 @@
-# Halcytone Content Generator - Monitoring Runbook
+# Toombos - Monitoring Runbook
 
 ## Overview
 
-This runbook provides operational guidance for the Halcytone Content Generator monitoring infrastructure, part of Sprint 4 (Monitoring & Observability).
+This runbook provides operational guidance for the Toombos monitoring infrastructure, part of Sprint 4 (Monitoring & Observability).
 
 ### Architecture
 
@@ -90,10 +90,10 @@ docker ps | grep halcytone
 curl -f http://localhost:8000/health || echo "Service down"
 
 # Check application logs
-docker logs halcytone-content-generator
+docker logs toombos-backend
 
 # Restart if needed
-docker-compose restart halcytone-content-generator
+docker-compose restart toombos-backend
 ```
 
 #### Mock Services Down
@@ -151,16 +151,16 @@ python mocks/platform_service.py &
 2. **Query Examples**:
    ```
    # All application logs
-   {job="halcytone-content-generator"}
+   {job="toombos-backend"}
 
    # Error logs only
-   {job="halcytone-content-generator"} |= "ERROR"
+   {job="toombos-backend"} |= "ERROR"
 
    # Mock service logs
    {job=~"mock-.*-service"}
 
    # Filter by time range
-   {job="halcytone-content-generator"} |= "content generation" | json | __error__=""
+   {job="toombos-backend"} |= "content generation" | json | __error__=""
    ```
 
 ### Common Log Patterns

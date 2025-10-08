@@ -3,27 +3,27 @@ groups:
     rules:
       # Application Health Alerts
       - alert: ApplicationDown
-        expr: up{job="halcytone-content-generator"} == 0
+        expr: up{job="toombos-backend"} == 0
         for: 1m
         labels:
           severity: critical
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
-          summary: "Halcytone Content Generator is down"
-          description: "The Halcytone Content Generator application has been down for more than 1 minute."
+          summary: "Toombos is down"
+          description: "The Toombos application has been down for more than 1 minute."
           runbook: "https://docs.halcytone.com/runbooks/application-down"
 
       - alert: ApplicationUnhealthy
-        expr: app_component_health{service="halcytone-content-generator"} == 0
+        expr: app_component_health{service="toombos-backend"} == 0
         for: 2m
         labels:
           severity: critical
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "Application component {{ $labels.component }} is unhealthy"
-          description: "Component {{ $labels.component }} in Halcytone Content Generator has been unhealthy for more than 2 minutes."
+          description: "Component {{ $labels.component }} in Toombos has been unhealthy for more than 2 minutes."
           runbook: "https://docs.halcytone.com/runbooks/component-unhealthy"
 
       - alert: HighErrorRate
@@ -31,7 +31,7 @@ groups:
         for: 5m
         labels:
           severity: warning
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "High error rate detected"
@@ -43,7 +43,7 @@ groups:
         for: 5m
         labels:
           severity: warning
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "High response time detected"
@@ -55,7 +55,7 @@ groups:
         for: 3m
         labels:
           severity: warning
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "Health check success rate is low"
@@ -67,7 +67,7 @@ groups:
         for: 1m
         labels:
           severity: critical
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "Database connection failed"
@@ -80,7 +80,7 @@ groups:
         for: 3m
         labels:
           severity: warning
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "External services unavailable"
@@ -93,7 +93,7 @@ groups:
         for: 5m
         labels:
           severity: warning
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "High memory usage"
@@ -105,7 +105,7 @@ groups:
         for: 1m
         labels:
           severity: critical
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "Critical memory usage"
@@ -117,7 +117,7 @@ groups:
         for: 10m
         labels:
           severity: warning
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "High CPU usage"
@@ -128,7 +128,7 @@ groups:
         for: 5m
         labels:
           severity: warning
-          service: halcytone-content-generator
+          service: toombos-backend
           team: platform
         annotations:
           summary: "High disk usage"
@@ -141,7 +141,7 @@ groups:
         for: 5m
         labels:
           severity: warning
-          service: halcytone-content-generator
+          service: toombos-backend
           team: content
         annotations:
           summary: "High content generation failure rate"
@@ -152,7 +152,7 @@ groups:
         for: 5m
         labels:
           severity: warning
-          service: halcytone-content-generator
+          service: toombos-backend
           team: content
         annotations:
           summary: "Slow content generation"

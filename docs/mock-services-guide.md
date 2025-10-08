@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Halcytone Content Generator includes comprehensive mock services for development and testing without external dependencies. This guide covers how to start, manage, and use mock services.
+The Toombos includes comprehensive mock services for development and testing without external dependencies. This guide covers how to start, manage, and use mock services.
 
 ## Mock Services Available
 

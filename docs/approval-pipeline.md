@@ -5,7 +5,7 @@ Comprehensive approval system ensuring content quality, brand consistency, and s
 
 ## Overview
 
-The Halcytone Content Generator approval pipeline implements a multi-tiered review system that balances content quality with publication efficiency. The system automatically routes content through appropriate approval levels based on content type, priority, and business impact.
+The Toombos approval pipeline implements a multi-tiered review system that balances content quality with publication efficiency. The system automatically routes content through appropriate approval levels based on content type, priority, and business impact.
 
 ## Approval Matrix
 

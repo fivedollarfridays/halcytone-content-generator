@@ -1,6 +1,6 @@
 # Test Coverage Summary
 
-**Project:** Halcytone Content Generator
+**Project:** Toombos
 **Sprint:** Sprint 1 - Foundation & Cleanup
 **Date:** January 2025
 **Overall Coverage:** 26% (up from 11%)

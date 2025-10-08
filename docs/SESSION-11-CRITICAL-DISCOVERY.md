@@ -68,7 +68,7 @@ addopts =
 ```python
 # Created src/__init__.py
 """
-Halcytone Content Generator - Source package
+Toombos - Source package
 """
 ```
 

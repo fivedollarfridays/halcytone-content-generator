@@ -12,7 +12,7 @@
 
 ## Overview
 
-This guide provides comprehensive procedures for managing secrets, rotating API keys, and maintaining security compliance for the Halcytone Content Generator production environment.
+This guide provides comprehensive procedures for managing secrets, rotating API keys, and maintaining security compliance for the Toombos production environment.
 
 ### Critical Secrets Inventory
 
@@ -299,7 +299,7 @@ openai_key = vault.get_secret('halcytone/production/openai', 'api_key')
 ```bash
 # 1. Create new service account
 gcloud iam service-accounts create halcytone-prod-v2 \
-  --display-name="Halcytone Content Generator Production v2"
+  --display-name="Toombos Production v2"
 
 # 2. Grant necessary permissions
 gcloud projects add-iam-policy-binding PROJECT_ID \

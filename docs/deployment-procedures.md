@@ -1,8 +1,8 @@
-# Halcytone Content Generator - Deployment Procedures
+# Toombos - Deployment Procedures
 
 ## Overview
 
-This document provides comprehensive deployment procedures for the Halcytone Content Generator dry run system across different environments: local development, staging, and production simulation.
+This document provides comprehensive deployment procedures for the Toombos dry run system across different environments: local development, staging, and production simulation.
 
 **Version:** Sprint 5 - Documentation & Production Readiness
 **Last Updated:** 2025-01-24
@@ -101,7 +101,7 @@ curl --version
 ### Access Requirements
 
 #### Repository Access
-- **Git Repository**: Access to Halcytone Content Generator repository
+- **Git Repository**: Access to Toombos repository
 - **Credentials**: SSH key or HTTPS authentication configured
 - **Permissions**: Read access minimum, write access for contributors
 
@@ -122,7 +122,7 @@ curl --version
 # Sprint 5 - Production Ready Configuration
 
 # === SERVICE IDENTIFICATION ===
-SERVICE_NAME=halcytone-content-generator
+SERVICE_NAME=toombos-backend
 SERVICE_VERSION=1.0.0
 ENVIRONMENT=production-simulation
 
@@ -256,8 +256,8 @@ chmod 644 cert.pem
 #### 1. Repository Setup
 ```bash
 # Clone repository
-git clone https://github.com/company/halcytone-content-generator.git
-cd halcytone-content-generator
+git clone https://github.com/company/toombos-backend.git
+cd toombos-backend
 
 # Switch to development branch
 git checkout develop
@@ -407,8 +407,8 @@ sudo usermod -aG sudo halcytone
 sudo su - halcytone
 
 # Clone repository
-git clone https://github.com/company/halcytone-content-generator.git
-cd halcytone-content-generator
+git clone https://github.com/company/toombos-backend.git
+cd toombos-backend
 
 # Checkout staging branch
 git checkout staging
@@ -446,32 +446,32 @@ nano .env.staging
 programs=halcytone-main,halcytone-crm-mock,halcytone-platform-mock
 
 [program:halcytone-main]
-command=/home/halcytone/halcytone-content-generator/venv/bin/python -m uvicorn src.halcytone_content_generator.main:app --host 0.0.0.0 --port 8000 --workers 2
-directory=/home/halcytone/halcytone-content-generator
+command=/home/halcytone/toombos-backend/venv/bin/python -m uvicorn src.halcytone_content_generator.main:app --host 0.0.0.0 --port 8000 --workers 2
+directory=/home/halcytone/toombos-backend
 user=halcytone
 autostart=true
 autorestart=true
-stdout_logfile=/home/halcytone/halcytone-content-generator/logs/main.log
-stderr_logfile=/home/halcytone/halcytone-content-generator/logs/main-error.log
-environment=PATH="/home/halcytone/halcytone-content-generator/venv/bin"
+stdout_logfile=/home/halcytone/toombos-backend/logs/main.log
+stderr_logfile=/home/halcytone/toombos-backend/logs/main-error.log
+environment=PATH="/home/halcytone/toombos-backend/venv/bin"
 
 [program:halcytone-crm-mock]
-command=/home/halcytone/halcytone-content-generator/venv/bin/python mocks/crm_service.py
-directory=/home/halcytone/halcytone-content-generator
+command=/home/halcytone/toombos-backend/venv/bin/python mocks/crm_service.py
+directory=/home/halcytone/toombos-backend
 user=halcytone
 autostart=true
 autorestart=true
-stdout_logfile=/home/halcytone/halcytone-content-generator/logs/crm-mock.log
-stderr_logfile=/home/halcytone/halcytone-content-generator/logs/crm-mock-error.log
+stdout_logfile=/home/halcytone/toombos-backend/logs/crm-mock.log
+stderr_logfile=/home/halcytone/toombos-backend/logs/crm-mock-error.log
 
 [program:halcytone-platform-mock]
-command=/home/halcytone/halcytone-content-generator/venv/bin/python mocks/platform_service.py
-directory=/home/halcytone/halcytone-content-generator
+command=/home/halcytone/toombos-backend/venv/bin/python mocks/platform_service.py
+directory=/home/halcytone/toombos-backend
 user=halcytone
 autostart=true
 autorestart=true
-stdout_logfile=/home/halcytone/halcytone-content-generator/logs/platform-mock.log
-stderr_logfile=/home/halcytone/halcytone-content-generator/logs/platform-mock-error.log
+stdout_logfile=/home/halcytone/toombos-backend/logs/platform-mock.log
+stderr_logfile=/home/halcytone/toombos-backend/logs/platform-mock-error.log
 ```
 
 **Nginx Configuration (`/etc/nginx/sites-available/halcytone`):**
@@ -589,8 +589,8 @@ sudo chmod 600 /home/halcytone-prod/.ssh/authorized_keys
 sudo su - halcytone-prod
 
 # Deploy application
-git clone https://github.com/company/halcytone-content-generator.git
-cd halcytone-content-generator
+git clone https://github.com/company/toombos-backend.git
+cd toombos-backend
 git checkout main  # Production branch
 
 # Setup environment
@@ -631,7 +631,7 @@ CORS_ALLOWED_ORIGINS=["https://halcytone.com"]
 ```bash
 # Create log rotation configuration
 sudo tee /etc/logrotate.d/halcytone << EOF
-/home/halcytone-prod/halcytone-content-generator/logs/*.log {
+/home/halcytone-prod/toombos-backend/logs/*.log {
     daily
     rotate 30
     compress
@@ -1082,7 +1082,7 @@ print(f'Dry run mode: {s.DRY_RUN_MODE}')
 
 set -e
 
-echo "=== Halcytone Content Generator Health Check ==="
+echo "=== Toombos Health Check ==="
 echo "Timestamp: $(date)"
 echo
 
@@ -1189,7 +1189,7 @@ echo "Health check completed at $(date)"
 #### 1. Cron-based Health Checks
 ```bash
 # Add to crontab
-echo "*/5 * * * * /home/halcytone/halcytone-content-generator/scripts/health-check-all.sh >> /var/log/halcytone-health.log 2>&1" | crontab -
+echo "*/5 * * * * /home/halcytone/toombos-backend/scripts/health-check-all.sh >> /var/log/halcytone-health.log 2>&1" | crontab -
 ```
 
 #### 2. Systemd Health Check Service
@@ -1202,7 +1202,7 @@ After=network.target
 [Service]
 Type=oneshot
 User=halcytone
-ExecStart=/home/halcytone/halcytone-content-generator/scripts/health-check-all.sh
+ExecStart=/home/halcytone/toombos-backend/scripts/health-check-all.sh
 StandardOutput=journal
 StandardError=journal
 
@@ -1336,7 +1336,7 @@ echo "$(date): Deployment validated successfully" >> deployments.log
 # Fix file permissions
 chmod +x scripts/*.sh
 chmod 600 .env*
-chown -R halcytone:halcytone /home/halcytone/halcytone-content-generator
+chown -R halcytone:halcytone /home/halcytone/toombos-backend
 
 # Fix log directory permissions
 mkdir -p logs

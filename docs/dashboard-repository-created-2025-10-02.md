@@ -1,8 +1,8 @@
 # Dashboard Repository Created - October 2, 2025
 
 **Status**: ✅ Complete
-**Repository**: `content-generator-dashboard`
-**Location**: `/c/Users/kmast/PycharmProjects/content-generator-dashboard`
+**Repository**: `toombos-frontend`
+**Location**: `/c/Users/kmast/PycharmProjects/toombos-frontend`
 **Date**: 2025-10-02
 
 ---
@@ -16,10 +16,10 @@ Successfully created the **Content Generator Dashboard** repository as planned i
 ## What Was Created
 
 ### Repository Details
-- **Name**: content-generator-dashboard
+- **Name**: toombos-frontend
 - **Framework**: Next.js 15.5.4 with TypeScript
 - **Styling**: Tailwind CSS
-- **Location**: `C:\Users\kmast\PycharmProjects\content-generator-dashboard`
+- **Location**: `C:\Users\kmast\PycharmProjects\toombos-frontend`
 - **Build Status**: ✅ Passing (0 errors)
 - **Git Commits**: 3 commits
 
@@ -59,7 +59,7 @@ Successfully created the **Content Generator Dashboard** repository as planned i
 - **.bpsai/config.yaml** (137 lines) - Coding standards
 
 ### In This Repository
-- **docs/content-generator-dashboard.md** (636 lines) - Dashboard architecture guide
+- **docs/toombos-frontend.md** (636 lines) - Dashboard architecture guide
 - **docs/ARCHITECTURE-STANDALONE-PRODUCT.md** (248 lines) - Product overview
 - **docs/DOCUMENTATION-UPDATE-2025-10-02.md** - Architecture clarification
 
@@ -68,7 +68,7 @@ Successfully created the **Content Generator Dashboard** repository as planned i
 ## Migration Details
 
 ### Components Migrated
-All 6 components from `halcytone-content-generator/frontend/src/components/`:
+All 6 components from `toombos-backend/frontend/src/components/`:
 
 | Component | Lines | Status |
 |-----------|-------|--------|
@@ -217,21 +217,21 @@ a1127fb feat: Add bpsai-pair configuration
 
 ### Start Dashboard (Development)
 ```bash
-cd /c/Users/kmast/PycharmProjects/content-generator-dashboard
+cd /c/Users/kmast/PycharmProjects/toombos-frontend
 npm run dev
 # Visit http://localhost:3000
 ```
 
 ### Start Backend API (Required)
 ```bash
-cd /c/Users/kmast/PycharmProjects/halcytone-content-generator
+cd /c/Users/kmast/PycharmProjects/toombos-backend
 python -m uvicorn src.halcytone_content_generator.main:app --reload
 # API at http://localhost:8000
 ```
 
 ### Build Dashboard (Production)
 ```bash
-cd /c/Users/kmast/PycharmProjects/content-generator-dashboard
+cd /c/Users/kmast/PycharmProjects/toombos-frontend
 npm run build
 npm start
 ```
@@ -281,7 +281,7 @@ npm start
 ## Related Documentation
 
 ### Backend Repository
-- `docs/content-generator-dashboard.md` - Dashboard setup guide
+- `docs/toombos-frontend.md` - Dashboard setup guide
 - `docs/ARCHITECTURE-STANDALONE-PRODUCT.md` - Product architecture
 - `context/development.md` - Development roadmap
 

@@ -15,7 +15,7 @@
 
 ## Overview
 
-The Halcytone Content Generator supports multiple database backends for production deployment. This guide focuses on PostgreSQL as the recommended production database.
+The Toombos supports multiple database backends for production deployment. This guide focuses on PostgreSQL as the recommended production database.
 
 ### Supported Databases
 

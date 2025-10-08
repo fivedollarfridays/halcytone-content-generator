@@ -1,8 +1,8 @@
-# Halcytone Content Generator - Dry Run System Guide
+# Toombos - Dry Run System Guide
 
 ## Overview
 
-The Halcytone Content Generator dry run system provides complete isolation from external APIs while maintaining full functionality through mock services. This guide covers operation, deployment, and management of the dry run infrastructure.
+The Toombos dry run system provides complete isolation from external APIs while maintaining full functionality through mock services. This guide covers operation, deployment, and management of the dry run infrastructure.
 
 **Version:** Sprint 5 - Documentation & Production Readiness
 **Last Updated:** 2025-01-24
@@ -35,7 +35,7 @@ The Halcytone Content Generator dry run system provides complete isolation from 
 ### 30-Second Launch
 ```bash
 # 1. Clone and navigate to project
-cd halcytone-content-generator
+cd toombos-backend
 
 # 2. Start mock services (required for dry run)
 python mocks/crm_service.py &
@@ -130,7 +130,7 @@ MONITORING_ENABLED=true             # Enable metrics collection
 
 #### Configuration File (`.env`)
 ```ini
-# Halcytone Content Generator - Dry Run Configuration
+# Toombos - Dry Run Configuration
 
 # === CORE SETTINGS ===
 DRY_RUN_MODE=true
@@ -267,7 +267,7 @@ if self.dry_run_mode and self.use_mock_services:
 
 3. **Log Review**: Check for any errors or warnings
    ```bash
-   docker-compose logs --tail=50 halcytone-content-generator
+   docker-compose logs --tail=50 toombos-backend
    ```
 
 #### Content Generation Testing
