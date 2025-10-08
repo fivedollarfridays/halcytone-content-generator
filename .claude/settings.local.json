@@ -26,7 +26,10 @@
       "Bash(git commit:*)",
       "Bash(git pull:*)",
       "Bash(git branch:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(docker:*)",
+      "Bash(git tag:*)"
     ],
     "deny": [],
     "ask": []
