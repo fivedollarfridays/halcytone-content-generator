@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
 from jinja2 import Template
 
-from src.halcytone_content_generator.services.content_assembler import ContentAssembler
+from halcytone_content_generator.services.content_assembler import ContentAssembler
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ class TestContentAssembler:
         assert "tips" in template
         assert "vision" in template
 
-    @patch('src.halcytone_content_generator.services.content_assembler.datetime')
+    @patch('halcytone_content_generator.services.content_assembler.datetime')
     def test_generate_newsletter_full_content(self, mock_datetime, content_assembler, sample_content):
         """Test newsletter generation with full content"""
         # Mock datetime
@@ -116,7 +116,7 @@ class TestContentAssembler:
         assert isinstance(text, str)
         assert len(text) > 0
 
-    @patch('src.halcytone_content_generator.services.content_assembler.datetime')
+    @patch('halcytone_content_generator.services.content_assembler.datetime')
     def test_generate_newsletter_empty_content(self, mock_datetime, content_assembler, empty_content):
         """Test newsletter generation with empty content"""
         mock_now = datetime(2024, 3, 15, 10, 30, 0)
@@ -130,7 +130,7 @@ class TestContentAssembler:
         assert 'text' in result
         assert result['subject'] == "Halcytone March Update"
 
-    @patch('src.halcytone_content_generator.services.content_assembler.datetime')
+    @patch('halcytone_content_generator.services.content_assembler.datetime')
     def test_generate_newsletter_partial_content(self, mock_datetime, content_assembler):
         """Test newsletter generation with partial content"""
         mock_now = datetime(2024, 3, 15, 10, 30, 0)
@@ -148,7 +148,7 @@ class TestContentAssembler:
         assert "Test Update" in result['html']
         assert result['subject'] == "Halcytone March Update: Test Update"
 
-    @patch('src.halcytone_content_generator.services.content_assembler.datetime')
+    @patch('halcytone_content_generator.services.content_assembler.datetime')
     def test_generate_web_update_full_content(self, mock_datetime, content_assembler, sample_content):
         """Test web update generation with full content"""
         mock_now = datetime(2024, 3, 15, 10, 30, 0)
@@ -180,7 +180,7 @@ class TestContentAssembler:
         assert isinstance(excerpt, str)
         assert len(excerpt) <= 203  # 200 + "..."
 
-    @patch('src.halcytone_content_generator.services.content_assembler.datetime')
+    @patch('halcytone_content_generator.services.content_assembler.datetime')
     def test_generate_web_update_empty_content(self, mock_datetime, content_assembler, empty_content):
         """Test web update generation with empty content"""
         mock_now = datetime(2024, 3, 15, 10, 30, 0)
@@ -292,7 +292,7 @@ class TestContentAssembler:
             'vision': []
         }
 
-        with patch('src.halcytone_content_generator.services.content_assembler.datetime') as mock_datetime:
+        with patch('halcytone_content_generator.services.content_assembler.datetime') as mock_datetime:
             mock_datetime.now.return_value = datetime(2024, 3, 15)
             result = content_assembler.generate_newsletter(long_title_content)
 
@@ -352,7 +352,7 @@ class TestContentAssembler:
         # Should use empty string for missing fields
         assert 'Missing Content' in html
 
-    @patch('src.halcytone_content_generator.services.content_assembler.Template')
+    @patch('halcytone_content_generator.services.content_assembler.Template')
     def test_template_rendering_error_handling(self, mock_template, content_assembler, sample_content):
         """Test handling of template rendering errors"""
         # Mock template to raise an exception

@@ -7,7 +7,7 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
 
-from src.halcytone_content_generator.services.breathscape_event_listener import (
+from halcytone_content_generator.services.breathscape_event_listener import (
     BreathscapeEventListener,
     BreathscapeEventType
 )
@@ -124,7 +124,7 @@ class TestEventListenerCoverage:
         }
 
         # Mock the WebSocket manager to avoid actual broadcast
-        with patch('src.halcytone_content_generator.services.breathscape_event_listener.websocket_manager') as mock_ws:
+        with patch('halcytone_content_generator.services.breathscape_event_listener.websocket_manager') as mock_ws:
             mock_ws.broadcast_session_update = AsyncMock()
             mock_ws.close_session = AsyncMock()
 
@@ -223,7 +223,7 @@ class TestEventListenerCoverage:
         assert 'session_id' in transformed
 
     @pytest.mark.asyncio
-    @patch('src.halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
+    @patch('halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
     async def test_hrv_milestone_handler(self, mock_ws_manager, listener):
         """Test HRV milestone event handler"""
         mock_ws_manager.broadcast_session_update = AsyncMock()
@@ -250,7 +250,7 @@ class TestEventListenerCoverage:
         mock_ws_manager.broadcast_session_update.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch('src.halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
+    @patch('halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
     async def test_achievement_unlocked_handler(self, mock_ws_manager, listener):
         """Test achievement unlocked event handler"""
         mock_ws_manager.broadcast_session_update = AsyncMock()

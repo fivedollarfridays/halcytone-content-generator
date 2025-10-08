@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 import httpx
 from datetime import datetime
 
-from src.halcytone_content_generator.services.platform_client import PlatformClient
+from halcytone_content_generator.services.platform_client import PlatformClient
 
 
 @pytest.fixture
@@ -212,7 +212,7 @@ class TestPublishUpdate:
         assert request_data['content'] == ""
         assert request_data['excerpt'] == ""
 
-    @patch('src.halcytone_content_generator.services.platform_client.datetime')
+    @patch('halcytone_content_generator.services.platform_client.datetime')
     @pytest.mark.asyncio
     @patch('httpx.AsyncClient')
     async def test_publish_update_datetime_handling(

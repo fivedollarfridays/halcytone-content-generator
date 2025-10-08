@@ -6,8 +6,8 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
 
-from src.halcytone_content_generator.api.endpoints_v2 import router
-from src.halcytone_content_generator.schemas.content import ContentGenerationRequest
+from halcytone_content_generator.api.endpoints_v2 import router
+from halcytone_content_generator.schemas.content import ContentGenerationRequest
 from fastapi import FastAPI
 
 
@@ -104,12 +104,12 @@ def sample_social_posts():
 class TestGenerateEnhancedContent:
     """Test generate enhanced content endpoint"""
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.ContentValidator')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
-    @patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
-    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.ContentValidator')
+    @patch('halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
+    @patch('halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
+    @patch('halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_enhanced_content_preview_only(
         self, mock_platform_client, mock_crm_client, mock_assembler,
@@ -164,11 +164,11 @@ class TestGenerateEnhancedContent:
         assert data['results']['template_style'] == 'modern'
         assert data['results']['seo_enabled'] is True
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
-    @patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
-    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
+    @patch('halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
+    @patch('halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_enhanced_content_full_flow(
         self, mock_platform_client, mock_crm_client, mock_assembler,
@@ -223,8 +223,8 @@ class TestGenerateEnhancedContent:
         assert data['web_update'] is None
         assert data['social_posts'] is None
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
     @pytest.mark.asyncio
     async def test_generate_enhanced_content_validation_disabled(
         self, mock_fetcher, mock_get_settings, client, mock_settings, sample_content
@@ -236,7 +236,7 @@ class TestGenerateEnhancedContent:
         mock_fetcher_instance.fetch_content.return_value = sample_content
         mock_fetcher.return_value = mock_fetcher_instance
 
-        with patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler') as mock_assembler:
+        with patch('halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler') as mock_assembler:
             mock_assembler_instance = Mock()
             mock_assembler_instance.generate_newsletter.return_value = {'subject': 'test', 'html': 'test', 'text': 'test'}
             mock_assembler_instance.generate_web_update.return_value = {'title': 'test', 'content': 'test', 'excerpt': 'test'}
@@ -256,8 +256,8 @@ class TestGenerateEnhancedContent:
 
             assert response.status_code == 200
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
     @pytest.mark.asyncio
     async def test_generate_enhanced_content_error_handling(
         self, mock_fetcher, mock_get_settings, client, mock_settings
@@ -277,9 +277,9 @@ class TestGenerateEnhancedContent:
         assert response.status_code == 500
         assert "Fetch failed" in response.json()['detail']
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.ContentValidator')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.ContentValidator')
     @pytest.mark.asyncio
     async def test_content_validation_with_issues(
         self, mock_validator, mock_fetcher, mock_get_settings, client,
@@ -299,7 +299,7 @@ class TestGenerateEnhancedContent:
         mock_validator_instance.generate_content_summary.return_value = "Content has issues"
         mock_validator.return_value = mock_validator_instance
 
-        with patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler') as mock_assembler:
+        with patch('halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler') as mock_assembler:
             mock_assembler_instance = Mock()
             mock_assembler_instance.generate_newsletter.return_value = {'subject': 'test', 'html': 'test', 'text': 'test'}
             mock_assembler_instance.generate_web_update.return_value = {'title': 'test', 'content': 'test', 'excerpt': 'test'}
@@ -372,9 +372,9 @@ class TestListAvailableTemplates:
 class TestValidateContent:
     """Test validate content endpoint"""
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.ContentValidator')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.ContentValidator')
     @pytest.mark.asyncio
     async def test_validate_content_success(
         self, mock_validator, mock_fetcher, mock_get_settings,
@@ -396,14 +396,14 @@ class TestValidateContent:
 
         assert response.status_code == 200
         data = response.json()
-        assert data['valid'] is True
+        assert data['is_valid'] is True
         assert data['issues'] == []
         assert data['summary'] == "All content looks good"
         assert 'recommendations' in data
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.ContentValidator')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.ContentValidator')
     @pytest.mark.asyncio
     async def test_validate_content_with_issues(
         self, mock_validator, mock_fetcher, mock_get_settings,
@@ -426,15 +426,15 @@ class TestValidateContent:
 
         assert response.status_code == 200
         data = response.json()
-        assert data['valid'] is False
+        assert data['is_valid'] is False
         assert len(data['issues']) == 3
         assert "stale" in str(data['issues'])
         assert data['recommendations']['add_more_content'] is True
         assert data['recommendations']['refresh_stale'] is True
         assert data['recommendations']['fix_duplicates'] is True
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
     @pytest.mark.asyncio
     async def test_validate_content_error(
         self, mock_fetcher, mock_get_settings, client, mock_settings
@@ -455,9 +455,9 @@ class TestValidateContent:
 class TestPreviewSocialPost:
     """Test preview social post endpoint"""
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
     @pytest.mark.asyncio
     async def test_preview_social_post_success(
         self, mock_assembler, mock_fetcher, mock_get_settings,
@@ -499,9 +499,9 @@ class TestPreviewSocialPost:
         assert 'fits_limit' in data['preview']
         assert 'requires_media' in data['preview']
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
     @pytest.mark.asyncio
     async def test_preview_social_post_no_content(
         self, mock_assembler, mock_fetcher, mock_get_settings,
@@ -525,8 +525,8 @@ class TestPreviewSocialPost:
         assert 'error' in data
         assert 'twitter' in data['error']
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
     @pytest.mark.asyncio
     async def test_preview_social_post_error(
         self, mock_fetcher, mock_get_settings, client, mock_settings
@@ -543,9 +543,9 @@ class TestPreviewSocialPost:
         assert response.status_code == 500
         assert "Preview failed" in response.json()['detail']
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
     @pytest.mark.asyncio
     async def test_preview_social_post_character_limits(
         self, mock_assembler, mock_fetcher, mock_get_settings,
@@ -579,9 +579,9 @@ class TestPreviewSocialPost:
             data = response.json()
             assert data['preview']['platform_limit'] == limit
 
-    @patch('src.halcytone_content_generator.api.endpoints_v2.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
+    @patch('halcytone_content_generator.api.endpoints_v2.get_settings')
+    @patch('halcytone_content_generator.api.endpoints_v2.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints_v2.EnhancedContentAssembler')
     @pytest.mark.asyncio
     async def test_preview_social_post_with_media(
         self, mock_assembler, mock_fetcher, mock_get_settings,

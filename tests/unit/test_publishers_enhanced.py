@@ -7,13 +7,13 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from datetime import datetime, timedelta
 import json
 
-from src.halcytone_content_generator.services.publishers.base import (
+from halcytone_content_generator.services.publishers.base import (
     Publisher, ValidationIssue, ValidationSeverity, ValidationResult
 )
-from src.halcytone_content_generator.services.publishers.email_publisher import EmailPublisher
-from src.halcytone_content_generator.services.publishers.web_publisher import WebPublisher
-from src.halcytone_content_generator.services.publishers.social_publisher import SocialPublisher
-from src.halcytone_content_generator.schemas.content import Content
+from halcytone_content_generator.services.publishers.email_publisher import EmailPublisher
+from halcytone_content_generator.services.publishers.web_publisher import WebPublisher
+from halcytone_content_generator.services.publishers.social_publisher import SocialPublisher
+from halcytone_content_generator.schemas.content import Content
 
 
 class TestBasePublisher:
@@ -34,7 +34,7 @@ class TestBasePublisher:
     def base_publisher(self, base_publisher_config):
         """Create base publisher instance"""
         # Use MockPublisher since Publisher is abstract
-        from src.halcytone_content_generator.services.publishers.base import MockPublisher
+        from halcytone_content_generator.services.publishers.base import MockPublisher
         return MockPublisher('test_channel', base_publisher_config)
 
     def test_base_publisher_initialization(self, base_publisher):
@@ -148,7 +148,7 @@ class TestEmailPublisher:
         assert email_publisher is not None
         assert hasattr(email_publisher, 'publish')
 
-    @patch('src.halcytone_content_generator.services.crm_client_v2.EnhancedCRMClient')
+    @patch('halcytone_content_generator.services.crm_client_v2.EnhancedCRMClient')
     @pytest.mark.asyncio
     async def test_email_publish_success(self, mock_crm, email_publisher, email_content):
         """Test successful email publishing"""
@@ -166,7 +166,7 @@ class TestEmailPublisher:
         assert 'job_id' in result
         mock_crm_instance.send_newsletter.assert_called_once()
 
-    @patch('src.halcytone_content_generator.services.crm_client_v2.EnhancedCRMClient')
+    @patch('halcytone_content_generator.services.crm_client_v2.EnhancedCRMClient')
     @pytest.mark.asyncio
     async def test_email_publish_failure(self, mock_crm, email_publisher, email_content):
         """Test email publishing failure"""
@@ -329,7 +329,7 @@ class TestWebPublisher:
         assert web_publisher is not None
         assert hasattr(web_publisher, 'publish')
 
-    @patch('src.halcytone_content_generator.services.platform_client_v2.EnhancedPlatformClient')
+    @patch('halcytone_content_generator.services.platform_client_v2.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_web_publish_success(self, mock_platform, web_publisher, web_content):
         """Test successful web publishing"""
@@ -347,7 +347,7 @@ class TestWebPublisher:
         assert 'url' in result
         mock_platform_instance.publish_content.assert_called_once()
 
-    @patch('src.halcytone_content_generator.services.platform_client_v2.EnhancedPlatformClient')
+    @patch('halcytone_content_generator.services.platform_client_v2.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_web_publish_failure(self, mock_platform, web_publisher, web_content):
         """Test web publishing failure"""
@@ -694,7 +694,7 @@ class TestPublisherIntegration:
 
     def test_coordinated_publishing(self, multi_publisher_config):
         """Test coordinated publishing across multiple channels"""
-        from src.halcytone_content_generator.services.publishers.coordinator import PublisherCoordinator
+        from halcytone_content_generator.services.publishers.coordinator import PublisherCoordinator
 
         coordinator = PublisherCoordinator(multi_publisher_config)
 
@@ -713,7 +713,7 @@ class TestPublisherIntegration:
 
     def test_publishing_rollback(self, multi_publisher_config):
         """Test publishing rollback on failure"""
-        from src.halcytone_content_generator.services.publishers.coordinator import PublisherCoordinator
+        from halcytone_content_generator.services.publishers.coordinator import PublisherCoordinator
 
         coordinator = PublisherCoordinator(multi_publisher_config)
 
@@ -731,7 +731,7 @@ class TestPublisherIntegration:
 
     def test_publishing_metrics_aggregation(self, multi_publisher_config):
         """Test aggregated publishing metrics"""
-        from src.halcytone_content_generator.services.publishers.coordinator import PublisherCoordinator
+        from halcytone_content_generator.services.publishers.coordinator import PublisherCoordinator
 
         coordinator = PublisherCoordinator(multi_publisher_config)
 

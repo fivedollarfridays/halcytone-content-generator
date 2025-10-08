@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-from src.halcytone_content_generator.services.content_assembler_v2 import EnhancedContentAssembler
+from halcytone_content_generator.services.content_assembler_v2 import EnhancedContentAssembler
 from enum import Enum
 
 # Define test enums

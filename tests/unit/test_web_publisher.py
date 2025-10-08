@@ -6,12 +6,12 @@ import pytest
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.halcytone_content_generator.services.publishers.web_publisher import WebPublisher
-from src.halcytone_content_generator.services.publishers.base import (
+from halcytone_content_generator.services.publishers.web_publisher import WebPublisher
+from halcytone_content_generator.services.publishers.base import (
     PublishStatus, ValidationSeverity, ValidationIssue, ValidationResult,
     PreviewResult, PublishResult
 )
-from src.halcytone_content_generator.schemas.content import Content, WebUpdateContent
+from halcytone_content_generator.schemas.content import Content, WebUpdateContent
 
 
 class TestWebPublisher:
@@ -30,7 +30,7 @@ class TestWebPublisher:
 
     @pytest.fixture
     def web_publisher(self, publisher_config):
-        with patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient'):
+        with patch('halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient'):
             return WebPublisher(config=publisher_config)
 
     @pytest.fixture
@@ -70,7 +70,7 @@ class TestWebPublisher:
 
     def test_init_default_config(self):
         """Test WebPublisher initialization with default config"""
-        with patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient'):
+        with patch('halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient'):
             publisher = WebPublisher()
             assert publisher.config == {}
             assert publisher.rate_limits['posts_per_hour'] == 10
@@ -524,8 +524,8 @@ class TestWebPublisher:
     @pytest.mark.asyncio
     async def test_integration_with_settings(self, publisher_config):
         """Test integration with Settings object creation"""
-        with patch('src.halcytone_content_generator.services.publishers.web_publisher.Settings') as mock_settings, \
-             patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient') as mock_client:
+        with patch('halcytone_content_generator.services.publishers.web_publisher.Settings') as mock_settings, \
+             patch('halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient') as mock_client:
 
             mock_settings_instance = MagicMock()
             mock_settings.return_value = mock_settings_instance

@@ -1,0 +1,113 @@
+# ConfigMaps for Halcytone Content Generator
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: content-generator-config
+  namespace: halcytone
+  labels:
+    app: content-generator
+data:
+  # Service URLs
+  crm-base-url: "https://crm.halcytone.com"
+  platform-base-url: "https://platform.halcytone.com"
+
+  # Application settings
+  environment: "production"
+  log-level: "INFO"
+  debug: "false"
+
+  # Performance settings
+  max-concurrent-requests: "100"
+  request-timeout: "120"
+  worker-connections: "1000"
+
+  # Cache settings
+  cache-ttl: "300"
+  cache-max-size: "1000"
+
+  # Circuit breaker settings
+  circuit-breaker-failure-threshold: "5"
+  circuit-breaker-recovery-timeout: "60"
+  max-retries: "3"
+  retry-max-wait: "60"
+
+  # Email settings
+  email-batch-size: "50"
+  email-rate-limit: "100"
+
+  # Monitoring
+  enable-metrics: "true"
+  enable-tracing: "true"
+  metrics-port: "9090"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: content-generator-data
+  namespace: halcytone
+  labels:
+    app: content-generator
+data:
+  # Static configuration files can go here
+  templates.json: |
+    {
+      "breathscape": {
+        "name": "Breathscape Template",
+        "version": "1.0.0"
+      }
+    }
+
+---
+# Logging configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: content-generator-logging
+  namespace: halcytone
+data:
+  logging.conf: |
+    [loggers]
+    keys=root,uvicorn,fastapi
+
+    [handlers]
+    keys=console,file
+
+    [formatters]
+    keys=detailed,simple
+
+    [logger_root]
+    level=INFO
+    handlers=console,file
+
+    [logger_uvicorn]
+    level=INFO
+    handlers=console,file
+    qualname=uvicorn
+    propagate=0
+
+    [logger_fastapi]
+    level=INFO
+    handlers=console,file
+    qualname=fastapi
+    propagate=0
+
+    [handler_console]
+    class=StreamHandler
+    level=INFO
+    formatter=simple
+    args=(sys.stdout,)
+
+    [handler_file]
+    class=handlers.RotatingFileHandler
+    level=INFO
+    formatter=detailed
+    args=('/app/logs/app.log', 'a', 10485760, 5)
+
+    [formatter_simple]
+    format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+
+    [formatter_detailed]
+    format=%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s

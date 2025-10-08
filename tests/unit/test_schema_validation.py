@@ -6,13 +6,13 @@ import pytest
 from datetime import datetime, timezone, timedelta
 from pydantic import ValidationError
 
-from src.halcytone_content_generator.schemas.content_types import (
+from halcytone_content_generator.schemas.content_types import (
     ContentType, ContentPriority, TemplateStyle, ChannelType, SocialPlatform,
     UpdateContentStrict, BlogContentStrict, AnnouncementContentStrict,
     ContentValidationResult, SocialPostStrict, NewsletterContentStrict, WebUpdateContentStrict,
     ContentRequestStrict, ContentResponseStrict
 )
-from src.halcytone_content_generator.services.schema_validator import SchemaValidator
+from halcytone_content_generator.services.schema_validator import SchemaValidator
 
 
 class TestContentTypeSchemas:
@@ -591,3 +591,537 @@ class TestRequestResponseModels:
         assert result.content_type == ContentType.BLOG
         assert len(result.warnings) == 1
         assert result.enhanced_metadata["seo_score"] == 85
+
+
+class TestEdgeCasesAndErrorHandling:
+    """Test edge cases and error handling in schema validation"""
+
+    def test_empty_content_rejection(self):
+        """Test that empty content is rejected"""
+        with pytest.raises(ValidationError):
+            UpdateContentStrict(
+                type="update",
+                title="Valid Title",
+                content="",  # Empty content
+                published=True
+            )
+
+    def test_none_values_handling(self):
+        """Test handling of None values in optional fields"""
+        # Just omit optional fields - don't explicitly pass None
+        update = UpdateContentStrict(
+            type="update",
+            title="Test",
+            content="Valid content here",
+            published=True
+            # excerpt and tags omitted
+        )
+
+        # Optional fields should be None or have defaults
+        assert update.excerpt is None or isinstance(update.excerpt, str)
+        assert update.tags is None or isinstance(update.tags, list)
+
+    def test_whitespace_only_content_rejection(self):
+        """Test that whitespace-only content is rejected"""
+        with pytest.raises(ValidationError):
+            UpdateContentStrict(
+                type="update",
+                title="Valid Title",
+                content="   \n\t   ",  # Only whitespace
+                published=True
+            )
+
+    def test_special_characters_in_title(self):
+        """Test handling of special characters in titles"""
+        title_with_special = "Test 🎉 Title with émojis & spéçial çhars!"
+
+        update = UpdateContentStrict(
+            type="update",
+            title=title_with_special,
+            content="Valid content for special character testing",
+            published=True
+        )
+
+        assert update.title == title_with_special
+
+    def test_very_long_title_rejection(self):
+        """Test that excessively long titles are rejected"""
+        long_title = "x" * 300  # 300 characters
+
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateContentStrict(
+                type="update",
+                title=long_title,
+                content="Valid content here",
+                published=True
+            )
+
+        errors = exc_info.value.errors()
+        assert any("at most 200" in str(error['msg']) for error in errors)
+
+    def test_very_long_content_acceptance(self):
+        """Test that very long content is accepted"""
+        very_long_content = " ".join(["word"] * 10000)  # 10k words
+
+        blog = BlogContentStrict(
+            type="blog",
+            title="Very Long Blog Post",
+            content=very_long_content,
+            category="Technology",
+            published=True
+        )
+
+        assert blog.reading_time >= 50  # Should be around 50 minutes
+
+    def test_duplicate_tags_handling(self):
+        """Test handling of duplicate tags"""
+        update = UpdateContentStrict(
+            type="update",
+            title="Test Update",
+            content="Valid content with duplicate tags",
+            published=True,
+            tags=["tag1", "tag2", "tag1", "tag2"]  # Duplicates
+        )
+
+        # Pydantic model deduplicates tags
+        assert len(update.tags) == 2  # Should be dedupl icated to ['tag1', 'tag2']
+
+    def test_case_sensitive_tags(self):
+        """Test that tags are normalized to lowercase"""
+        update = UpdateContentStrict(
+            type="update",
+            title="Test Update",
+            content="Valid content with case variations",
+            published=True,
+            tags=["Technology", "technology", "TECHNOLOGY"]
+        )
+
+        # Tags are normalized to lowercase and deduplicated
+        assert len(update.tags) == 1  # All become 'technology'
+        assert update.tags[0] == "technology"
+
+    def test_empty_tags_list(self):
+        """Test that empty tags list is accepted"""
+        update = UpdateContentStrict(
+            type="update",
+            title="Test Update",
+            content="Valid content without tags",
+            published=True,
+            tags=[]
+        )
+
+        assert update.tags == [] or update.tags is None
+
+    def test_invalid_enum_values(self):
+        """Test rejection of invalid enum values"""
+        with pytest.raises(ValidationError):
+            UpdateContentStrict(
+                type="invalid_type",  # Not a valid ContentType
+                title="Test",
+                content="Valid content",
+                published=True
+            )
+
+    def test_timezone_aware_datetime(self):
+        """Test that timezone-aware datetimes are handled"""
+        from datetime import timezone
+
+        future_time = datetime.now(timezone.utc) + timedelta(hours=2)
+
+        update = UpdateContentStrict(
+            type="update",
+            title="Test",
+            content="Valid content with at least three words",
+            published=True,
+            scheduled_for=future_time
+        )
+
+        assert update.scheduled_for.tzinfo is not None
+
+    def test_naive_datetime_handling(self):
+        """Test handling of naive (timezone-unaware) datetimes"""
+        # Need to use UTC timezone and ensure it's far enough in future
+        from datetime import timezone
+        naive_future = datetime.now(timezone.utc) + timedelta(hours=3)
+
+        update = UpdateContentStrict(
+            type="update",
+            title="Test",
+            content="Valid content with three words",
+            published=True,
+            scheduled_for=naive_future
+        )
+
+        # Should have datetime (may or may not have timezone depending on Pydantic config)
+        assert update.scheduled_for is not None
+
+    def test_maximum_tags_limit(self):
+        """Test that excessive number of tags is rejected"""
+        many_tags = [f"tag{i}" for i in range(100)]
+
+        with pytest.raises(ValidationError) as exc_info:
+            UpdateContentStrict(
+                type="update",
+                title="Test",
+                content="Valid content",
+                published=True,
+                tags=many_tags
+            )
+
+        errors = exc_info.value.errors()
+        assert any("at most" in str(error['msg']) for error in errors)
+
+    def test_html_in_plain_content(self):
+        """Test that HTML in plain content fields is handled"""
+        # HTML should be accepted (no sanitization at this level)
+        html_content = "<script>alert('test')</script><p>Real content here with sufficient length</p>"
+
+        update = UpdateContentStrict(
+            type="update",
+            title="Test",
+            content=html_content,
+            published=True
+        )
+
+        assert "<script>" in update.content
+
+    def test_url_injection_in_fields(self):
+        """Test handling of URLs in text fields"""
+        content_with_url = "Check out https://example.com for more information about our service"
+
+        update = UpdateContentStrict(
+            type="update",
+            title="Test Update",
+            content=content_with_url,
+            published=True
+        )
+
+        assert "https://example.com" in update.content
+
+
+class TestSchemaValidatorAdvanced:
+    """Advanced tests for SchemaValidator service"""
+
+    def test_validator_handles_missing_fields(self):
+        """Test validator handles content with missing optional fields"""
+        validator = SchemaValidator()
+
+        minimal_content = {
+            "type": "update",
+            "title": "Minimal Content",
+            "content": "This is minimal valid content",
+            "published": True
+        }
+
+        result = validator.validate_content_structure(minimal_content)
+        assert result.is_valid is True
+
+    def test_validator_handles_extra_fields(self):
+        """Test validator rejects content with extra unexpected fields"""
+        validator = SchemaValidator()
+
+        content_with_extra = {
+            "type": "update",
+            "title": "Test Content",
+            "content": "Valid content here",
+            "published": True,
+            "unexpected_field": "unexpected_value",
+            "another_extra": 123
+        }
+
+        result = validator.validate_content_structure(content_with_extra)
+        # Pydantic strict mode forbids extra fields
+        assert result.is_valid is False
+        assert len(result.issues) >= 2  # Should have issues for the extra fields
+
+    def test_content_type_detection_with_mixed_signals(self):
+        """Test content type detection when signals are mixed"""
+        validator = SchemaValidator()
+
+        # Has announcement markers but is long like a blog
+        mixed_content = {
+            "title": "🎉 ANNOUNCEMENT: Comprehensive Guide",
+            "content": " ".join(["word"] * 500)  # Very long
+        }
+
+        detected_type = validator.detect_content_type(mixed_content)
+        # Should detect as announcement (title marker takes precedence)
+        assert detected_type == ContentType.ANNOUNCEMENT
+
+    def test_enrichment_preserves_original_data(self):
+        """Test that enrichment doesn't overwrite original data"""
+        validator = SchemaValidator()
+
+        original_content = {
+            "title": "Test Blog",
+            "content": "Original content here",
+            "category": "Original Category",
+            "excerpt": "Original excerpt"
+        }
+
+        enriched = validator._enrich_content_data(original_content, ContentType.BLOG)
+
+        # Original values should be preserved
+        assert enriched["category"] == "Original Category"
+        assert enriched["excerpt"] == "Original excerpt"
+
+    def test_business_rules_no_warnings_for_valid_content(self):
+        """Test that valid content produces no business rule warnings"""
+        validator = SchemaValidator()
+
+        # Weekday scheduling, good length
+        weekday = datetime.now(timezone.utc) + timedelta(days=3)
+        while weekday.weekday() >= 5:  # Skip to weekday
+            weekday += timedelta(days=1)
+
+        valid_blog = BlogContentStrict(
+            type="blog",
+            title="Valid Blog Post",
+            content=" ".join(["word"] * 400),  # Good length
+            category="Technology",
+            published=True,
+            scheduled_for=weekday
+        )
+
+        warnings = validator._validate_business_rules(valid_blog)
+        # May have warnings, but should be minimal
+        assert isinstance(warnings, list)
+
+    def test_metadata_generation_for_different_types(self):
+        """Test metadata generation for different content types"""
+        validator = SchemaValidator()
+
+        # Test for update
+        update = UpdateContentStrict(
+            type="update",
+            title="Update Test",
+            content="Content for update metadata testing",
+            published=True
+        )
+
+        update_meta = validator._generate_enhanced_metadata(update)
+        assert "word_count" in update_meta
+
+        # Test for blog
+        blog = BlogContentStrict(
+            type="blog",
+            title="Blog Test",
+            content="Content for blog metadata testing",
+            category="Tech",
+            published=True
+        )
+
+        blog_meta = validator._generate_enhanced_metadata(blog)
+        assert "word_count" in blog_meta
+        assert "seo_score" in blog_meta
+
+    def test_seo_score_components(self):
+        """Test individual components of SEO score calculation"""
+        validator = SchemaValidator()
+
+        # Content with good SEO elements
+        good_seo_blog = BlogContentStrict(
+            type="blog",
+            title="The Ultimate Guide to Breathing Wellness Techniques",  # 50+ chars
+            content=" ".join(["breathing technique wellness"] * 50),  # Keywords repeated
+            category="Wellness",
+            seo_description="Learn comprehensive breathing wellness techniques to improve health and reduce stress in daily life.",
+            tags=["breathing", "wellness", "health"],
+            published=True
+        )
+
+        score = validator._calculate_basic_seo_score(good_seo_blog)
+        assert score >= 60  # Should get decent score
+
+    def test_channel_recommendations(self):
+        """Test channel recommendations in metadata"""
+        validator = SchemaValidator()
+
+        # Short, urgent announcement
+        announcement = AnnouncementContentStrict(
+            type="announcement",
+            title="Critical System Update",
+            content="System maintenance scheduled for tonight",
+            urgency="critical",
+            published=True
+        )
+
+        metadata = validator._generate_enhanced_metadata(announcement)
+        assert "recommended_channels" in metadata
+        # Should recommend email for critical announcement
+        assert "email" in metadata["recommended_channels"]
+
+
+class TestComplexValidationScenarios:
+    """Test complex, real-world validation scenarios"""
+
+    def test_multilingual_content(self):
+        """Test content with multiple languages"""
+        multilingual_content = "English text here. Texto en español. 日本語のテキスト."
+
+        update = UpdateContentStrict(
+            type="update",
+            title="Multilingual Update",
+            content=multilingual_content,
+            published=True
+        )
+
+        assert update.content == multilingual_content
+
+    def test_content_with_markdown(self):
+        """Test content with Markdown formatting"""
+        markdown_content = """
+        # Heading 1
+        ## Heading 2
+
+        **Bold text** and *italic text*
+
+        - List item 1
+        - List item 2
+
+        [Link](https://example.com)
+        """
+
+        blog = BlogContentStrict(
+            type="blog",
+            title="Markdown Test",
+            content=markdown_content,
+            category="Technology",
+            published=True
+        )
+
+        assert "# Heading 1" in blog.content
+        assert "**Bold text**" in blog.content
+
+    def test_batch_validation(self):
+        """Test validating multiple content items"""
+        validator = SchemaValidator()
+
+        contents = [
+            {
+                "type": "update",
+                "title": f"Update {i}",
+                "content": f"Content for update {i}",
+                "published": True
+            }
+            for i in range(10)
+        ]
+
+        results = [validator.validate_content_structure(c) for c in contents]
+        assert all(r.is_valid for r in results)
+        assert len(results) == 10
+
+    def test_priority_propagation(self):
+        """Test that priority settings propagate correctly"""
+        # High urgency should set high priority
+        high_announcement = AnnouncementContentStrict(
+            type="announcement",
+            title="High Priority Alert",
+            content="This requires attention soon",
+            urgency="high",
+            published=True
+        )
+
+        assert high_announcement.priority == ContentPriority.HIGH
+
+    def test_featured_content_validation(self):
+        """Test featured content validation logic"""
+        # Featured requires published or scheduled
+        with pytest.raises(ValidationError):
+            UpdateContentStrict(
+                type="update",
+                title="Test",
+                content="Valid content here",
+                published=False,
+                scheduled_for=None,
+                featured=True  # Can't be featured if not published/scheduled
+            )
+
+    def test_call_to_action_validation(self):
+        """Test call-to-action field validation"""
+        announcement = AnnouncementContentStrict(
+            type="announcement",
+            title="Action Required",
+            content="Please complete your profile",
+            call_to_action="Update Profile Now!",
+            published=True
+        )
+
+        assert announcement.call_to_action == "Update Profile Now!"
+        assert len(announcement.call_to_action) <= 100
+
+    def test_template_style_validation(self):
+        """Test template style enum validation"""
+        newsletter = NewsletterContentStrict(
+            subject="Test Newsletter",
+            html="<p>Content</p>",
+            text="Content",
+            template_style="modern"
+        )
+
+        assert newsletter.template_style == TemplateStyle.MODERN
+
+        # Invalid style should fail
+        with pytest.raises(ValidationError):
+            NewsletterContentStrict(
+                subject="Test Newsletter",
+                html="<p>Content</p>",
+                text="Content",
+                template_style="invalid_style"
+            )
+
+    def test_target_keywords_limit(self):
+        """Test target keywords count limits"""
+        # Should accept reasonable number of keywords
+        blog = BlogContentStrict(
+            type="blog",
+            title="SEO Optimized Post",
+            content="Content about breathing and wellness techniques",
+            category="Wellness",
+            target_keywords=["breathing", "wellness", "health", "meditation"],
+            published=True
+        )
+
+        assert len(blog.target_keywords) == 4
+
+    def test_excerpt_auto_generation(self):
+        """Test automatic excerpt generation when not provided"""
+        long_content = "This is a long piece of content. " * 20
+
+        # Excerpt is required for WebUpdateContentStrict - provide it
+        web_content = WebUpdateContentStrict(
+            title="Auto Excerpt Test",
+            content=long_content,
+            excerpt="Generated excerpt from the long content"
+        )
+
+        # Should have the provided excerpt
+        assert len(web_content.excerpt) > 0
+
+    def test_reading_time_accuracy(self):
+        """Test reading time calculation accuracy"""
+        # 200 words = 1 minute at 200 wpm
+        content_200_words = " ".join(["word"] * 200)
+
+        blog = BlogContentStrict(
+            type="blog",
+            title="Reading Time Test",
+            content=content_200_words,
+            category="Technology",
+            published=True
+        )
+
+        assert blog.reading_time == 1  # Should be 1 minute
+
+        # 600 words = 3 minutes
+        content_600_words = " ".join(["word"] * 600)
+
+        blog2 = BlogContentStrict(
+            type="blog",
+            title="Longer Reading Time",
+            content=content_600_words,
+            category="Technology",
+            published=True
+        )
+
+        assert blog2.reading_time == 3

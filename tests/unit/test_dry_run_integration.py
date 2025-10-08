@@ -5,14 +5,14 @@ import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from fastapi.testclient import TestClient
 
-from src.halcytone_content_generator.main import app
-from src.halcytone_content_generator.schemas.content import (
+from halcytone_content_generator.main import app
+from halcytone_content_generator.schemas.content import (
     ContentGenerationRequest, Content, NewsletterContent, WebUpdateContent, SocialPost
 )
-from src.halcytone_content_generator.services.publishers.base import (
+from halcytone_content_generator.services.publishers.base import (
     ValidationResult, PreviewResult, PublishResult, PublishStatus
 )
-from src.halcytone_content_generator.services.content_assembler_v2 import EnhancedContentAssembler
+from halcytone_content_generator.services.content_assembler_v2 import EnhancedContentAssembler
 
 
 class TestDryRunIntegration:
@@ -95,10 +95,10 @@ class TestDryRunIntegration:
 
     def test_global_dry_run_configuration(self, client, mock_dry_run_publishers, mock_content_data):
         """Test global dry-run mode via configuration"""
-        with patch('src.halcytone_content_generator.config.get_settings') as mock_settings, \
-             patch('src.halcytone_content_generator.api.endpoints.get_publishers') as mock_get_pub, \
-             patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler:
+        with patch('halcytone_content_generator.config.get_settings') as mock_settings, \
+             patch('halcytone_content_generator.api.endpoints.get_publishers') as mock_get_pub, \
+             patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler:
 
             # Configure global dry-run mode
             settings = Mock()
@@ -160,9 +160,9 @@ class TestDryRunIntegration:
 
     def test_batch_dry_run_mode(self, client, mock_dry_run_publishers, mock_content_data):
         """Test dry-run mode in batch operations"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_get_pub, \
-             patch('src.halcytone_content_generator.api.endpoints_batch.get_document_fetcher') as mock_get_fetcher, \
-             patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_get_assembler:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_get_pub, \
+             patch('halcytone_content_generator.api.endpoints_batch.get_document_fetcher') as mock_get_fetcher, \
+             patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_get_assembler:
 
             mock_get_pub.return_value = mock_dry_run_publishers
 
@@ -247,9 +247,9 @@ class TestDryRunIntegration:
 
     def test_publisher_dry_run_behavior(self, mock_dry_run_publishers):
         """Test that publishers respect dry-run mode"""
-        from src.halcytone_content_generator.services.publishers.email_publisher import EmailPublisher
-        from src.halcytone_content_generator.services.publishers.web_publisher import WebPublisher
-        from src.halcytone_content_generator.services.publishers.social_publisher import SocialPublisher
+        from halcytone_content_generator.services.publishers.email_publisher import EmailPublisher
+        from halcytone_content_generator.services.publishers.web_publisher import WebPublisher
+        from halcytone_content_generator.services.publishers.social_publisher import SocialPublisher
 
         config = {
             'dry_run': True,
@@ -324,7 +324,7 @@ class TestDryRunIntegration:
 
     def test_dry_run_with_validation_failures(self, client, mock_content_data):
         """Test dry-run mode when validation fails"""
-        from src.halcytone_content_generator.services.publishers.base import ValidationIssue, ValidationSeverity
+        from halcytone_content_generator.services.publishers.base import ValidationIssue, ValidationSeverity
 
         # Create publisher that fails validation
         mock_publisher = Mock()
@@ -344,9 +344,9 @@ class TestDryRunIntegration:
             'social': mock_publisher
         }
 
-        with patch('src.halcytone_content_generator.api.endpoints.get_publishers') as mock_get_pub, \
-             patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler:
+        with patch('halcytone_content_generator.api.endpoints.get_publishers') as mock_get_pub, \
+             patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler:
 
             mock_get_pub.return_value = mock_publishers
 
@@ -377,7 +377,7 @@ class TestDryRunIntegration:
 
     def test_dry_run_environment_variables(self):
         """Test dry-run configuration from environment"""
-        from src.halcytone_content_generator.config import Settings
+        from halcytone_content_generator.config import Settings
 
         # Test with DRY_RUN enabled
         with patch.dict('os.environ', {'DRY_RUN': 'true'}):
@@ -391,9 +391,9 @@ class TestDryRunIntegration:
 
     def test_preview_mode_vs_dry_run_mode(self, client, mock_dry_run_publishers, mock_content_data):
         """Test the difference between preview mode and dry-run mode"""
-        with patch('src.halcytone_content_generator.api.endpoints.get_publishers') as mock_get_pub, \
-             patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler:
+        with patch('halcytone_content_generator.api.endpoints.get_publishers') as mock_get_pub, \
+             patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler:
 
             mock_get_pub.return_value = mock_dry_run_publishers
 
@@ -460,13 +460,13 @@ class TestDryRunIntegration:
 
     def test_comprehensive_dry_run_workflow(self, client, mock_dry_run_publishers, mock_content_data):
         """Test complete dry-run workflow from content generation to batch processing"""
-        with patch('src.halcytone_content_generator.config.get_settings') as mock_settings, \
-             patch('src.halcytone_content_generator.api.endpoints.get_publishers') as mock_get_pub, \
-             patch('src.halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_batch_get_pub, \
-             patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher, \
-             patch('src.halcytone_content_generator.api.endpoints_batch.get_document_fetcher') as mock_batch_fetcher, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler, \
-             patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_batch_assembler:
+        with patch('halcytone_content_generator.config.get_settings') as mock_settings, \
+             patch('halcytone_content_generator.api.endpoints.get_publishers') as mock_get_pub, \
+             patch('halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_batch_get_pub, \
+             patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher, \
+             patch('halcytone_content_generator.api.endpoints_batch.get_document_fetcher') as mock_batch_fetcher, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler, \
+             patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_batch_assembler:
 
             # Configure global dry-run
             settings = Mock()

@@ -10,7 +10,7 @@ import hashlib
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
 
-from src.halcytone_content_generator.services.cache_manager import (
+from halcytone_content_generator.services.cache_manager import (
     CacheManager,
     CacheTarget,
     InvalidationRequest,

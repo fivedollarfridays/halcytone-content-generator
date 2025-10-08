@@ -387,7 +387,7 @@ class AIContentEnhancer:
                     overall_score=(scores.get("readability", 70) +
                                  scores.get("engagement", 70) +
                                  scores.get("seo", 70) +
-                                 scores.get("brand", 70)) / 4,
+                                 scores.get("brand", 70)) / 400,  # Normalize to 0-1 range
                     readability=scores.get("readability", 70) / 100,
                     engagement_potential=scores.get("engagement", 70) / 100,
                     seo_score=scores.get("seo", 70) / 100,

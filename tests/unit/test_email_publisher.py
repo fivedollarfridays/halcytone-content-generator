@@ -6,12 +6,12 @@ import pytest
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.halcytone_content_generator.services.publishers.email_publisher import EmailPublisher
-from src.halcytone_content_generator.services.publishers.base import (
+from halcytone_content_generator.services.publishers.email_publisher import EmailPublisher
+from halcytone_content_generator.services.publishers.base import (
     PublishStatus, ValidationSeverity, ValidationIssue, ValidationResult,
     PreviewResult, PublishResult
 )
-from src.halcytone_content_generator.schemas.content import Content, NewsletterContent
+from halcytone_content_generator.schemas.content import Content, NewsletterContent
 
 
 class TestEmailPublisher:
@@ -34,8 +34,8 @@ class TestEmailPublisher:
 
     @pytest.fixture
     def email_publisher(self, publisher_config):
-        with patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient'), \
-             patch('src.halcytone_content_generator.services.publishers.email_publisher.EmailAnalytics'):
+        with patch('halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient'), \
+             patch('halcytone_content_generator.services.publishers.email_publisher.EmailAnalytics'):
             return EmailPublisher(config=publisher_config)
 
     @pytest.fixture
@@ -75,8 +75,8 @@ class TestEmailPublisher:
 
     def test_init_default_config(self):
         """Test EmailPublisher initialization with default config"""
-        with patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient'), \
-             patch('src.halcytone_content_generator.services.publishers.email_publisher.EmailAnalytics'):
+        with patch('halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient'), \
+             patch('halcytone_content_generator.services.publishers.email_publisher.EmailAnalytics'):
             publisher = EmailPublisher()
             assert publisher.config == {}
             assert publisher.rate_limits['emails_per_hour'] == 1000
@@ -575,9 +575,9 @@ class TestEmailPublisher:
     @pytest.mark.asyncio
     async def test_integration_with_settings(self, publisher_config):
         """Test integration with Settings object creation"""
-        with patch('src.halcytone_content_generator.services.publishers.email_publisher.Settings') as mock_settings, \
-             patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient') as mock_client, \
-             patch('src.halcytone_content_generator.services.publishers.email_publisher.EmailAnalytics') as mock_analytics:
+        with patch('halcytone_content_generator.services.publishers.email_publisher.Settings') as mock_settings, \
+             patch('halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient') as mock_client, \
+             patch('halcytone_content_generator.services.publishers.email_publisher.EmailAnalytics') as mock_analytics:
 
             mock_settings_instance = MagicMock()
             mock_settings.return_value = mock_settings_instance

@@ -7,7 +7,7 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, MagicMock
 from datetime import datetime, timezone
 
-from src.halcytone_content_generator.services.websocket_manager import (
+from halcytone_content_generator.services.websocket_manager import (
     WebSocketManager,
     ConnectionRole
 )

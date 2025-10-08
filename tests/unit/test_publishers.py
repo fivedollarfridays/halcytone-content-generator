@@ -5,14 +5,14 @@ import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime
 
-from src.halcytone_content_generator.services.publishers.base import (
+from halcytone_content_generator.services.publishers.base import (
     Publisher, MockPublisher, PublishResult, ValidationResult, PreviewResult,
     PublishStatus, ValidationSeverity, ValidationIssue
 )
-from src.halcytone_content_generator.services.publishers.email_publisher import EmailPublisher
-from src.halcytone_content_generator.services.publishers.web_publisher import WebPublisher
-from src.halcytone_content_generator.services.publishers.social_publisher import SocialPublisher
-from src.halcytone_content_generator.schemas.content import (
+from halcytone_content_generator.services.publishers.email_publisher import EmailPublisher
+from halcytone_content_generator.services.publishers.web_publisher import WebPublisher
+from halcytone_content_generator.services.publishers.social_publisher import SocialPublisher
+from halcytone_content_generator.schemas.content import (
     Content, NewsletterContent, WebUpdateContent, SocialPost
 )
 

@@ -213,8 +213,9 @@ class ContentSyncService:
                         logger.info(f"Successfully synced to {channel.value}")
 
                     except Exception as e:
+                        import traceback
                         error_msg = f"Failed to sync to {channel.value}: {str(e)}"
-                        logger.error(error_msg)
+                        logger.error(f"{error_msg}\n{traceback.format_exc()}")
                         errors.append(error_msg)
                         results[channel.value] = {'error': str(e)}
 
@@ -323,7 +324,7 @@ class ContentSyncService:
             subject=newsletter['subject'],
             html=newsletter['html'],
             text=newsletter['text'],
-            test_mode=self.settings.get('TEST_MODE', False)
+            test_mode=getattr(self.settings, 'TEST_MODE', False)
         )
 
         return {
@@ -344,19 +345,29 @@ class ContentSyncService:
         # Publish via Platform API
         result = await self.platform_client.publish_content(
             title=web_update['title'],
-            content=web_update['html'],
-            author="Content Generator",
-            category="updates",
+            content=web_update.get('content', web_update.get('html', '')),  # Support both v1 and v2
+            excerpt=web_update.get('excerpt', web_update.get('meta_description', ''))[:200],
+            categories=["updates"],
             tags=web_update.get('tags', []),
-            seo_metadata=web_update.get('seo_metadata'),
+            seo_metadata=web_update.get('seo_metadata', web_update.get('schema_markup')),
             correlation_id=correlation_id
         )
 
-        return {
-            'content_id': result.get('id'),
-            'status': result.get('status'),
-            'url': result.get('url')
-        }
+        # Handle both dict and object responses
+        if hasattr(result, 'content_id'):
+            # PublishedContent object
+            return {
+                'content_id': result.content_id,
+                'status': getattr(result, 'status', 'published').value if hasattr(getattr(result, 'status', ''), 'value') else 'published',
+                'url': getattr(result, 'url', getattr(result, 'permalink', ''))
+            }
+        else:
+            # Dict response
+            return {
+                'content_id': result.get('id'),
+                'status': result.get('status'),
+                'url': result.get('url')
+            }
 
     async def _sync_social(
         self,

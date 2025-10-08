@@ -54,7 +54,7 @@ async def health_check(
         status=overall_status,
         timestamp=datetime.utcnow(),
         service=settings.SERVICE_NAME,
-        version=settings.get("VERSION", "0.1.0"),
+        version=getattr(settings, "VERSION", "0.1.0"),
         environment=settings.ENVIRONMENT,
         uptime_seconds=health_manager.get_uptime_seconds()
     )
@@ -153,7 +153,7 @@ async def detailed_health_check(
         status=overall_status,
         timestamp=datetime.utcnow(),
         service=settings.SERVICE_NAME,
-        version=settings.get("VERSION", "0.1.0"),
+        version=getattr(settings, "VERSION", "0.1.0"),
         environment=settings.ENVIRONMENT,
         uptime_seconds=health_manager.get_uptime_seconds(),
         components=components,

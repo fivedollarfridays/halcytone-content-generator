@@ -6,7 +6,7 @@ import pytest
 from datetime import datetime, timezone, timedelta
 from pydantic import ValidationError
 
-from src.halcytone_content_generator.schemas.content_types import (
+from halcytone_content_generator.schemas.content_types import (
     SessionContentStrict,
     ContentType,
     ContentPriority

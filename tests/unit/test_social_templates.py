@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-from src.halcytone_content_generator.templates.social_templates import (
+from halcytone_content_generator.templates.social_templates import (
     SocialTemplateManager, get_platform_template, format_social_post,
     generate_hashtags, create_thread, validate_character_limits
 )

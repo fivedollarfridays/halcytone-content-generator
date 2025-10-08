@@ -5,8 +5,8 @@ import pytest
 from unittest.mock import Mock, patch, AsyncMock
 import httpx
 
-from src.halcytone_content_generator.services.crm_client import CRMClient
-from src.halcytone_content_generator.config import Settings
+from halcytone_content_generator.services.crm_client import CRMClient
+from halcytone_content_generator.config import Settings
 
 
 class TestCRMClient:

@@ -7,8 +7,8 @@ from datetime import datetime, timezone
 from unittest.mock import patch, MagicMock
 from pydantic import ValidationError
 
-from src.halcytone_content_generator.services.schema_validator import SchemaValidator
-from src.halcytone_content_generator.schemas.content_types import (
+from halcytone_content_generator.services.schema_validator import SchemaValidator
+from halcytone_content_generator.schemas.content_types import (
     ContentType, ContentValidationResult, UpdateContentStrict,
     BlogContentStrict, AnnouncementContentStrict, NewsletterContentStrict,
     WebUpdateContentStrict, SocialPostStrict
@@ -571,7 +571,7 @@ class TestSchemaValidator:
             "recipient_count": 100
         }
 
-        with patch('src.halcytone_content_generator.services.schema_validator.NewsletterContentStrict') as mock_newsletter:
+        with patch('halcytone_content_generator.services.schema_validator.NewsletterContentStrict') as mock_newsletter:
             mock_instance = MagicMock()
             mock_instance.subject = "Test Newsletter"
             mock_newsletter.return_value = mock_instance
@@ -589,7 +589,7 @@ class TestSchemaValidator:
         # Create a proper ValidationError
         error_list = [{"loc": ("subject",), "msg": "field required", "type": "value_error"}]
 
-        with patch('src.halcytone_content_generator.services.schema_validator.NewsletterContentStrict') as mock_newsletter:
+        with patch('halcytone_content_generator.services.schema_validator.NewsletterContentStrict') as mock_newsletter:
             mock_newsletter.side_effect = ValidationError.from_exception_data("ValidationError", error_list)
 
             is_valid, issues, validated = validator.validate_newsletter_content(invalid_newsletter_data)
@@ -606,7 +606,7 @@ class TestSchemaValidator:
             "scheduled_time": datetime.now(timezone.utc)
         }
 
-        with patch('src.halcytone_content_generator.services.schema_validator.SocialPostStrict') as mock_social:
+        with patch('halcytone_content_generator.services.schema_validator.SocialPostStrict') as mock_social:
             mock_instance = MagicMock()
             mock_instance.platform = "twitter"
             mock_social.return_value = mock_instance
@@ -623,7 +623,7 @@ class TestSchemaValidator:
 
         error_list = [{"loc": ("content",), "msg": "field required", "type": "value_error"}]
 
-        with patch('src.halcytone_content_generator.services.schema_validator.SocialPostStrict') as mock_social:
+        with patch('halcytone_content_generator.services.schema_validator.SocialPostStrict') as mock_social:
             mock_social.side_effect = ValidationError.from_exception_data("ValidationError", error_list)
 
             is_valid, issues, validated = validator.validate_social_content(invalid_social_data)
@@ -641,7 +641,7 @@ class TestSchemaValidator:
             "excerpt": "Test excerpt"
         }
 
-        with patch('src.halcytone_content_generator.services.schema_validator.WebUpdateContentStrict') as mock_web:
+        with patch('halcytone_content_generator.services.schema_validator.WebUpdateContentStrict') as mock_web:
             mock_instance = MagicMock()
             mock_instance.title = "Test Web Content"
             mock_web.return_value = mock_instance
@@ -658,7 +658,7 @@ class TestSchemaValidator:
 
         error_list = [{"loc": ("title",), "msg": "field required", "type": "value_error"}]
 
-        with patch('src.halcytone_content_generator.services.schema_validator.WebUpdateContentStrict') as mock_web:
+        with patch('halcytone_content_generator.services.schema_validator.WebUpdateContentStrict') as mock_web:
             mock_web.side_effect = ValidationError.from_exception_data("ValidationError", error_list)
 
             is_valid, issues, validated = validator.validate_web_content(invalid_web_data)

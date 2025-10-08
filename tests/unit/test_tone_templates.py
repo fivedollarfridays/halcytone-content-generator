@@ -5,9 +5,9 @@ Sprint 4: Ecosystem Integration - Tone-specific template testing
 import pytest
 from jinja2 import Template
 
-from src.halcytone_content_generator.templates.tones.professional import ProfessionalToneTemplates
-from src.halcytone_content_generator.templates.tones.encouraging import EncouragingToneTemplates
-from src.halcytone_content_generator.templates.tones.medical_scientific import MedicalScientificToneTemplates
+from halcytone_content_generator.templates.tones.professional import ProfessionalToneTemplates
+from halcytone_content_generator.templates.tones.encouraging import EncouragingToneTemplates
+from halcytone_content_generator.templates.tones.medical_scientific import MedicalScientificToneTemplates
 
 
 class TestProfessionalToneTemplates:

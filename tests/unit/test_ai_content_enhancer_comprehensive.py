@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 import json
 from datetime import datetime
 
-from src.halcytone_content_generator.services.ai_content_enhancer import (
+from halcytone_content_generator.services.ai_content_enhancer import (
     AIContentEnhancer, PromptManager, EnhancementMode, ContentType, QualityScore
 )
 
@@ -101,19 +101,22 @@ class TestAIContentEnhancer:
     @pytest.fixture
     def ai_enhancer(self):
         """Create AI content enhancer with mock configuration"""
-        config = {
-            'openai_api_key': 'test_key',
-            'model': 'gpt-3.5-turbo',
-            'max_tokens': 1000,
-            'temperature': 0.7
-        }
-        return AIContentEnhancer(config)
+        from unittest.mock import Mock
+        enhancer = AIContentEnhancer()
+        # Mock the settings to provide test configuration
+        enhancer.api_key = 'test_key'
+        enhancer.model = 'gpt-3.5-turbo'
+        enhancer._client = Mock()  # Mock OpenAI client
+        return enhancer
 
     @pytest.fixture
     def ai_enhancer_no_key(self):
         """Create AI content enhancer without API key"""
-        config = {}
-        return AIContentEnhancer(config)
+        enhancer = AIContentEnhancer()
+        # Override to have no API key
+        enhancer.api_key = None
+        enhancer._client = None
+        return enhancer
 
     def test_enhancer_initialization(self, ai_enhancer):
         """Test AI enhancer initialization"""

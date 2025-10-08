@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, Depends, Header, Request, BackgroundTasks
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from ..services.cache_manager import (
     get_cache_manager,
@@ -54,7 +54,8 @@ class CacheInvalidationRequest(BaseModel):
         description="Optional webhook URL for completion notification"
     )
 
-    @validator('targets')
+    @field_validator('targets')
+    @classmethod
     def validate_targets(cls, v):
         """Validate cache targets"""
         valid_targets = [target.value for target in CacheTarget]
@@ -63,7 +64,8 @@ class CacheInvalidationRequest(BaseModel):
                 raise ValueError(f"Invalid cache target: {target}. Valid targets: {valid_targets}")
         return v
 
-    @validator('patterns')
+    @field_validator('patterns')
+    @classmethod
     def validate_patterns(cls, v):
         """Validate cache patterns"""
         if v:

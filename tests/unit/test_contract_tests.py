@@ -7,9 +7,9 @@ from unittest.mock import Mock, patch, AsyncMock
 import json
 from datetime import datetime
 
-from src.halcytone_content_generator.services.crm_client_v2 import EnhancedCRMClient
-from src.halcytone_content_generator.services.platform_client_v2 import EnhancedPlatformClient
-from src.halcytone_content_generator.services.document_fetcher import DocumentFetcher
+from halcytone_content_generator.services.crm_client_v2 import EnhancedCRMClient
+from halcytone_content_generator.services.platform_client_v2 import EnhancedPlatformClient
+from halcytone_content_generator.services.document_fetcher import DocumentFetcher
 
 
 class TestCRMClientContract:

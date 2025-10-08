@@ -7,17 +7,17 @@ from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta
 import json
 
-from src.halcytone_content_generator.services.platform_client_v2 import (
+from halcytone_content_generator.services.platform_client_v2 import (
     EnhancedPlatformClient,
     ContentStatus,
     ContentVersion
 )
-from src.halcytone_content_generator.services.monitoring import (
+from halcytone_content_generator.services.monitoring import (
     MonitoringService,
     EventType,
     HealthStatus
 )
-from src.halcytone_content_generator.services.content_sync import (
+from halcytone_content_generator.services.content_sync import (
     ContentSyncService,
     SyncJob,
     SyncStatus,

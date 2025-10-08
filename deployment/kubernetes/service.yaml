@@ -1,0 +1,91 @@
+# Kubernetes Services for Halcytone Content Generator
+
+---
+# Main Application Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: content-generator-service
+  namespace: halcytone
+  labels:
+    app: content-generator
+    component: api
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "30"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/health"
+spec:
+  type: ClusterIP
+  selector:
+    app: content-generator
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600
+
+---
+# Headless Service for StatefulSet (if using)
+apiVersion: v1
+kind: Service
+metadata:
+  name: content-generator-headless
+  namespace: halcytone
+  labels:
+    app: content-generator
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: content-generator
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: halcytone
+  labels:
+    app: redis
+spec:
+  type: ClusterIP
+  selector:
+    app: redis
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
+
+---
+# PostgreSQL Service (if using)
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: halcytone
+  labels:
+    app: postgres
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+    protocol: TCP

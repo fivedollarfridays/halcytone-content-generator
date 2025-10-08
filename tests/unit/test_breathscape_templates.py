@@ -5,8 +5,8 @@ import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-from src.halcytone_content_generator.services.content_assembler_v2 import EnhancedContentAssembler
-from src.halcytone_content_generator.templates.breathscape_templates import (
+from halcytone_content_generator.services.content_assembler_v2 import EnhancedContentAssembler
+from halcytone_content_generator.templates.breathscape_templates import (
     get_breathscape_template_for_content, get_breathscape_content_themes
 )
 

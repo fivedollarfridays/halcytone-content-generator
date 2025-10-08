@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import Mock, AsyncMock, patch
 import statistics
 
-from src.halcytone_content_generator.services.content_quality_scorer import (
+from halcytone_content_generator.services.content_quality_scorer import (
     ContentQualityScorer,
     QualityScore,
     QualityLevel,
@@ -17,7 +17,7 @@ from src.halcytone_content_generator.services.content_quality_scorer import (
     ScoreCategory,
     get_content_quality_scorer
 )
-from src.halcytone_content_generator.services.ai_content_enhancer import ContentType
+from halcytone_content_generator.services.ai_content_enhancer import ContentType
 
 
 class TestReadabilityMetrics:

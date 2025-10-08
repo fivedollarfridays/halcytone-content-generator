@@ -38,20 +38,26 @@ class AuthenticationManager:
         """
         try:
             if credentials_json:
-                # Try to parse as JSON string
-                if credentials_json.startswith('{'):
-                    creds = json.loads(credentials_json)
-                # Or load from file path
-                elif os.path.exists(credentials_json):
+                # Check if it's a file path first
+                if os.path.exists(credentials_json):
                     with open(credentials_json, 'r') as f:
                         creds = json.load(f)
                 else:
-                    # Try environment variable
-                    env_creds = os.getenv('GOOGLE_CREDENTIALS_JSON')
-                    if env_creds:
-                        creds = json.loads(env_creds)
-                    else:
-                        raise ValueError("Google credentials not found")
+                    # Try to parse as JSON string
+                    try:
+                        creds = json.loads(credentials_json)
+                    except json.JSONDecodeError as json_err:
+                        # Try environment variable as fallback
+                        env_creds = os.getenv('GOOGLE_CREDENTIALS_JSON')
+                        if env_creds:
+                            try:
+                                creds = json.loads(env_creds)
+                            except json.JSONDecodeError:
+                                # Environment variable also invalid
+                                raise ValueError("Google credentials must be valid JSON") from json_err
+                        else:
+                            # No environment variable, original JSON was invalid
+                            raise ValueError("Google credentials must be valid JSON") from json_err
 
                 # Validate required fields
                 required_fields = ['type', 'project_id', 'private_key', 'client_email']
@@ -196,8 +202,12 @@ class AuthenticationManager:
             if service == 'google_docs':
                 env_vars['GOOGLE_CREDENTIALS_JSON'] = json.dumps(credentials)
             elif service == 'notion':
-                env_vars['NOTION_API_KEY'] = credentials
-                env_vars['NOTION_DATABASE_ID'] = credentials.get('database_id', '')
+                # Notion can be string (token) or dict (token + database_id)
+                if isinstance(credentials, str):
+                    env_vars['NOTION_API_KEY'] = credentials
+                else:
+                    env_vars['NOTION_API_KEY'] = credentials.get('api_key', credentials.get('token', ''))
+                    env_vars['NOTION_DATABASE_ID'] = credentials.get('database_id', '')
             elif service == 'openai':
                 env_vars['OPENAI_API_KEY'] = credentials
 

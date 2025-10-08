@@ -6,18 +6,18 @@ import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime
 
-from src.halcytone_content_generator.services.crm_client_v2 import (
+from halcytone_content_generator.services.crm_client_v2 import (
     EnhancedCRMClient,
     EmailRecipient,
     BulkEmailJob,
     EmailStatus,
     RateLimiter
 )
-from src.halcytone_content_generator.services.email_analytics import (
+from halcytone_content_generator.services.email_analytics import (
     EmailAnalyticsService,
     EmailMetrics
 )
-from src.halcytone_content_generator.core.auth_middleware import (
+from halcytone_content_generator.core.auth_middleware import (
     APIKeyValidator,
     HMACValidator
 )

@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-from src.halcytone_content_generator.templates.email_templates import (
+from halcytone_content_generator.templates.email_templates import (
     get_email_template, render_email_template, validate_template_variables,
     MODERN_TEMPLATE, MINIMAL_TEMPLATE, PLAIN_TEMPLATE, BREATHSCAPE_TEMPLATE
 )

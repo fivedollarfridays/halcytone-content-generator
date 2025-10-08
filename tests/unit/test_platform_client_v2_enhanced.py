@@ -8,7 +8,7 @@ import httpx
 from datetime import datetime
 import json
 
-from src.halcytone_content_generator.services.platform_client_v2 import (
+from halcytone_content_generator.services.platform_client_v2 import (
     EnhancedPlatformClient, ContentStatus, ContentType
 )
 

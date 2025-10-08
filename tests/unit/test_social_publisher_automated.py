@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 import aiohttp
 from aioresponses import aioresponses
 
-from src.halcytone_content_generator.services.publishers.social_publisher import (
+from halcytone_content_generator.services.publishers.social_publisher import (
     SocialPublisher,
     PostStatus,
     PlatformAPIStatus,
@@ -21,8 +21,8 @@ from src.halcytone_content_generator.services.publishers.social_publisher import
     PostingStats,
     APIResponse
 )
-from src.halcytone_content_generator.services.publishers.base import PublishStatus
-from src.halcytone_content_generator.schemas.content import Content
+from halcytone_content_generator.services.publishers.base import PublishStatus
+from halcytone_content_generator.schemas.content import Content
 
 
 class TestAutomatedSocialPublisher:
@@ -31,7 +31,7 @@ class TestAutomatedSocialPublisher:
     @pytest.fixture
     def social_publisher(self):
         """Create a social publisher instance for testing."""
-        with patch('src.halcytone_content_generator.services.publishers.social_publisher.get_settings') as mock_settings:
+        with patch('halcytone_content_generator.services.publishers.social_publisher.get_settings') as mock_settings:
             mock_settings.return_value = Mock(
                 TWITTER_API_KEY="test_key",
                 TWITTER_API_SECRET="test_secret",

@@ -34,6 +34,10 @@ class TestEndToEndIntegration:
         settings.NOTION_API_KEY = "test-notion-key"
         settings.EMAIL_BATCH_SIZE = 10
         settings.EMAIL_RATE_LIMIT = 100
+        # Disable dry run and mock services to test real HTTP mocking
+        settings.DRY_RUN_MODE = False
+        settings.DRY_RUN = False
+        settings.USE_MOCK_SERVICES = False
         return settings
 
     @pytest.fixture
@@ -95,7 +99,8 @@ class TestEndToEndIntegration:
                         'url': '/updates/content-456'
                     }
                     mock_response.status_code = 200
-                    mock_client.return_value.__aenter__.return_value.post.return_value = mock_response
+                    mock_response.raise_for_status = Mock()
+                    mock_client.return_value.__aenter__.return_value.request = AsyncMock(return_value=mock_response)
 
                     # Execute sync
                     job = await sync_service.sync_content(
@@ -154,7 +159,8 @@ class TestEndToEndIntegration:
                     'status': 'published'
                 }
                 mock_response.status_code = 200
-                mock_client.return_value.__aenter__.return_value.post.return_value = mock_response
+                mock_response.raise_for_status = Mock()
+                mock_client.return_value.__aenter__.return_value.request = AsyncMock(return_value=mock_response)
 
                 job = await sync_service.sync_content(
                     document_id='notion:page-123',

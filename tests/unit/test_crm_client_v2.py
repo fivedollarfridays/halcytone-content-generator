@@ -6,8 +6,8 @@ from unittest.mock import Mock, patch, AsyncMock
 import httpx
 from datetime import datetime
 
-from src.halcytone_content_generator.services.crm_client_v2 import EnhancedCRMClient, EmailStatus, EmailRecipient, BulkEmailJob
-from src.halcytone_content_generator.config import Settings
+from halcytone_content_generator.services.crm_client_v2 import EnhancedCRMClient, EmailStatus, EmailRecipient, BulkEmailJob
+from halcytone_content_generator.config import Settings
 
 
 class TestEnhancedCRMClient:

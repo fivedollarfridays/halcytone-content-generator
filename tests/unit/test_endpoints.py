@@ -6,8 +6,8 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 from fastapi import HTTPException, BackgroundTasks
 
-from src.halcytone_content_generator.api.endpoints import router
-from src.halcytone_content_generator.schemas.content import ContentGenerationRequest, ContentGenerationResponse
+from halcytone_content_generator.api.endpoints import router
+from halcytone_content_generator.schemas.content import ContentGenerationRequest, ContentGenerationResponse
 from fastapi import FastAPI
 
 
@@ -98,11 +98,11 @@ def sample_social_posts():
 class TestGenerateContent:
     """Test generate content endpoint"""
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
-    @patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
-    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.ContentAssembler')
+    @patch('halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
+    @patch('halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_content_preview_only(
         self, mock_platform_client, mock_crm_client, mock_assembler,
@@ -152,11 +152,11 @@ class TestGenerateContent:
         mock_assembler_instance.generate_web_update.assert_called_once_with(sample_content)
         mock_assembler_instance.generate_social_posts.assert_called_once_with(sample_content)
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
-    @patch('src.halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
-    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.ContentAssembler')
+    @patch('halcytone_content_generator.services.publishers.email_publisher.EnhancedCRMClient')
+    @patch('halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_content_full_flow(
         self, mock_platform_client, mock_crm_client, mock_assembler,
@@ -223,9 +223,9 @@ class TestGenerateContent:
             sample_web_update['excerpt']
         )
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.ContentAssembler')
     @pytest.mark.asyncio
     async def test_generate_content_partial_flow(
         self, mock_assembler, mock_fetcher, mock_get_settings, client,
@@ -261,8 +261,8 @@ class TestGenerateContent:
         data = response.json()
         assert data['status'] == 'preview'
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
     @pytest.mark.asyncio
     async def test_generate_content_error_handling(
         self, mock_fetcher, mock_get_settings, client, mock_settings
@@ -282,10 +282,10 @@ class TestGenerateContent:
         assert response.status_code == 500
         assert "Fetch failed" in response.json()['detail']
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
-    @patch('src.halcytone_content_generator.api.endpoints.CRMClient')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.ContentAssembler')
+    @patch('halcytone_content_generator.api.endpoints.CRMClient')
     @pytest.mark.asyncio
     async def test_generate_content_email_only(
         self, mock_crm_client, mock_assembler, mock_fetcher, mock_get_settings,
@@ -325,10 +325,10 @@ class TestGenerateContent:
         assert 'email' in data['results']
         assert 'web' not in data['results']
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
-    @patch('src.halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.ContentAssembler')
+    @patch('halcytone_content_generator.services.publishers.web_publisher.EnhancedPlatformClient')
     @pytest.mark.asyncio
     async def test_generate_content_web_only(
         self, mock_platform_client, mock_assembler, mock_fetcher, mock_get_settings,
@@ -368,10 +368,10 @@ class TestGenerateContent:
         assert 'web' in data['results']
         assert 'email' not in data['results']
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
-    @patch('src.halcytone_content_generator.api.endpoints.CRMClient')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.ContentAssembler')
+    @patch('halcytone_content_generator.api.endpoints.CRMClient')
     @pytest.mark.asyncio
     async def test_generate_content_email_error(
         self, mock_crm_client, mock_assembler, mock_fetcher, mock_get_settings,
@@ -410,9 +410,9 @@ class TestGenerateContent:
 class TestPreviewContent:
     """Test preview content endpoint"""
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.ContentAssembler')
     @pytest.mark.asyncio
     async def test_preview_content_success(
         self, mock_assembler, mock_fetcher, mock_get_settings, client,
@@ -448,8 +448,8 @@ class TestPreviewContent:
         assert summary['tips'] == 1
         assert summary['vision'] == 1
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
     @pytest.mark.asyncio
     async def test_preview_content_error(
         self, mock_fetcher, mock_get_settings, client, mock_settings
@@ -466,9 +466,9 @@ class TestPreviewContent:
         assert response.status_code == 500
         assert "Preview failed" in response.json()['detail']
 
-    @patch('src.halcytone_content_generator.api.endpoints.get_settings')
-    @patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher')
-    @patch('src.halcytone_content_generator.api.endpoints.ContentAssembler')
+    @patch('halcytone_content_generator.api.endpoints.get_settings')
+    @patch('halcytone_content_generator.api.endpoints.DocumentFetcher')
+    @patch('halcytone_content_generator.api.endpoints.ContentAssembler')
     @pytest.mark.asyncio
     async def test_preview_content_empty(
         self, mock_assembler, mock_fetcher, mock_get_settings, client, mock_settings
@@ -509,7 +509,7 @@ class TestGetStatus:
 
     def test_get_status_all_configured(self, app, mock_settings):
         """Test status endpoint with all services configured"""
-        from src.halcytone_content_generator.config import get_settings
+        from halcytone_content_generator.config import get_settings
 
         # Override dependency
         app.dependency_overrides[get_settings] = lambda: mock_settings
@@ -534,7 +534,7 @@ class TestGetStatus:
 
     def test_get_status_partially_configured(self, app):
         """Test status endpoint with some services not configured"""
-        from src.halcytone_content_generator.config import get_settings
+        from halcytone_content_generator.config import get_settings
 
         settings = MagicMock()
         settings.SERVICE_NAME = "content-generator"
@@ -565,7 +565,7 @@ class TestGetStatus:
 
     def test_get_status_minimal_configuration(self, app):
         """Test status endpoint with minimal configuration"""
-        from src.halcytone_content_generator.config import get_settings
+        from halcytone_content_generator.config import get_settings
 
         settings = MagicMock()
         settings.SERVICE_NAME = "test-service"
@@ -632,28 +632,28 @@ class TestRequestValidation:
 
     def test_generate_content_default_values(self, client):
         """Test that default values work correctly"""
-        with patch('src.halcytone_content_generator.api.endpoints.get_settings') as mock_get_settings:
+        with patch('halcytone_content_generator.api.endpoints.get_settings') as mock_get_settings:
             mock_settings = MagicMock()
             mock_get_settings.return_value = mock_settings
 
-            with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher:
+            with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher:
                 mock_fetcher_instance = AsyncMock()
                 mock_fetcher_instance.fetch_content.return_value = {}
                 mock_fetcher.return_value = mock_fetcher_instance
 
-                with patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler:
+                with patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler:
                     mock_assembler_instance = Mock()
                     mock_assembler_instance.generate_newsletter.return_value = {'subject': '', 'html': '', 'text': ''}
                     mock_assembler_instance.generate_web_update.return_value = {'title': '', 'content': '', 'excerpt': ''}
                     mock_assembler_instance.generate_social_posts.return_value = []
                     mock_assembler.return_value = mock_assembler_instance
 
-                    with patch('src.halcytone_content_generator.api.endpoints.CRMClient') as mock_crm:
+                    with patch('halcytone_content_generator.api.endpoints.CRMClient') as mock_crm:
                         mock_crm_instance = AsyncMock()
                         mock_crm_instance.send_newsletter.return_value = {'sent': 10, 'failed': 0}
                         mock_crm.return_value = mock_crm_instance
 
-                        with patch('src.halcytone_content_generator.api.endpoints.PlatformClient') as mock_platform:
+                        with patch('halcytone_content_generator.api.endpoints.PlatformClient') as mock_platform:
                             mock_platform_instance = AsyncMock()
                             mock_platform_instance.publish_update.return_value = {'id': 'test123'}
                             mock_platform.return_value = mock_platform_instance

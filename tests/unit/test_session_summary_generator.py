@@ -6,8 +6,8 @@ import pytest
 from datetime import datetime, timezone
 import json
 
-from src.halcytone_content_generator.schemas.content_types import SessionContentStrict
-from src.halcytone_content_generator.services.session_summary_generator import SessionSummaryGenerator
+from halcytone_content_generator.schemas.content_types import SessionContentStrict
+from halcytone_content_generator.services.session_summary_generator import SessionSummaryGenerator
 
 
 class TestSessionSummaryGenerator:

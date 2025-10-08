@@ -6,13 +6,13 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 from fastapi.testclient import TestClient
 
-from src.halcytone_content_generator.main import app
-from src.halcytone_content_generator.schemas.content import (
+from halcytone_content_generator.main import app
+from halcytone_content_generator.schemas.content import (
     BatchContentRequest, BatchContentResponse, BatchContentItem,
     Content, NewsletterContent, WebUpdateContent, SocialPost
 )
-from src.halcytone_content_generator.services.content_assembler_v2 import EnhancedContentAssembler
-from src.halcytone_content_generator.services.publishers.base import ValidationResult, PreviewResult
+from halcytone_content_generator.services.content_assembler_v2 import EnhancedContentAssembler
+from halcytone_content_generator.services.publishers.base import ValidationResult, PreviewResult
 
 
 class TestBatchEndpoints:
@@ -63,7 +63,7 @@ class TestBatchEndpoints:
 
     def test_generate_batch_success(self, client, mock_assembler, sample_newsletter):
         """Test successful batch generation"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
             mock_dep.return_value = mock_assembler
 
             # Mock assembler responses
@@ -71,7 +71,7 @@ class TestBatchEndpoints:
             mock_assembler.generate_newsletter.return_value = sample_newsletter
 
             # Mock publisher validation and preview
-            with patch('src.halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
+            with patch('halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
                 mock_publisher = Mock()
                 mock_publisher.validate = AsyncMock(return_value=ValidationResult(
                     is_valid=True, issues=[], metadata={}
@@ -127,7 +127,7 @@ class TestBatchEndpoints:
 
     def test_generate_batch_exceeds_limit(self, client):
         """Test batch generation exceeding limits"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_settings') as mock_settings:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_settings') as mock_settings:
             mock_settings.return_value.BATCH_MAX_ITEMS = 10
 
             response = client.post(
@@ -145,7 +145,7 @@ class TestBatchEndpoints:
     def test_generate_batch_multiple_channels(self, client, mock_assembler,
                                            sample_newsletter, sample_web_update, sample_social_post):
         """Test batch generation with multiple channels"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
             mock_dep.return_value = mock_assembler
 
             # Mock assembler responses
@@ -155,7 +155,7 @@ class TestBatchEndpoints:
             mock_assembler.generate_social_post.return_value = sample_social_post
 
             # Mock publishers
-            with patch('src.halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
+            with patch('halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
                 mock_publisher = Mock()
                 mock_publisher.validate = AsyncMock(return_value=ValidationResult(
                     is_valid=True, issues=[], metadata={}
@@ -191,13 +191,13 @@ class TestBatchEndpoints:
 
     def test_generate_batch_with_scheduling(self, client, mock_assembler, sample_newsletter):
         """Test batch generation with scheduling enabled"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
             mock_dep.return_value = mock_assembler
 
             mock_assembler.fetch_living_document_content.return_value = {"test": "data"}
             mock_assembler.generate_newsletter.return_value = sample_newsletter
 
-            with patch('src.halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
+            with patch('halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
                 mock_publisher = Mock()
                 mock_publisher.validate = AsyncMock(return_value=ValidationResult(
                     is_valid=True, issues=[], metadata={}
@@ -230,13 +230,13 @@ class TestBatchEndpoints:
 
     def test_generate_batch_validation_failure(self, client, mock_assembler, sample_newsletter):
         """Test batch generation with content validation failure"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
             mock_dep.return_value = mock_assembler
 
             mock_assembler.fetch_living_document_content.return_value = {"test": "data"}
             mock_assembler.generate_newsletter.return_value = sample_newsletter
 
-            with patch('src.halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
+            with patch('halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
                 mock_publisher = Mock()
                 # Validation fails
                 mock_publisher.validate = AsyncMock(return_value=ValidationResult(
@@ -309,13 +309,13 @@ class TestBatchEndpoints:
 
     def test_generate_batch_period_variations(self, client, mock_assembler, sample_newsletter):
         """Test different period types affect item count"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
             mock_dep.return_value = mock_assembler
 
             mock_assembler.fetch_living_document_content.return_value = {"test": "data"}
             mock_assembler.generate_newsletter.return_value = sample_newsletter
 
-            with patch('src.halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
+            with patch('halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
                 mock_publisher = Mock()
                 mock_publisher.validate = AsyncMock(return_value=ValidationResult(
                     is_valid=True, issues=[], metadata={}
@@ -369,13 +369,13 @@ class TestBatchEndpoints:
 
     def test_generate_batch_content_themes(self, client, mock_assembler, sample_newsletter):
         """Test batch generation with specific content themes"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
             mock_dep.return_value = mock_assembler
 
             mock_assembler.fetch_living_document_content.return_value = {"test": "data"}
             mock_assembler.generate_newsletter.return_value = sample_newsletter
 
-            with patch('src.halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
+            with patch('halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
                 mock_publisher = Mock()
                 mock_publisher.validate = AsyncMock(return_value=ValidationResult(
                     is_valid=True, issues=[], metadata={}
@@ -403,7 +403,7 @@ class TestBatchEndpoints:
 
     def test_generate_batch_assembler_error(self, client):
         """Test batch generation when assembler fails"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
             mock_assembler = Mock()
             mock_assembler.fetch_living_document_content = AsyncMock(side_effect=Exception("Assembler failed"))
             mock_dep.return_value = mock_assembler
@@ -421,13 +421,13 @@ class TestBatchEndpoints:
 
     def test_batch_distribution_calculation(self, client, mock_assembler, sample_newsletter):
         """Test that scheduling distribution is calculated correctly"""
-        with patch('src.halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
+        with patch('halcytone_content_generator.api.endpoints_batch.get_content_assembler') as mock_dep:
             mock_dep.return_value = mock_assembler
 
             mock_assembler.fetch_living_document_content.return_value = {"test": "data"}
             mock_assembler.generate_newsletter.return_value = sample_newsletter
 
-            with patch('src.halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
+            with patch('halcytone_content_generator.api.endpoints_batch.get_publishers') as mock_publishers:
                 mock_publisher = Mock()
                 mock_publisher.validate = AsyncMock(return_value=ValidationResult(
                     is_valid=True, issues=[], metadata={}

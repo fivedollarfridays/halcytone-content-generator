@@ -84,7 +84,15 @@ async def generate_enhanced_content(
             except ValidationError as e:
                 # Return 422 for validation errors as expected by the test
                 logger.warning(f"Content validation failed: {e}")
-                raise HTTPException(status_code=422, detail=e.errors())
+                # Convert validation errors to JSON-serializable format
+                error_details = []
+                for error in e.errors():
+                    error_dict = dict(error)
+                    # Convert any non-serializable values to strings
+                    if 'ctx' in error_dict and 'error' in error_dict['ctx']:
+                        error_dict['ctx']['error'] = str(error_dict['ctx']['error'])
+                    error_details.append(error_dict)
+                raise HTTPException(status_code=422, detail=error_details)
         else:
             # Standard ContentGenerationRequest
             try:
@@ -92,7 +100,15 @@ async def generate_enhanced_content(
                 logger.info("Processing standard content generation request")
             except ValidationError as e:
                 logger.warning(f"Request validation failed: {e}")
-                raise HTTPException(status_code=422, detail=e.errors())
+                # Convert validation errors to JSON-serializable format
+                error_details = []
+                for error in e.errors():
+                    error_dict = dict(error)
+                    # Convert any non-serializable values to strings
+                    if 'ctx' in error_dict and 'error' in error_dict['ctx']:
+                        error_dict['ctx']['error'] = str(error_dict['ctx']['error'])
+                    error_details.append(error_dict)
+                raise HTTPException(status_code=422, detail=error_details)
 
         # Handle legacy dry_run detection
         if isinstance(raw_body, dict) and "content" in raw_body:

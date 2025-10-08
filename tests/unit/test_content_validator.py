@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
-from src.halcytone_content_generator.services.content_validator import ContentValidator
+from halcytone_content_generator.services.content_validator import ContentValidator
 
 
 class TestContentValidator:

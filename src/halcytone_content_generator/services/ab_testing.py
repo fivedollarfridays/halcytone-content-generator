@@ -25,7 +25,7 @@ from .personalization import ContentPersonalizationEngine
 logger = logging.getLogger(__name__)
 
 
-class TestStatus(Enum):
+class ABTestStatus(Enum):
     """Status of an A/B test."""
     DRAFT = "draft"
     ACTIVE = "active"
@@ -34,7 +34,7 @@ class TestStatus(Enum):
     ARCHIVED = "archived"
 
 
-class TestType(Enum):
+class ABTestType(Enum):
     """Types of A/B tests."""
     CONTENT_VARIATION = "content_variation"
     PERSONALIZATION = "personalization"
@@ -67,7 +67,7 @@ class MetricType(Enum):
 
 
 @dataclass
-class TestVariation:
+class ABTestVariation:
     """A variation in an A/B test."""
     variation_id: str
     variation_type: VariationType
@@ -79,7 +79,7 @@ class TestVariation:
 
 
 @dataclass
-class TestMetric:
+class ABTestMetric:
     """A metric to track in an A/B test."""
     metric_type: MetricType
     name: str
@@ -100,7 +100,7 @@ class UserAssignment:
 
 
 @dataclass
-class TestEvent:
+class ABTestEvent:
     """An event recorded for A/B test tracking."""
     event_id: str
     user_id: str
@@ -113,7 +113,7 @@ class TestEvent:
 
 
 @dataclass
-class TestResults:
+class ABTestResults:
     """Results of an A/B test."""
     test_id: str
     variation_results: Dict[str, Dict[str, float]]
@@ -132,10 +132,10 @@ class ABTest:
     test_id: str
     name: str
     description: str
-    test_type: TestType
-    variations: List[TestVariation]
-    metrics: List[TestMetric]
-    status: TestStatus = TestStatus.DRAFT
+    test_type: ABTestType
+    variations: List[ABTestVariation]
+    metrics: List[ABTestMetric]
+    status: ABTestStatus = ABTestStatus.DRAFT
     traffic_allocation: float = 1.0
     min_sample_size: int = 100
     max_duration_days: int = 30
@@ -162,16 +162,16 @@ class ABTestingFramework:
         # In-memory storage (in production, this would be a database)
         self.tests: Dict[str, ABTest] = {}
         self.user_assignments: Dict[str, List[UserAssignment]] = {}
-        self.test_events: Dict[str, List[TestEvent]] = {}
-        self.test_results: Dict[str, TestResults] = {}
+        self.test_events: Dict[str, List[ABTestEvent]] = {}
+        self.test_results: Dict[str, ABTestResults] = {}
 
     async def create_test(
         self,
         name: str,
         description: str,
-        test_type: TestType,
+        test_type: ABTestType,
         base_content: str,
-        metrics: List[TestMetric],
+        metrics: List[ABTestMetric],
         variation_count: int = 2,
         traffic_allocation: float = 1.0,
         min_sample_size: int = 100,
@@ -235,10 +235,10 @@ class ABTestingFramework:
     async def _generate_variations(
         self,
         test_id: str,
-        test_type: TestType,
+        test_type: ABTestType,
         base_content: str,
         variation_count: int
-    ) -> List[TestVariation]:
+    ) -> List[ABTestVariation]:
         """
         Generate test variations based on test type and base content.
 
@@ -254,7 +254,7 @@ class ABTestingFramework:
         variations = []
 
         # Control variation (original)
-        control = TestVariation(
+        control = ABTestVariation(
             variation_id=f"{test_id}_control",
             variation_type=VariationType.CONTROL,
             name="Control",
@@ -266,7 +266,7 @@ class ABTestingFramework:
         # Generate AI-powered variations if enabled
         if (self.config.AI_ENABLE_AB_TESTING and
             variation_count > 1 and
-            test_type in [TestType.CONTENT_VARIATION, TestType.SUBJECT_LINE, TestType.EMAIL_TEMPLATE]):
+            test_type in [ABTestType.CONTENT_VARIATION, ABTestType.SUBJECT_LINE, ABTestType.EMAIL_TEMPLATE]):
 
             ai_variations = await self._generate_ai_variations(
                 test_id=test_id,
@@ -290,10 +290,10 @@ class ABTestingFramework:
     async def _generate_ai_variations(
         self,
         test_id: str,
-        test_type: TestType,
+        test_type: ABTestType,
         base_content: str,
         variation_count: int
-    ) -> List[TestVariation]:
+    ) -> List[ABTestVariation]:
         """Generate AI-powered content variations."""
         variations = []
         variation_types = [VariationType.VARIANT_A, VariationType.VARIANT_B,
@@ -316,7 +316,7 @@ class ABTestingFramework:
                 )
 
                 if enhanced_content and enhanced_content.enhanced_content:
-                    variation = TestVariation(
+                    variation = ABTestVariation(
                         variation_id=f"{test_id}_{variation_types[i].value}",
                         variation_type=variation_types[i],
                         name=f"AI Variant {chr(65 + i)}",
@@ -342,10 +342,10 @@ class ABTestingFramework:
     def _generate_rule_based_variations(
         self,
         test_id: str,
-        test_type: TestType,
+        test_type: ABTestType,
         base_content: str,
         variation_count: int
-    ) -> List[TestVariation]:
+    ) -> List[ABTestVariation]:
         """Generate rule-based content variations."""
         variations = []
         variation_types = [VariationType.VARIANT_A, VariationType.VARIANT_B,
@@ -362,10 +362,10 @@ class ABTestingFramework:
     def _generate_single_rule_variation(
         self,
         test_id: str,
-        test_type: TestType,
+        test_type: ABTestType,
         base_content: str,
         variation_number: int
-    ) -> TestVariation:
+    ) -> ABTestVariation:
         """Generate a single rule-based variation."""
         variation_types = [VariationType.VARIANT_A, VariationType.VARIANT_B,
                           VariationType.VARIANT_C, VariationType.VARIANT_D]
@@ -373,7 +373,7 @@ class ABTestingFramework:
         variation_type = variation_types[variation_number - 1]
         modified_content = base_content
 
-        if test_type == TestType.SUBJECT_LINE:
+        if test_type == ABTestType.SUBJECT_LINE:
             modifications = [
                 lambda x: f"🎯 {x}",  # Add emoji
                 lambda x: f"{x} - Limited Time!",  # Add urgency
@@ -382,7 +382,7 @@ class ABTestingFramework:
             ]
             modified_content = modifications[variation_number - 1](base_content)
 
-        elif test_type == TestType.CTA_BUTTON:
+        elif test_type == ABTestType.CTA_BUTTON:
             cta_variations = [
                 "Get Started Now",
                 "Try It Free",
@@ -391,7 +391,7 @@ class ABTestingFramework:
             ]
             modified_content = cta_variations[(variation_number - 1) % len(cta_variations)]
 
-        elif test_type == TestType.CONTENT_VARIATION:
+        elif test_type == ABTestType.CONTENT_VARIATION:
             if variation_number == 1:
                 modified_content = f"**Enhanced:** {base_content}"
             elif variation_number == 2:
@@ -401,7 +401,7 @@ class ABTestingFramework:
             else:
                 modified_content = f"🌟 {base_content} 🌟"
 
-        return TestVariation(
+        return ABTestVariation(
             variation_id=f"{test_id}_{variation_type.value}",
             variation_type=variation_type,
             name=f"Variant {chr(64 + variation_number)}",
@@ -409,22 +409,22 @@ class ABTestingFramework:
             metadata={"generation_method": "rule_based"}
         )
 
-    def _create_variation_prompt(self, test_type: TestType, variation_number: int) -> str:
+    def _create_variation_prompt(self, test_type: ABTestType, variation_number: int) -> str:
         """Create AI enhancement prompt for generating variations."""
         base_prompts = {
-            TestType.CONTENT_VARIATION: [
+            ABTestType.CONTENT_VARIATION: [
                 "Create a more engaging version with stronger emotional appeal",
                 "Rewrite with a more professional and authoritative tone",
                 "Make it more conversational and friendly",
                 "Add urgency and scarcity elements"
             ],
-            TestType.SUBJECT_LINE: [
+            ABTestType.SUBJECT_LINE: [
                 "Create a more compelling subject line with curiosity gap",
                 "Write a benefit-focused subject line",
                 "Create an urgent, time-sensitive subject line",
                 "Write a personalized, direct subject line"
             ],
-            TestType.EMAIL_TEMPLATE: [
+            ABTestType.EMAIL_TEMPLATE: [
                 "Redesign with better structure and flow",
                 "Create a more visual, scannable version",
                 "Make it more concise and action-oriented",
@@ -457,12 +457,12 @@ class ABTestingFramework:
 
         test = self.tests[test_id]
 
-        if test.status != TestStatus.DRAFT:
+        if test.status != ABTestStatus.DRAFT:
             logger.error(f"Test {test_id} is not in draft status")
             return False
 
         try:
-            test.status = TestStatus.ACTIVE
+            test.status = ABTestStatus.ACTIVE
             test.started_at = datetime.utcnow()
 
             logger.info(f"Started A/B test: {test.name}")
@@ -494,7 +494,7 @@ class ABTestingFramework:
 
         test = self.tests[test_id]
 
-        if test.status != TestStatus.ACTIVE:
+        if test.status != ABTestStatus.ACTIVE:
             return None
 
         # Check if user already assigned
@@ -600,7 +600,7 @@ class ABTestingFramework:
             return False
 
         try:
-            event = TestEvent(
+            event = ABTestEvent(
                 event_id=self._generate_event_id(),
                 user_id=user_id,
                 test_id=test_id,
@@ -624,7 +624,7 @@ class ABTestingFramework:
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
         return f"event_{timestamp}"
 
-    async def analyze_test_results(self, test_id: str) -> Optional[TestResults]:
+    async def analyze_test_results(self, test_id: str) -> Optional[ABTestResults]:
         """
         Analyze A/B test results with statistical significance testing.
 
@@ -689,7 +689,7 @@ class ABTestingFramework:
                 end_time = test.ended_at or datetime.utcnow()
                 duration = end_time - test.started_at
 
-            results = TestResults(
+            results = ABTestResults(
                 test_id=test_id,
                 variation_results=variation_results,
                 statistical_significance=statistical_significance,
@@ -711,9 +711,9 @@ class ABTestingFramework:
 
     def _calculate_variation_metrics(
         self,
-        events: List[TestEvent],
+        events: List[ABTestEvent],
         assignments: List[UserAssignment],
-        metrics: List[TestMetric]
+        metrics: List[ABTestMetric]
     ) -> Dict[str, float]:
         """Calculate metrics for a variation."""
         results = {}
@@ -836,7 +836,7 @@ class ABTestingFramework:
         self,
         variation_results: Dict[str, Dict[str, float]],
         statistical_significance: Dict[str, bool],
-        metrics: List[TestMetric]
+        metrics: List[ABTestMetric]
     ) -> Tuple[Optional[str], str]:
         """Determine test winner and provide recommendation."""
         if not variation_results:
@@ -893,11 +893,11 @@ class ABTestingFramework:
 
         test = self.tests[test_id]
 
-        if test.status != TestStatus.ACTIVE:
+        if test.status != ABTestStatus.ACTIVE:
             return False
 
         try:
-            test.status = TestStatus.COMPLETED
+            test.status = ABTestStatus.COMPLETED
             test.ended_at = datetime.utcnow()
             test.metadata["stop_reason"] = reason
 
@@ -972,14 +972,14 @@ class ABTestingFramework:
 
     def get_active_tests(self) -> List[ABTest]:
         """Get all active tests."""
-        return [test for test in self.tests.values() if test.status == TestStatus.ACTIVE]
+        return [test for test in self.tests.values() if test.status == ABTestStatus.ACTIVE]
 
     def get_test_summary(self) -> Dict[str, Any]:
         """Get summary of all tests."""
         summary = {
             "total_tests": len(self.tests),
-            "active_tests": len([t for t in self.tests.values() if t.status == TestStatus.ACTIVE]),
-            "completed_tests": len([t for t in self.tests.values() if t.status == TestStatus.COMPLETED]),
+            "active_tests": len([t for t in self.tests.values() if t.status == ABTestStatus.ACTIVE]),
+            "completed_tests": len([t for t in self.tests.values() if t.status == ABTestStatus.COMPLETED]),
             "total_assignments": sum(len(assignments) for assignments in self.user_assignments.values()),
             "total_events": sum(len(events) for events in self.test_events.values())
         }

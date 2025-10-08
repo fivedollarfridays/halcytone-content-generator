@@ -10,7 +10,7 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch, AsyncMock
 
-from src.halcytone_content_generator.services.personalization import (
+from halcytone_content_generator.services.personalization import (
     ContentPersonalizationEngine,
     PersonalizationLevel,
     ContentType,
@@ -159,7 +159,7 @@ class TestContentPersonalizationEngine:
              patch.object(personalization_engine.segmentation_service, 'get_user_segments') as mock_get:
 
             # Mock return value should use SegmentCategory enum
-            from src.halcytone_content_generator.services.user_segmentation import SegmentCategory
+            from halcytone_content_generator.services.user_segmentation import SegmentCategory
             mock_get.return_value = {SegmentCategory.INDUSTRY: "healthcare_professional"}
 
             # Track some preferences first

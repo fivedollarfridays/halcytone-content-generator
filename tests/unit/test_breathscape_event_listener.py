@@ -7,7 +7,7 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
 
-from src.halcytone_content_generator.services.breathscape_event_listener import (
+from halcytone_content_generator.services.breathscape_event_listener import (
     BreathscapeEventListener,
     BreathscapeEventType
 )
@@ -129,7 +129,7 @@ class TestBreathscapeEventListener:
         assert BreathscapeEventType.TECHNIQUE_CHANGED in listener.event_handlers
 
     @pytest.mark.asyncio
-    @patch('src.halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
+    @patch('halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
     async def test_session_started_handler(self, mock_ws_manager, listener):
         """Test session started event handler"""
         mock_ws_manager.broadcast_session_update = AsyncMock()
@@ -161,7 +161,7 @@ class TestBreathscapeEventListener:
         mock_ws_manager.broadcast_session_update.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch('src.halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
+    @patch('halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
     async def test_session_ended_handler(self, mock_ws_manager, listener):
         """Test session ended event handler"""
         mock_ws_manager.broadcast_session_update = AsyncMock()
@@ -206,7 +206,7 @@ class TestBreathscapeEventListener:
         )
 
     @pytest.mark.asyncio
-    @patch('src.halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
+    @patch('halcytone_content_generator.services.breathscape_event_listener.websocket_manager')
     async def test_participant_joined_handler(self, mock_ws_manager, listener):
         """Test participant joined event handler"""
         mock_ws_manager.broadcast_session_update = AsyncMock()

@@ -1,0 +1,135 @@
+# Kubernetes Ingress for Halcytone Content Generator
+# Using nginx-ingress controller
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: content-generator-ingress
+  namespace: halcytone
+  labels:
+    app: content-generator
+  annotations:
+    # Ingress controller
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+    # SSL/TLS
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    # Rate limiting
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+
+    # Timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+
+    # Body size
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+
+    # Headers
+    nginx.ingress.kubernetes.io/proxy-set-headers: "halcytone/custom-headers"
+
+    # CORS (if needed)
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://halcytone.com"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+
+    # Load balancing
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$binary_remote_addr"
+    nginx.ingress.kubernetes.io/load-balance: "ewma"
+
+    # Health checks
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/health-check-interval: "30"
+    nginx.ingress.kubernetes.io/health-check-path: "/health"
+
+    # Caching
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_cache_methods GET HEAD;
+      proxy_cache_valid 200 304 5m;
+      proxy_cache_key "$scheme$request_method$host$request_uri";
+      add_header X-Cache-Status $upstream_cache_status;
+
+spec:
+  tls:
+  - hosts:
+    - api.halcytone.com
+    secretName: halcytone-tls-secret
+
+  rules:
+  - host: api.halcytone.com
+    http:
+      paths:
+      # Health check endpoint (no rate limiting)
+      - path: /health
+        pathType: Exact
+        backend:
+          service:
+            name: content-generator-service
+            port:
+              number: 8000
+
+      # Readiness check
+      - path: /ready
+        pathType: Exact
+        backend:
+          service:
+            name: content-generator-service
+            port:
+              number: 8000
+
+      # API endpoints
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: content-generator-service
+            port:
+              number: 8000
+
+      # WebSocket endpoints
+      - path: /ws
+        pathType: Prefix
+        backend:
+          service:
+            name: content-generator-service
+            port:
+              number: 8000
+
+      # Documentation
+      - path: /docs
+        pathType: Prefix
+        backend:
+          service:
+            name: content-generator-service
+            port:
+              number: 8000
+
+      # Root
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: content-generator-service
+            port:
+              number: 8000
+
+---
+# ConfigMap for custom headers
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-headers
+  namespace: halcytone
+data:
+  X-Frame-Options: "SAMEORIGIN"
+  X-Content-Type-Options: "nosniff"
+  X-XSS-Protection: "1; mode=block"
+  Referrer-Policy: "no-referrer-when-downgrade"
+  Strict-Transport-Security: "max-age=63072000; includeSubDomains; preload"

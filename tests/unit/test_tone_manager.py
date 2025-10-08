@@ -5,12 +5,12 @@ Sprint 4: Ecosystem Integration - Advanced tone management testing
 import pytest
 from unittest.mock import patch, MagicMock
 
-from src.halcytone_content_generator.services.tone_manager import (
+from halcytone_content_generator.services.tone_manager import (
     ToneManager,
     AdvancedTone,
     ToneProfile
 )
-from src.halcytone_content_generator.schemas.content_types import ContentType
+from halcytone_content_generator.schemas.content_types import ContentType
 
 
 class TestToneManager:
@@ -389,7 +389,7 @@ class TestToneManagerIntegration:
             selected_tone = tone_manager.select_tone(content_type, channel)
             assert selected_tone == expected_tone
 
-    @patch('src.halcytone_content_generator.services.tone_manager.logger')
+    @patch('halcytone_content_generator.services.tone_manager.logger')
     def test_tone_manager_logging(self, mock_logger, tone_manager):
         """Test that tone manager logs appropriate messages"""
         tone_manager.select_tone(
@@ -403,7 +403,7 @@ class TestToneManagerIntegration:
 
     def test_global_tone_manager_instance(self):
         """Test that global tone manager instance is properly initialized"""
-        from src.halcytone_content_generator.services.tone_manager import tone_manager as global_manager
+        from halcytone_content_generator.services.tone_manager import tone_manager as global_manager
 
         assert global_manager is not None
         assert isinstance(global_manager, ToneManager)

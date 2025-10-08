@@ -5,7 +5,7 @@ Sprint 8 - AI Enhancement & Personalization
 import pytest
 from typing import Dict, List
 
-from src.halcytone_content_generator.templates.ai_prompts import (
+from halcytone_content_generator.templates.ai_prompts import (
     AIPromptTemplates,
     ToneStyle,
     ContentPurpose,

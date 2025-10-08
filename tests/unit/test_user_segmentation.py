@@ -6,7 +6,7 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
-from src.halcytone_content_generator.services.user_segmentation import (
+from halcytone_content_generator.services.user_segmentation import (
     UserSegmentationService,
     UserProfile,
     UserBehavior,

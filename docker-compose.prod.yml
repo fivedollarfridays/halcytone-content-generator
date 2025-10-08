@@ -1,0 +1,444 @@
+# Production Docker Compose configuration for Halcytone Content Generator
+# Includes load balancing, monitoring, and high availability setup
+
+version: '3.8'
+
+services:
+  # Nginx Load Balancer & Reverse Proxy
+  nginx:
+    build:
+      context: ./deployment/nginx
+      dockerfile: Dockerfile
+    container_name: halcytone-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deployment/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx-cache:/var/cache/nginx
+      - certbot-webroot:/var/www/certbot:ro
+    networks:
+      - halcytone-frontend
+      - halcytone-backend
+    depends_on:
+      - content-generator-1
+      - content-generator-2
+      - content-generator-3
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Content Generator - Instance 1 (Primary)
+  content-generator-1:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: content-generator-1
+    hostname: content-generator-1
+    environment:
+      # Application settings
+      - APP_NAME=Halcytone Content Generator
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      - INSTANCE_ID=1
+
+      # Server configuration
+      - PORT=8000
+      - WORKERS=4
+      - WORKER_CLASS=uvicorn.workers.UvicornWorker
+
+      # Service URLs
+      - CRM_BASE_URL=${CRM_BASE_URL}
+      - PLATFORM_BASE_URL=${PLATFORM_BASE_URL}
+
+      # Secrets (use Docker secrets in production)
+      - CRM_API_KEY=${CRM_API_KEY}
+      - PLATFORM_API_KEY=${PLATFORM_API_KEY}
+      - GOOGLE_CREDENTIALS_JSON=${GOOGLE_CREDENTIALS_JSON}
+      - NOTION_API_KEY=${NOTION_API_KEY}
+      - NOTION_DATABASE_ID=${NOTION_DATABASE_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+      # Redis
+      - REDIS_URL=redis://redis:6379/0
+      - CACHE_TTL=300
+
+      # Circuit breaker
+      - CIRCUIT_BREAKER_FAILURE_THRESHOLD=5
+      - CIRCUIT_BREAKER_RECOVERY_TIMEOUT=60
+      - MAX_RETRIES=3
+
+      # Performance
+      - MAX_CONCURRENT_REQUESTS=100
+      - REQUEST_TIMEOUT=120
+
+      # Monitoring
+      - ENABLE_METRICS=true
+      - METRICS_PORT=9090
+      - ENABLE_TRACING=true
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+    volumes:
+      - app-logs-1:/app/logs
+      - app-data:/app/data:ro
+      - app-cache:/app/cache
+    networks:
+      - halcytone-backend
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Content Generator - Instance 2 (Secondary)
+  content-generator-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: content-generator-2
+    hostname: content-generator-2
+    environment:
+      - APP_NAME=Halcytone Content Generator
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      - INSTANCE_ID=2
+      - PORT=8000
+      - WORKERS=4
+      - WORKER_CLASS=uvicorn.workers.UvicornWorker
+      - CRM_BASE_URL=${CRM_BASE_URL}
+      - PLATFORM_BASE_URL=${PLATFORM_BASE_URL}
+      - CRM_API_KEY=${CRM_API_KEY}
+      - PLATFORM_API_KEY=${PLATFORM_API_KEY}
+      - GOOGLE_CREDENTIALS_JSON=${GOOGLE_CREDENTIALS_JSON}
+      - NOTION_API_KEY=${NOTION_API_KEY}
+      - NOTION_DATABASE_ID=${NOTION_DATABASE_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379/0
+      - ENABLE_METRICS=true
+      - ENABLE_TRACING=true
+      - JAEGER_AGENT_HOST=jaeger
+    volumes:
+      - app-logs-2:/app/logs
+      - app-data:/app/data:ro
+      - app-cache:/app/cache
+    networks:
+      - halcytone-backend
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Content Generator - Instance 3 (Backup)
+  content-generator-3:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: content-generator-3
+    hostname: content-generator-3
+    environment:
+      - APP_NAME=Halcytone Content Generator
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      - INSTANCE_ID=3
+      - PORT=8000
+      - WORKERS=2
+      - WORKER_CLASS=uvicorn.workers.UvicornWorker
+      - CRM_BASE_URL=${CRM_BASE_URL}
+      - PLATFORM_BASE_URL=${PLATFORM_BASE_URL}
+      - CRM_API_KEY=${CRM_API_KEY}
+      - PLATFORM_API_KEY=${PLATFORM_API_KEY}
+      - GOOGLE_CREDENTIALS_JSON=${GOOGLE_CREDENTIALS_JSON}
+      - NOTION_API_KEY=${NOTION_API_KEY}
+      - NOTION_DATABASE_ID=${NOTION_DATABASE_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379/0
+      - ENABLE_METRICS=true
+      - ENABLE_TRACING=true
+      - JAEGER_AGENT_HOST=jaeger
+    volumes:
+      - app-logs-3:/app/logs
+      - app-data:/app/data:ro
+      - app-cache:/app/cache
+    networks:
+      - halcytone-backend
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis - Caching Layer
+  redis:
+    image: redis:7-alpine
+    container_name: halcytone-redis
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    volumes:
+      - redis-data:/data
+    networks:
+      - halcytone-backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1.5G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # PostgreSQL - Persistence (optional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: halcytone-postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-contentuser}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=content_db
+      - POSTGRES_MAX_CONNECTIONS=200
+      - POSTGRES_SHARED_BUFFERS=256MB
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./deployment/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - halcytone-backend
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-contentuser}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: halcytone-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - halcytone-backend
+      - halcytone-monitoring
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Grafana - Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: halcytone-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SERVER_ROOT_URL=https://grafana.halcytone.com
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - halcytone-monitoring
+    depends_on:
+      - prometheus
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Jaeger - Distributed Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: halcytone-jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=badger
+      - BADGER_EPHEMERAL=false
+      - BADGER_DIRECTORY_VALUE=/badger/data
+      - BADGER_DIRECTORY_KEY=/badger/key
+    volumes:
+      - jaeger-data:/badger
+    networks:
+      - halcytone-backend
+      - halcytone-monitoring
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Certbot - SSL Certificate Management
+  certbot:
+    image: certbot/certbot:latest
+    container_name: halcytone-certbot
+    volumes:
+      - ./deployment/nginx/ssl:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - halcytone-frontend
+
+networks:
+  halcytone-frontend:
+    driver: bridge
+  halcytone-backend:
+    driver: bridge
+    internal: true
+  halcytone-monitoring:
+    driver: bridge
+
+volumes:
+  nginx-cache:
+  app-logs-1:
+  app-logs-2:
+  app-logs-3:
+  app-data:
+  app-cache:
+  redis-data:
+  postgres-data:
+  prometheus-data:
+  grafana-data:
+  jaeger-data:
+  certbot-webroot:

@@ -3,6 +3,25 @@ Configuration Management Package
 Provides enhanced configuration with secrets management and validation
 """
 
+# Import base Settings first by directly loading the config module to avoid circular import
+import sys
+import os
+from pathlib import Path
+
+# Add parent directory to path to import config.py directly
+parent_dir = Path(__file__).parent.parent
+config_module_path = parent_dir / "config.py"
+
+# Import Settings and get_settings from the config.py file (not the package)
+import importlib.util
+spec = importlib.util.spec_from_file_location("base_config", config_module_path)
+base_config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(base_config)
+
+Settings = base_config.Settings
+get_settings = base_config.get_settings
+
+# Now import the enhanced config modules
 from .enhanced_config import (
     ProductionSettings,
     ConfigurationManager,
@@ -26,10 +45,6 @@ from .validation import (
     ValidationIssue,
     ConfigurationValidator
 )
-
-# Import Settings and get_settings from parent module's config.py
-# Use absolute import to avoid conflicts
-from src.halcytone_content_generator.config import Settings, get_settings
 
 __all__ = [
     # Enhanced configuration

@@ -5,11 +5,11 @@ import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from fastapi import HTTPException, BackgroundTasks
 
-from src.halcytone_content_generator.api.endpoints import (
+from halcytone_content_generator.api.endpoints import (
     generate_content, preview_content, get_status, get_publishers
 )
-from src.halcytone_content_generator.config import Settings
-from src.halcytone_content_generator.schemas.content import (
+from halcytone_content_generator.config import Settings
+from halcytone_content_generator.schemas.content import (
     ContentGenerationRequest, NewsletterContent, WebUpdateContent, SocialPost
 )
 
@@ -86,8 +86,8 @@ class TestGenerateContent:
         """Test content generation in preview mode"""
         sample_request.preview_only = True
 
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class:
 
             # Mock fetcher
             mock_fetcher = AsyncMock()
@@ -125,9 +125,9 @@ class TestGenerateContent:
         """Test content generation with actual publishing"""
         sample_request.preview_only = False
 
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class, \
-             patch('src.halcytone_content_generator.api.endpoints.get_publishers') as mock_get_publishers:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class, \
+             patch('halcytone_content_generator.api.endpoints.get_publishers') as mock_get_publishers:
 
             # Mock fetcher
             mock_fetcher = AsyncMock()
@@ -194,9 +194,9 @@ class TestGenerateContent:
         """Test content generation with validation failures"""
         sample_request.preview_only = False
 
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class, \
-             patch('src.halcytone_content_generator.api.endpoints.get_publishers') as mock_get_publishers:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class, \
+             patch('halcytone_content_generator.api.endpoints.get_publishers') as mock_get_publishers:
 
             # Mock fetcher
             mock_fetcher = AsyncMock()
@@ -238,7 +238,7 @@ class TestGenerateContent:
     @pytest.mark.asyncio
     async def test_generate_content_exception_handling(self, sample_request, mock_settings, mock_background_tasks):
         """Test exception handling in generate_content"""
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class:
             mock_fetcher_class.side_effect = Exception("Test error")
 
             with pytest.raises(HTTPException) as exc_info:
@@ -258,9 +258,9 @@ class TestGenerateContent:
             preview_only=False
         )
 
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class, \
-             patch('src.halcytone_content_generator.api.endpoints.get_publishers') as mock_get_publishers:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class, \
+             patch('halcytone_content_generator.api.endpoints.get_publishers') as mock_get_publishers:
 
             # Mock setup
             mock_fetcher = AsyncMock()
@@ -311,8 +311,8 @@ class TestPreviewContent:
     @pytest.mark.asyncio
     async def test_preview_content_success(self, mock_settings, sample_content):
         """Test successful content preview"""
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class:
 
             # Mock fetcher
             mock_fetcher = AsyncMock()
@@ -350,7 +350,7 @@ class TestPreviewContent:
     @pytest.mark.asyncio
     async def test_preview_content_exception_handling(self, mock_settings):
         """Test exception handling in preview_content"""
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class:
             mock_fetcher_class.side_effect = Exception("Preview error")
 
             with pytest.raises(HTTPException) as exc_info:
@@ -369,8 +369,8 @@ class TestPreviewContent:
             'vision': []
         }
 
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class:
 
             mock_fetcher = AsyncMock()
             mock_fetcher_class.return_value = mock_fetcher
@@ -458,8 +458,8 @@ class TestEndpointsIntegration:
             'vision': []
         }
 
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class:
 
             # Setup mocks
             mock_fetcher = AsyncMock()
@@ -513,7 +513,7 @@ class TestEndpointsIntegration:
         """Test error handling consistency across endpoints"""
         error_message = "Document service unavailable"
 
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class:
             mock_fetcher_class.side_effect = Exception(error_message)
 
             # Test preview endpoint error handling
@@ -534,9 +534,9 @@ class TestEndpointsIntegration:
         """Test social posts processing with multiple platforms"""
         sample_content = {'breathscape': [], 'hardware': [], 'tips': [], 'vision': []}
 
-        with patch('src.halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
-             patch('src.halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class, \
-             patch('src.halcytone_content_generator.api.endpoints.get_publishers') as mock_get_publishers:
+        with patch('halcytone_content_generator.api.endpoints.DocumentFetcher') as mock_fetcher_class, \
+             patch('halcytone_content_generator.api.endpoints.ContentAssembler') as mock_assembler_class, \
+             patch('halcytone_content_generator.api.endpoints.get_publishers') as mock_get_publishers:
 
             # Setup mocks
             mock_fetcher = AsyncMock()

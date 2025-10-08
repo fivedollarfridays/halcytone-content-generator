@@ -6,10 +6,10 @@ from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta
 import json
 
-from src.halcytone_content_generator.services.monitoring import (
+from halcytone_content_generator.services.monitoring import (
     MonitoringService, HealthStatus, EventType, MonitoringEvent
 )
-from src.halcytone_content_generator.config import Settings
+from halcytone_content_generator.config import Settings
 
 
 class TestMonitoringService:

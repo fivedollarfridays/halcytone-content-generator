@@ -349,7 +349,7 @@ class DocumentFetcher:
         Returns:
             Mock content dictionary
         """
-        return self.parse_mock_content()
+        return self._get_mock_content()
 
     async def fetch_from_url(self, url: str, parse_strategy: Optional[str] = None) -> Dict[str, List[Dict]]:
         """
@@ -372,7 +372,7 @@ class DocumentFetcher:
 
             # Simple parsing based on content
             if "breathscape" in content_text.lower():
-                return self.parse_mock_content()
+                return self._get_mock_content()
             else:
                 return {"content": [{"title": "URL Content", "content": content_text}]}
 

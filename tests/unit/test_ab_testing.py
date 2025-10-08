@@ -10,16 +10,16 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch, AsyncMock
 
-from src.halcytone_content_generator.services.ab_testing import (
+from halcytone_content_generator.services.ab_testing import (
     ABTestingFramework,
     ABTest,
-    TestVariation,
-    TestMetric,
+    ABTestVariation,
+    ABTestMetric,
     UserAssignment,
-    TestEvent,
-    TestResults,
-    TestStatus,
-    TestType,
+    ABTestEvent,
+    ABTestResults,
+    ABTestStatus,
+    ABTestType,
     VariationType,
     MetricType,
     get_ab_testing_framework
@@ -38,14 +38,14 @@ class TestABTestingFramework:
     def sample_metrics(self):
         """Create sample test metrics."""
         return [
-            TestMetric(
+            ABTestMetric(
                 metric_type=MetricType.CONVERSION_RATE,
                 name="Conversion Rate",
                 description="Primary conversion metric",
                 primary=True,
                 target_value=0.15
             ),
-            TestMetric(
+            ABTestMetric(
                 metric_type=MetricType.CLICK_THROUGH_RATE,
                 name="Click-Through Rate",
                 description="Secondary engagement metric",
@@ -65,7 +65,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Email Subject Test",
             description="Testing different email subject lines",
-            test_type=TestType.SUBJECT_LINE,
+            test_type=ABTestType.SUBJECT_LINE,
             base_content=sample_base_content,
             metrics=sample_metrics,
             variation_count=2
@@ -73,8 +73,8 @@ class TestABTestingFramework:
 
         assert isinstance(test, ABTest)
         assert test.name == "Email Subject Test"
-        assert test.test_type == TestType.SUBJECT_LINE
-        assert test.status == TestStatus.DRAFT
+        assert test.test_type == ABTestType.SUBJECT_LINE
+        assert test.status == ABTestStatus.DRAFT
         assert len(test.variations) == 2
         assert len(test.metrics) == 2
 
@@ -93,7 +93,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Multi-Variant Test",
             description="Testing multiple variations",
-            test_type=TestType.CONTENT_VARIATION,
+            test_type=ABTestType.CONTENT_VARIATION,
             base_content=sample_base_content,
             metrics=sample_metrics,
             variation_count=4
@@ -123,7 +123,7 @@ class TestABTestingFramework:
             test = await ab_framework.create_test(
                 name="AI Enhanced Test",
                 description="Testing with AI-generated variations",
-                test_type=TestType.CONTENT_VARIATION,
+                test_type=ABTestType.CONTENT_VARIATION,
                 base_content=sample_base_content,
                 metrics=sample_metrics,
                 variation_count=2
@@ -143,7 +143,7 @@ class TestABTestingFramework:
         base_content = "Newsletter Update"
         variations = ab_framework._generate_rule_based_variations(
             test_id="test_123",
-            test_type=TestType.SUBJECT_LINE,
+            test_type=ABTestType.SUBJECT_LINE,
             base_content=base_content,
             variation_count=2
         )
@@ -158,7 +158,7 @@ class TestABTestingFramework:
         base_content = "Click Here"
         variations = ab_framework._generate_rule_based_variations(
             test_id="test_123",
-            test_type=TestType.CTA_BUTTON,
+            test_type=ABTestType.CTA_BUTTON,
             base_content=base_content,
             variation_count=3
         )
@@ -185,18 +185,18 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Start Test",
             description="Test starting functionality",
-            test_type=TestType.EMAIL_TEMPLATE,
+            test_type=ABTestType.EMAIL_TEMPLATE,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
 
-        assert test.status == TestStatus.DRAFT
+        assert test.status == ABTestStatus.DRAFT
         assert test.started_at is None
 
         success = await ab_framework.start_test(test.test_id)
 
         assert success is True
-        assert test.status == TestStatus.ACTIVE
+        assert test.status == ABTestStatus.ACTIVE
         assert test.started_at is not None
 
     @pytest.mark.asyncio
@@ -211,7 +211,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Already Active Test",
             description="Test error handling",
-            test_type=TestType.CONTENT_VARIATION,
+            test_type=ABTestType.CONTENT_VARIATION,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -227,7 +227,7 @@ class TestABTestingFramework:
             test_id="test_123",
             name="Test",
             description="Test",
-            test_type=TestType.CONTENT_VARIATION,
+            test_type=ABTestType.CONTENT_VARIATION,
             variations=[],
             metrics=[],
             traffic_allocation=0.5  # 50% traffic
@@ -256,7 +256,7 @@ class TestABTestingFramework:
             test_id="test_123",
             name="Test",
             description="Test",
-            test_type=TestType.CONTENT_VARIATION,
+            test_type=ABTestType.CONTENT_VARIATION,
             variations=variations,
             metrics=[]
         )
@@ -276,7 +276,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Assignment Test",
             description="Test user assignment",
-            test_type=TestType.SUBJECT_LINE,
+            test_type=ABTestType.SUBJECT_LINE,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -297,7 +297,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Duplicate Assignment Test",
             description="Test duplicate assignment handling",
-            test_type=TestType.CONTENT_VARIATION,
+            test_type=ABTestType.CONTENT_VARIATION,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -316,7 +316,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Forced Assignment Test",
             description="Test forced assignment",
-            test_type=TestType.CTA_BUTTON,
+            test_type=ABTestType.CTA_BUTTON,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -337,7 +337,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Inactive Test",
             description="Test inactive assignment",
-            test_type=TestType.EMAIL_TEMPLATE,
+            test_type=ABTestType.EMAIL_TEMPLATE,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -353,7 +353,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Event Tracking Test",
             description="Test event tracking",
-            test_type=TestType.LANDING_PAGE,
+            test_type=ABTestType.LANDING_PAGE,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -385,7 +385,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Unassigned Event Test",
             description="Test unassigned event tracking",
-            test_type=TestType.CONTENT_VARIATION,
+            test_type=ABTestType.CONTENT_VARIATION,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -411,11 +411,11 @@ class TestABTestingFramework:
         ]
 
         events = [
-            TestEvent("e1", "user1", "test1", "var1", MetricType.CONVERSION_RATE, 1.0),
-            TestEvent("e2", "user3", "test1", "var1", MetricType.CONVERSION_RATE, 1.0),
+            ABTestEvent("e1", "user1", "test1", "var1", MetricType.CONVERSION_RATE, 1.0),
+            ABTestEvent("e2", "user3", "test1", "var1", MetricType.CONVERSION_RATE, 1.0),
             # 2 out of 5 users converted = 40% conversion rate
-            TestEvent("e3", "user1", "test1", "var1", MetricType.REVENUE, 50.0),
-            TestEvent("e4", "user2", "test1", "var1", MetricType.REVENUE, 75.0),
+            ABTestEvent("e3", "user1", "test1", "var1", MetricType.REVENUE, 50.0),
+            ABTestEvent("e4", "user2", "test1", "var1", MetricType.REVENUE, 75.0),
             # Total revenue = 125.0
         ]
 
@@ -531,7 +531,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Results Analysis Test",
             description="Test results analysis",
-            test_type=TestType.EMAIL_TEMPLATE,
+            test_type=ABTestType.EMAIL_TEMPLATE,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -555,7 +555,7 @@ class TestABTestingFramework:
         results = await ab_framework.analyze_test_results(test.test_id)
 
         assert results is not None
-        assert isinstance(results, TestResults)
+        assert isinstance(results, ABTestResults)
         assert results.test_id == test.test_id
         assert len(results.variation_results) > 0
         assert len(results.sample_sizes) > 0
@@ -573,18 +573,18 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Stop Test",
             description="Test stopping functionality",
-            test_type=TestType.CONTENT_VARIATION,
+            test_type=ABTestType.CONTENT_VARIATION,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
 
         await ab_framework.start_test(test.test_id)
-        assert test.status == TestStatus.ACTIVE
+        assert test.status == ABTestStatus.ACTIVE
 
         success = await ab_framework.stop_test(test.test_id, "Manual stop")
 
         assert success is True
-        assert test.status == TestStatus.COMPLETED
+        assert test.status == ABTestStatus.COMPLETED
         assert test.ended_at is not None
         assert test.metadata["stop_reason"] == "Manual stop"
 
@@ -594,7 +594,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Inactive Stop Test",
             description="Test stopping inactive test",
-            test_type=TestType.TIMING,
+            test_type=ABTestType.TIMING,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -610,7 +610,7 @@ class TestABTestingFramework:
         test = await ab_framework.create_test(
             name="Analytics Test",
             description="Test analytics generation",
-            test_type=TestType.SUBJECT_LINE,
+            test_type=ABTestType.SUBJECT_LINE,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -654,7 +654,7 @@ class TestABTestingFramework:
         test1 = await ab_framework.create_test(
             name="Active Test 1",
             description="First active test",
-            test_type=TestType.CONTENT_VARIATION,
+            test_type=ABTestType.CONTENT_VARIATION,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -664,7 +664,7 @@ class TestABTestingFramework:
         test2 = await ab_framework.create_test(
             name="Draft Test 2",
             description="Draft test",
-            test_type=TestType.EMAIL_TEMPLATE,
+            test_type=ABTestType.EMAIL_TEMPLATE,
             base_content=sample_base_content,
             metrics=sample_metrics
         )
@@ -673,14 +673,14 @@ class TestABTestingFramework:
 
         assert len(active_tests) == 1
         assert active_tests[0].test_id == test1.test_id
-        assert active_tests[0].status == TestStatus.ACTIVE
+        assert active_tests[0].status == ABTestStatus.ACTIVE
 
     def test_get_test_summary(self, ab_framework):
         """Test getting test summary."""
         # Add some mock data
-        ab_framework.tests["test1"] = Mock(status=TestStatus.ACTIVE)
-        ab_framework.tests["test2"] = Mock(status=TestStatus.COMPLETED)
-        ab_framework.tests["test3"] = Mock(status=TestStatus.DRAFT)
+        ab_framework.tests["test1"] = Mock(status=ABTestStatus.ACTIVE)
+        ab_framework.tests["test2"] = Mock(status=ABTestStatus.COMPLETED)
+        ab_framework.tests["test3"] = Mock(status=ABTestStatus.DRAFT)
 
         ab_framework.user_assignments["test1"] = [Mock(), Mock()]
         ab_framework.user_assignments["test2"] = [Mock()]
@@ -709,8 +709,8 @@ class TestABTestingDataStructures:
     """Test A/B testing data structures."""
 
     def test_test_variation_creation(self):
-        """Test TestVariation data structure."""
-        variation = TestVariation(
+        """Test ABTestVariation data structure."""
+        variation = ABTestVariation(
             variation_id="var_123",
             variation_type=VariationType.VARIANT_A,
             name="Variant A",
@@ -726,8 +726,8 @@ class TestABTestingDataStructures:
         assert isinstance(variation.created_at, datetime)
 
     def test_test_metric_creation(self):
-        """Test TestMetric data structure."""
-        metric = TestMetric(
+        """Test ABTestMetric data structure."""
+        metric = ABTestMetric(
             metric_type=MetricType.CONVERSION_RATE,
             name="Conversion Rate",
             description="Primary conversion metric",
@@ -756,8 +756,8 @@ class TestABTestingDataStructures:
         assert len(assignment.metadata) == 0  # Default empty
 
     def test_test_event_creation(self):
-        """Test TestEvent data structure."""
-        event = TestEvent(
+        """Test ABTestEvent data structure."""
+        event = ABTestEvent(
             event_id="event123",
             user_id="user456",
             test_id="test789",
@@ -775,8 +775,8 @@ class TestABTestingDataStructures:
         assert isinstance(event.timestamp, datetime)
 
     def test_test_results_creation(self):
-        """Test TestResults data structure."""
-        results = TestResults(
+        """Test ABTestResults data structure."""
+        results = ABTestResults(
             test_id="test123",
             variation_results={"control": {"conversion_rate": 0.10}},
             statistical_significance={"variant_a": True},
@@ -795,18 +795,18 @@ class TestABTestingDataStructures:
     def test_ab_test_creation(self):
         """Test ABTest data structure."""
         variations = [
-            TestVariation("control", VariationType.CONTROL, "Control", "Original"),
-            TestVariation("variant_a", VariationType.VARIANT_A, "Variant A", "Modified")
+            ABTestVariation("control", VariationType.CONTROL, "Control", "Original"),
+            ABTestVariation("variant_a", VariationType.VARIANT_A, "Variant A", "Modified")
         ]
         metrics = [
-            TestMetric(MetricType.CONVERSION_RATE, "Conversion", "Primary metric", primary=True)
+            ABTestMetric(MetricType.CONVERSION_RATE, "Conversion", "Primary metric", primary=True)
         ]
 
         test = ABTest(
             test_id="test123",
             name="Test Name",
             description="Test Description",
-            test_type=TestType.EMAIL_TEMPLATE,
+            test_type=ABTestType.EMAIL_TEMPLATE,
             variations=variations,
             metrics=metrics,
             traffic_allocation=0.8,
@@ -815,8 +815,8 @@ class TestABTestingDataStructures:
 
         assert test.test_id == "test123"
         assert test.name == "Test Name"
-        assert test.test_type == TestType.EMAIL_TEMPLATE
-        assert test.status == TestStatus.DRAFT  # Default
+        assert test.test_type == ABTestType.EMAIL_TEMPLATE
+        assert test.status == ABTestStatus.DRAFT  # Default
         assert len(test.variations) == 2
         assert len(test.metrics) == 1
         assert test.traffic_allocation == 0.8
@@ -827,21 +827,21 @@ class TestABTestingEnums:
     """Test A/B testing enumerations."""
 
     def test_test_status_enum(self):
-        """Test TestStatus enum values."""
-        assert TestStatus.DRAFT.value == "draft"
-        assert TestStatus.ACTIVE.value == "active"
-        assert TestStatus.PAUSED.value == "paused"
-        assert TestStatus.COMPLETED.value == "completed"
-        assert TestStatus.ARCHIVED.value == "archived"
+        """Test ABTestStatus enum values."""
+        assert ABTestStatus.DRAFT.value == "draft"
+        assert ABTestStatus.ACTIVE.value == "active"
+        assert ABTestStatus.PAUSED.value == "paused"
+        assert ABTestStatus.COMPLETED.value == "completed"
+        assert ABTestStatus.ARCHIVED.value == "archived"
 
     def test_test_type_enum(self):
-        """Test TestType enum values."""
-        assert TestType.CONTENT_VARIATION.value == "content_variation"
-        assert TestType.SUBJECT_LINE.value == "subject_line"
-        assert TestType.CTA_BUTTON.value == "cta_button"
-        assert TestType.EMAIL_TEMPLATE.value == "email_template"
-        assert TestType.LANDING_PAGE.value == "landing_page"
-        assert TestType.TIMING.value == "timing"
+        """Test ABTestType enum values."""
+        assert ABTestType.CONTENT_VARIATION.value == "content_variation"
+        assert ABTestType.SUBJECT_LINE.value == "subject_line"
+        assert ABTestType.CTA_BUTTON.value == "cta_button"
+        assert ABTestType.EMAIL_TEMPLATE.value == "email_template"
+        assert ABTestType.LANDING_PAGE.value == "landing_page"
+        assert ABTestType.TIMING.value == "timing"
 
     def test_variation_type_enum(self):
         """Test VariationType enum values."""

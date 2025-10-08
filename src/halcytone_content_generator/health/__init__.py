@@ -12,7 +12,9 @@ from .schemas import (
     HealthResponse,
     ReadinessResponse,
     LivenessResponse,
-    DetailedHealthResponse
+    DetailedHealthResponse,
+    ReadinessCheck,
+    ComponentStatus
 )
 
 __all__ = [
@@ -24,5 +26,7 @@ __all__ = [
     "HealthResponse",
     "ReadinessResponse",
     "LivenessResponse",
-    "DetailedHealthResponse"
+    "DetailedHealthResponse",
+    "ReadinessCheck",
+    "ComponentStatus"
 ]

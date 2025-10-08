@@ -5,10 +5,10 @@ import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-from src.halcytone_content_generator.services.monitoring import (
+from halcytone_content_generator.services.monitoring import (
     MonitoringService, HealthStatus, EventType, MonitoringEvent
 )
-from src.halcytone_content_generator.config import Settings
+from halcytone_content_generator.config import Settings
 
 
 class TestMonitoringService:
@@ -81,7 +81,7 @@ class TestMonitoringService:
 
         assert status in [HealthStatus.HEALTHY, HealthStatus.DEGRADED, HealthStatus.UNHEALTHY]
 
-    @patch('src.halcytone_content_generator.services.monitoring.MonitoringService._check_system_health')
+    @patch('halcytone_content_generator.services.monitoring.MonitoringService._check_system_health')
     def test_health_check_healthy(self, mock_health_check, monitoring_service):
         """Test health check when system is healthy"""
         mock_health_check.return_value = True
@@ -89,7 +89,7 @@ class TestMonitoringService:
         status = monitoring_service.get_health_status()
         assert status == HealthStatus.HEALTHY
 
-    @patch('src.halcytone_content_generator.services.monitoring.MonitoringService._check_system_health')
+    @patch('halcytone_content_generator.services.monitoring.MonitoringService._check_system_health')
     def test_health_check_unhealthy(self, mock_health_check, monitoring_service):
         """Test health check when system is unhealthy"""
         mock_health_check.return_value = False

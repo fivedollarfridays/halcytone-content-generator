@@ -1,0 +1,88 @@
+# Production-optimized Multi-stage Dockerfile for Halcytone Content Generator
+# Optimized for size, security, and performance
+
+# Stage 1: Builder - Install dependencies
+FROM python:3.11-slim as builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies with optimizations
+RUN pip install --no-cache-dir --user --upgrade pip && \
+    pip install --no-cache-dir --user -r requirements.txt && \
+    pip install --no-cache-dir --user gunicorn uvicorn[standard]
+
+# Stage 2: Runtime - Minimal production image
+FROM python:3.11-slim
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Security: Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser -u 1000 appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy Python dependencies from builder
+COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
+
+# Copy application code
+COPY --chown=appuser:appuser src ./src
+COPY --chown=appuser:appuser performance ./performance
+COPY --chown=appuser:appuser scripts ./scripts
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/data /app/cache && \
+    chown -R appuser:appuser /app
+
+# Environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app \
+    PATH="/home/appuser/.local/bin:${PATH}" \
+    PORT=8000 \
+    WORKERS=4 \
+    WORKER_CLASS=uvicorn.workers.UvicornWorker \
+    WORKER_CONNECTIONS=1000 \
+    TIMEOUT=60 \
+    KEEPALIVE=5 \
+    MAX_REQUESTS=1000 \
+    MAX_REQUESTS_JITTER=50
+
+# Switch to non-root user
+USER appuser
+
+# Health check with proper timeout and retries
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expose application port
+EXPOSE 8000
+
+# Use Gunicorn with Uvicorn workers for production
+CMD ["sh", "-c", "gunicorn src.halcytone_content_generator.main:app \
+    --workers ${WORKERS} \
+    --worker-class ${WORKER_CLASS} \
+    --bind 0.0.0.0:${PORT} \
+    --timeout ${TIMEOUT} \
+    --keepalive ${KEEPALIVE} \
+    --max-requests ${MAX_REQUESTS} \
+    --max-requests-jitter ${MAX_REQUESTS_JITTER} \
+    --worker-connections ${WORKER_CONNECTIONS} \
+    --access-logfile /app/logs/access.log \
+    --error-logfile /app/logs/error.log \
+    --log-level info \
+    --preload"]

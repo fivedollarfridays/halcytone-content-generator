@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 import httpx
 
-from src.halcytone_content_generator.services.document_fetcher import DocumentFetcher
+from halcytone_content_generator.services.document_fetcher import DocumentFetcher
 
 
 class TestDocumentFetcherConfiguration:
