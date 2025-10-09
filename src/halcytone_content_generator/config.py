@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     # API Configuration
     API_KEY: str = ""  # This service's API key for authentication
     API_PREFIX: str = "/api/v1"
+    CORS_ORIGINS: str = "*"  # Comma-separated list of allowed origins
 
     # External Services
     CRM_BASE_URL: str = "http://localhost:8001"

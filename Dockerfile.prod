@@ -14,11 +14,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
-COPY requirements.txt .
+COPY requirements-prod.txt .
 
 # Install Python dependencies with optimizations
 RUN pip install --no-cache-dir --user --upgrade pip && \
-    pip install --no-cache-dir --user -r requirements.txt && \
+    pip install --no-cache-dir --user -r requirements-prod.txt && \
     pip install --no-cache-dir --user gunicorn uvicorn[standard]
 
 # Stage 2: Runtime - Minimal production image
@@ -78,7 +78,7 @@ CMD ["sh", "-c", "gunicorn src.halcytone_content_generator.main:app \
     --worker-class ${WORKER_CLASS} \
     --bind 0.0.0.0:${PORT} \
     --timeout ${TIMEOUT} \
-    --keepalive ${KEEPALIVE} \
+    --keep-alive ${KEEPALIVE} \
     --max-requests ${MAX_REQUESTS} \
     --max-requests-jitter ${MAX_REQUESTS_JITTER} \
     --worker-connections ${WORKER_CONNECTIONS} \
